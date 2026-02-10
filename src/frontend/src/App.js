@@ -8,7 +8,8 @@ function App() {
 
   useEffect(() => {
     // Fetch data from backend API
-    axios.get('/api/hello')
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+    axios.get(`${apiUrl}/hello`)
       .then(response => {
         setMessage(response.data);
         setLoading(false);
