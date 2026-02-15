@@ -1,0 +1,20 @@
+# Docker ignore file for the project
+.git
+.gitignore
+README.md
+Docs/
+Presentation/
+
+# Frontend specific
+src/frontend/node_modules
+src/frontend/build
+src/frontend/.env.local
+src/frontend/npm-debug.log*
+
+# Backend specific
+src/backend/target
+src/backend/.mvn
+src/backend/mvnw
+src/backend/mvnw.cmd
+src/backend/.idea
+src/backend/*.iml
