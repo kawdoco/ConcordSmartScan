@@ -22,8 +22,7 @@ public class JwtUtil {
     private long expiration; // milliseconds
 
     private SecretKey getSigningKey() {
-        // Encode secret as Base64 bytes for HMAC-SHA key
-        byte[] keyBytes = secret.getBytes();
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
