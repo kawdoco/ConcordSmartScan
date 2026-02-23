@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import Login from './authentication/Login';
 import './App.css';
 
-function App() {
+function LandingPage() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch data from backend API
@@ -25,13 +28,37 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>Welcome to React + Spring Boot</h1>
+        
         {loading ? (
           <p>Loading...</p>
         ) : (
           <p>{message}</p>
         )}
+
+        {/* ✅ Login Button */}
+        <button 
+          className="login-button"
+          onClick={() => navigate('/login')}
+        >
+          Login
+        </button>
+        
+
       </header>
     </div>
+  );
+}
+
+
+// Main App with Routes
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    </Router>
   );
 }
 
