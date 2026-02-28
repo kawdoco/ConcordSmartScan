@@ -97,54 +97,78 @@
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .input-icon {
   position: absolute;
   left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 16px;
   color: #9ca3af;
   pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
 }
 
 .input-icon svg {
   width: 16px;
   height: 16px;
   color: #9ca3af;
+  stroke: #9ca3af;
+  fill: none;
 }
 
 .password-toggle {
   position: absolute;
   right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 16px;
   color: #9ca3af;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+
+.password-toggle:hover {
+  color: #6b7280;
 }
 
 .password-toggle svg {
   width: 16px;
   height: 16px;
   color: #9ca3af;
+  stroke: #9ca3af;
+  fill: none;
 }
 
 .form-group input {
-  padding: 11px 40px;
+  padding-left: 46px;
+  padding-right: 46px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
   transition: all 0.2s ease;
   width: 100%;
   background: #f9fafb;
+  box-sizing: border-box;
+  text-indent: 16px;
 }
 
 .form-group input::placeholder {
   color: #9ca3af;
+  text-indent: 16px;
 }
 
 .form-group input:focus {
