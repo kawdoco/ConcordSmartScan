@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import Login from './authentication/Login';
 import AddUser from './users/AddUser';
 import './App.css';
+import UserManagement from './components/UserManagement';
 
 function LandingPage() {
   const [message, setMessage] = useState('');
@@ -11,7 +12,6 @@ function LandingPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch data from backend API
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
     axios.get(`${apiUrl}/hello`)
       .then(response => {
@@ -29,27 +29,27 @@ function LandingPage() {
     <div className="App">
       <header className="App-header">
         <h1>Welcome to React + Spring Boot</h1>
-        
+
         {loading ? (
           <p>Loading...</p>
         ) : (
           <p>{message}</p>
         )}
 
-        {/* ✅ Login Button */}
-        <button 
+        <button
           className="login-button"
           onClick={() => navigate('/login')}
         >
           Login
         </button>
-        
-
       </header>
+
+      <main>
+        <UserManagement />
+      </main>
     </div>
   );
 }
-
 
 // Main App with Routes
 function App() {
