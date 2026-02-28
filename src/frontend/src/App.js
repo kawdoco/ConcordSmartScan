@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import Login from './authentication/Login';
+import AddUser from './users/AddUser';
 import './App.css';
 
 function LandingPage() {
@@ -57,6 +58,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/users/add" element={<AddUser />} />
       </Routes>
     </Router>
   );
