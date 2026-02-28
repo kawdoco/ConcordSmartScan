@@ -79,17 +79,31 @@
   color: #1f2937;
 }
 
+.sidebar-nav-item:hover .sidebar-nav-icon svg {
+  stroke: #2563eb;
+}
+
 .sidebar-nav-item.active {
   background: #2563eb;
   color: white;
 }
 
+.sidebar-nav-item.active .sidebar-nav-icon svg {
+  stroke: white;
+}
+
 .sidebar-nav-icon {
-  font-size: 20px;
-  width: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-nav-icon svg {
+  stroke: #2563eb;
+  transition: stroke 0.2s ease;
 }
 
 .sidebar-nav-label {
