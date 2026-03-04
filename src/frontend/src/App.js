@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import UserManagement from './components/UserManagement';
+import AddNewStore from './components/AddNewStore';
+import EditStore from './components/EditStore';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -22,9 +25,16 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
-      <UserManagement />
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Navigate to="/users" replace />} />
+          <Route path="/users" element={<UserManagement />} />
+          <Route path="/stores/add" element={<AddNewStore />} />
+          <Route path="/stores/edit" element={<EditStore />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
