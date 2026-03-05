@@ -47,13 +47,16 @@ public class LocationService {
                 .collect(Collectors.toList());
     }
 
-    /** Get all locations of type STORE */
-    public List<LocationResponse> getAllStores() {
-        return locationRepository.findByType(LocationType.STORE)
-                .stream()
-                .map(LocationResponse::new)
-                .collect(Collectors.toList());
-    }
+    // NOTE: Store management is handled by a separate implementation.
+    // getAllStores() has been commented out to avoid conflicts.
+    //
+    // /** Get all locations of type STORE */
+    // public List<LocationResponse> getAllStores() {
+    //     return locationRepository.findByType(LocationType.STORE)
+    //             .stream()
+    //             .map(LocationResponse::new)
+    //             .collect(Collectors.toList());
+    // }
 
     /** Get all locations */
     public List<LocationResponse> getAllLocations() {
