@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import ApprovedRequests from "./ApprovedRequests";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const Icon = ({ d, size = 18, stroke = 2, ...props }) => (
@@ -471,7 +472,11 @@ export default function UserManagement() {
             <div className="search">
               <Icons.Search />
               <input
-                placeholder="Search by name, user ID, or location…"
+                placeholder={
+                  activeNav === "Approved Requests"
+                    ? "Search by Machine ID, Store ID, or Garment ID…"
+                    : "Search by name, user ID, or location…"
+                }
                 value={searchQ}
                 onChange={e => setSearchQ(e.target.value)}
               />
@@ -491,7 +496,9 @@ export default function UserManagement() {
             </div>
           </header>
 
-          <div className="content">
+          {activeNav === "Approved Requests" && <ApprovedRequests />}
+
+          <div className="content" style={activeNav === "Approved Requests" ? { display: "none" } : {}}>
             <h1>User Management</h1>
 
             {/* Stats */}
