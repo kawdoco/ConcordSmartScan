@@ -47,15 +47,18 @@ public class LocationController {
         return ResponseEntity.ok(locationService.getAllGarments());
     }
 
-    /**
-     * GET /api/locations/stores
-     * Retrieve all store locations.
-     */
-    @GetMapping("/stores")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<LocationResponse>> getAllStores() {
-        return ResponseEntity.ok(locationService.getAllStores());
-    }
+    // NOTE: Store management is handled by a separate implementation.
+    // GET /api/locations/stores has been commented out to avoid conflicts.
+    //
+    // /**
+    //  * GET /api/locations/stores
+    //  * Retrieve all store locations.
+    //  */
+    // @GetMapping("/stores")
+    // @PreAuthorize("isAuthenticated()")
+    // public ResponseEntity<List<LocationResponse>> getAllStores() {
+    //     return ResponseEntity.ok(locationService.getAllStores());
+    // }
 
     /**
      * GET /api/locations
