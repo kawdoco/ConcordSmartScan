@@ -48,6 +48,7 @@ public class SecurityConfig {
                     .requestMatchers(
                             "/api/auth/**",
                             "/api/hello",
+                            "/api/users/**", //i changed this for access
                             "/h2-console/**"
                     ).permitAll()
                     // Everything else requires authentication
