@@ -1,0 +1,452 @@
+
+import { useState } from "react";
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+  }
+
+  .layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 210px;
+    background: #fff;
+    border-right: 1px solid #e4e7ec;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 20px 16px;
+    border-bottom: 1px solid #e4e7ec;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: #1e3a8a;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text { line-height: 1.2; }
+  .logo-text strong { display: block; font-size: 13px; font-weight: 600; color: #111; }
+  .logo-text span { font-size: 11px; color: #2563eb; font-weight: 500; }
+
+  .sidebar-nav { padding: 12px 10px; flex: 1; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: #4b5563;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    margin-bottom: 2px;
+    font-weight: 500;
+  }
+  .nav-item:hover { background: #f1f5ff; color: #1e3a8a; }
+  .nav-item.active { background: #2563eb; color: #fff; }
+  .nav-item svg { flex-shrink: 0; opacity: 0.8; }
+  .nav-item.active svg { opacity: 1; }
+
+  .sidebar-footer {
+    padding: 14px 16px;
+    border-top: 1px solid #e4e7ec;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar-sm {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #dbeafe; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: #1e40af; flex-shrink: 0;
+  }
+  .footer-info strong { font-size: 12px; color: #111; display: block; }
+  .footer-info span { font-size: 11px; color: #9ca3af; }
+
+  /* ── Main ── */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+  .topbar {
+    height: 56px;
+    background: #fff;
+    border-bottom: 1px solid #e4e7ec;
+    display: flex; align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+  }
+
+  .search-box {
+    flex: 1; max-width: 420px;
+    display: flex; align-items: center; gap: 8px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px; color: #9ca3af;
+    cursor: text;
+  }
+
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+  .bell-btn {
+    background: none; border: none; cursor: pointer;
+    color: #6b7280; padding: 4px;
+    display: flex; align-items: center;
+  }
+  .admin-info { text-align: right; }
+  .admin-info strong { display: block; font-size: 12px; color: #111; }
+  .admin-info span { font-size: 11px; color: #9ca3af; }
+  .avatar-lg {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: #fff;
+  }
+
+  /* ── Page content ── */
+  .page-content {
+    padding: 28px 32px;
+    flex: 1;
+  }
+
+  .breadcrumb {
+    font-size: 12.5px; color: #9ca3af;
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 6px;
+  }
+  .breadcrumb a { color: #9ca3af; text-decoration: none; }
+  .breadcrumb a:hover { color: #2563eb; }
+  .breadcrumb span { color: #4b5563; }
+
+  .page-title {
+    font-size: 22px; font-weight: 700;
+    color: #111827; margin-bottom: 22px;
+  }
+
+  /* ── Form card ── */
+  .form-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 28px;
+    max-width: 740px;
+  }
+
+  .section-heading {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 600;
+    color: #111827; margin-bottom: 20px;
+  }
+  .section-heading svg { color: #2563eb; }
+
+  .section-divider { border: none; border-top: 1px solid #f0f2f5; margin: 24px 0; }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .form-row.full { grid-template-columns: 1fr; }
+
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+
+  label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="date"],
+  input[type="tel"],
+  select,
+  textarea {
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: #111827;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  }
+  input:disabled, select:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+  textarea { resize: vertical; min-height: 80px; }
+  select { appearance: auto; cursor: pointer; }
+
+  /* ── Actions ── */
+  .form-actions {
+    display: flex; justify-content: flex-end;
+    align-items: center; gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f2f5;
+  }
+
+  .btn-cancel {
+    background: none; border: none;
+    font-size: 13.5px; font-weight: 500;
+    color: #4b5563; cursor: pointer;
+    padding: 9px 18px;
+    border-radius: 7px;
+    transition: background 0.15s;
+  }
+  .btn-cancel:hover { background: #f3f4f6; }
+
+  .btn-primary {
+    display: flex; align-items: center; gap: 7px;
+    background: #1e3a8a;
+    color: #fff;
+    border: none; border-radius: 7px;
+    padding: 9px 20px;
+    font-size: 13.5px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary:hover { background: #1e40af; }
+  .btn-primary:active { transform: scale(0.98); }
+
+  /* ── Footer ── */
+  .page-footer {
+    padding: 16px 32px;
+    border-top: 1px solid #e4e7ec;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11.5px; color: #9ca3af;
+    background: #fff;
+  }
+  .footer-links { display: flex; gap: 16px; }
+  .footer-links a { color: #9ca3af; text-decoration: none; }
+  .footer-links a:hover { color: #2563eb; }
+`;
+
+// ── Icons ──
+const Icon = ({ d, size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d={d} />
+  </svg>
+);
+
+const icons = {
+  dashboard: "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10",
+  users: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75",
+  machines: "M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5",
+  stores: "M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z M3 6h18",
+  garments: "M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z",
+  requests: "M9 11l3 3L22 4 M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11",
+  bell: "M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 01-3.46 0",
+  person: "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 11a4 4 0 100-8 4 4 0 000 8z",
+  building: "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z",
+  search: "M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z",
+  edit: "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7 M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z",
+};
+
+export default function EditUserPage() {
+  const [form, setForm] = useState({
+    firstName: "John", lastName: "Perera",
+    dob: "1990-05-15", phone: "+94 77 123 4567",
+    email: "john.p@gmail.com", address: "123 Main St, Colombo",
+    garmentId: "GR-005", companyEmail: "john.p@concord.com",
+    userType: "Technician", addedDate: "2023-11-12",
+  });
+
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const navItems = [
+    { label: "Dashboard", icon: icons.dashboard },
+    { label: "Users", icon: icons.users, active: true },
+    { label: "Machines", icon: icons.machines },
+    { label: "Stores", icon: icons.stores },
+    { label: "Garments", icon: icons.garments },
+    { label: "Approved Requests", icon: icons.requests },
+  ];
+
+  return (
+    <>
+      <style>{styles}</style>
+      <div className="layout">
+        {/* Sidebar */}
+        <aside className="sidebar">
+          <div className="sidebar-logo">
+            <div className="logo-icon">C</div>
+            <div className="logo-text">
+              <strong>Concord</strong>
+              <span>Apparel</span>
+            </div>
+          </div>
+          <nav className="sidebar-nav">
+            {navItems.map((item) => (
+              <div key={item.label} className={`nav-item ${item.active ? "active" : ""}`}>
+                <Icon d={item.icon} size={15} />
+                {item.label}
+              </div>
+            ))}
+          </nav>
+          <div className="sidebar-footer">
+            <div className="avatar-sm">AU</div>
+            <div className="footer-info">
+              <strong>Admin User</strong>
+              <span>system.admin@concord.com</span>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main */}
+        <div className="main">
+          {/* Topbar */}
+          <header className="topbar">
+            <div className="search-box">
+              <Icon d={icons.search} size={14} />
+              Search by Machine ID, Store ID, or Garment ID
+            </div>
+            <div className="topbar-right">
+              <button className="bell-btn"><Icon d={icons.bell} size={18} /></button>
+              <div className="admin-info">
+                <strong>Admin User</strong>
+                <span>system.admin@concord.com</span>
+              </div>
+              <div className="avatar-lg">AU</div>
+            </div>
+          </header>
+
+          {/* Page */}
+          <div className="page-content">
+            <div className="breadcrumb">
+              <a href="#">Users</a> › <span>Edit User</span>
+            </div>
+            <h1 className="page-title">Edit User</h1>
+
+            <div className="form-card">
+              {/* Personal Details */}
+              <div className="section-heading">
+                <Icon d={icons.person} size={16} />
+                Personal Details
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>First Name</label>
+                  <input type="text" value={form.firstName} onChange={set("firstName")} />
+                </div>
+                <div className="form-group">
+                  <label>Last Name</label>
+                  <input type="text" value={form.lastName} onChange={set("lastName")} />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Date of Birth</label>
+                  <input type="date" value={form.dob} onChange={set("dob")} />
+                </div>
+                <div className="form-group">
+                  <label>Phone Number</label>
+                  <input type="tel" value={form.phone} onChange={set("phone")} />
+                </div>
+              </div>
+
+              <div className="form-row full">
+                <div className="form-group">
+                  <label>Email Address</label>
+                  <input type="email" value={form.email} onChange={set("email")} />
+                </div>
+              </div>
+
+              <div className="form-row full">
+                <div className="form-group">
+                  <label>Address</label>
+                  <textarea value={form.address} onChange={set("address")} />
+                </div>
+              </div>
+
+              <hr className="section-divider" />
+
+              {/* Company Details */}
+              <div className="section-heading">
+                <Icon d={icons.building} size={16} />
+                Company Details
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Garment ID</label>
+                  <input type="text" value={form.garmentId} onChange={set("garmentId")} />
+                </div>
+                <div className="form-group">
+                  <label>Company Email</label>
+                  <input type="email" value={form.companyEmail} onChange={set("companyEmail")} />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>User Type</label>
+                  <select value={form.userType} onChange={set("userType")}>
+                    <option>Technician</option>
+                    <option>Manager</option>
+                    <option>Admin</option>
+                    <option>Operator</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>User Added Date</label>
+                  <input type="text" value={form.addedDate} disabled />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="form-actions">
+                <button className="btn-cancel">Cancel</button>
+                <button className="btn-primary">
+                  <Icon d={icons.edit} size={14} />
+                  Update User
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <footer className="page-footer">
+            <span>© 2024 Concord Apparel Pvt Ltd. Machine Replacement Locator System.</span>
+            <div className="footer-links">
+              <a href="#">Privacy Policy</a>
+              <a href="#">System Manual</a>
+              <a href="#">Technical Support</a>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </>
+  );
+}
