@@ -1,8 +1,6 @@
 // pages/AddMachine.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
 
 function AddMachine() {
   const navigate = useNavigate();
@@ -22,17 +20,11 @@ function AddMachine() {
   const submit = (e) => {
     e.preventDefault();
     alert("Machine Added Successfully!");
-    navigate("/");
+    navigate("/machines");
   };
 
   return (
-    <div style={styles.layout}>
-      <Sidebar />
-      
-      <div style={styles.mainArea}>
-        <Topbar />
-        
-        <div style={styles.content}>
+    <div style={styles.content}>
           <h1 style={styles.pageTitle}>Add Machine</h1>
           
           <form onSubmit={submit} style={styles.form}>
@@ -101,7 +93,7 @@ function AddMachine() {
             </div>
 
             <div style={styles.buttonGroup}>
-              <button type="button" style={styles.cancelButton} onClick={() => navigate("/")}>
+              <button type="button" style={styles.cancelButton} onClick={() => navigate("/machines")}>
                 Cancel
               </button>
               <button type="submit" style={styles.submitButton}>
@@ -109,19 +101,18 @@ function AddMachine() {
               </button>
             </div>
           </form>
-        </div>
+      
 
-        <footer style={styles.footer}>
-          <p style={styles.footerText}>© 2024 Concord Apparel Pvt Ltd. Machine Replacement Location System.</p>
-          <div style={styles.footerLinks}>
-            <a href="#" style={styles.footerLink}>Privacy Policy</a>
-            <span style={styles.separator}>|</span>
-            <a href="#" style={styles.footerLink}>System Manual</a>
-            <span style={styles.separator}>|</span>
-            <a href="#" style={styles.footerLink}>Technical Support</a>
-          </div>
-        </footer>
-      </div>
+      <footer style={styles.footer}>
+        <p style={styles.footerText}>© 2024 Concord Apparel Pvt Ltd. Machine Replacement Location System.</p>
+        <div style={styles.footerLinks}>
+          <a href="#" style={styles.footerLink}>Privacy Policy</a>
+          <span style={styles.separator}>|</span>
+          <a href="#" style={styles.footerLink}>System Manual</a>
+          <span style={styles.separator}>|</span>
+          <a href="#" style={styles.footerLink}>Technical Support</a>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -140,7 +131,7 @@ const styles = {
     minHeight: "100vh"
   },
   content: {
-    padding: "30px 40px",
+    padding: "6px 8px",
     flex: 1
   },
   pageTitle: {

@@ -6,6 +6,7 @@ import com.example.backend.model.Role;
 import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -16,9 +17,11 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -32,12 +35,16 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
         }
 
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is required");
+        }
+
         Role role = parseRole(request.getRole(), Role.TECHNICIAN);
 
         User user = new User();
         user.setName(request.getName().trim());
         user.setEmail(request.getEmail().trim().toLowerCase());
-        user.setPassword(request.getPassword()); // TODO: hash with BCrypt when security is configured
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
         user.setLocation(request.getLocation() != null ? request.getLocation().trim() : null);
 
@@ -78,7 +85,7 @@ public class UserService {
         }
 
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            user.setPassword(request.getPassword());
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
         return toResponse(userRepository.save(user));

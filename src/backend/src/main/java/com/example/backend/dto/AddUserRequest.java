@@ -12,7 +12,7 @@ public class AddUserRequest {
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotBlank(message = "Password is required")
+    // Optional for update; required for create in service validation.
     private String password;
 
     // TECHNICIAN | CHIEF_MANAGER | ADMIN — defaults to TECHNICIAN if omitted
