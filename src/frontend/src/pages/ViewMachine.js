@@ -1,8 +1,6 @@
 // pages/ViewMachine.js
 import React from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
 
 function ViewMachine() {
   const { id } = useParams();
@@ -23,13 +21,7 @@ function ViewMachine() {
   };
 
   return (
-    <div style={styles.layout}>
-      <Sidebar />
-      
-      <div style={styles.mainArea}>
-        <Topbar />
-        
-        <div style={styles.content}>
+    <div style={styles.content}>
           <div style={styles.header}>
             <button onClick={() => navigate(-1)} style={styles.backButton}>
               ← Back
@@ -114,19 +106,18 @@ function ViewMachine() {
             <button style={styles.transferButton}>Transfer Location</button>
             <button style={styles.deleteButton}>Delete Machine</button>
           </div>
-        </div>
+      
 
-        <footer style={styles.footer}>
-          <p style={styles.footerText}>© 2024 Concord Apparel Pvt Ltd. Machine Replacement Location System.</p>
-          <div style={styles.footerLinks}>
-            <a href="#" style={styles.footerLink}>Privacy Policy</a>
-            <span style={styles.separator}>|</span>
-            <a href="#" style={styles.footerLink}>System Manual</a>
-            <span style={styles.separator}>|</span>
-            <a href="#" style={styles.footerLink}>Technical Support</a>
-          </div>
-        </footer>
-      </div>
+      <footer style={styles.footer}>
+        <p style={styles.footerText}>© 2024 Concord Apparel Pvt Ltd. Machine Replacement Location System.</p>
+        <div style={styles.footerLinks}>
+          <a href="#" style={styles.footerLink}>Privacy Policy</a>
+          <span style={styles.separator}>|</span>
+          <a href="#" style={styles.footerLink}>System Manual</a>
+          <span style={styles.separator}>|</span>
+          <a href="#" style={styles.footerLink}>Technical Support</a>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -145,7 +136,7 @@ const styles = {
     minHeight: "100vh"
   },
   content: {
-    padding: "30px 40px",
+    padding: "6px 8px",
     flex: 1
   },
   header: {

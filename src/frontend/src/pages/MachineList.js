@@ -1,8 +1,6 @@
 // pages/MachineList.js
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
 import StatsCards from "../components/StatsCards";
 
 function MachineList() {
@@ -38,21 +36,27 @@ function MachineList() {
   };
 
   return (
-    <div style={styles.layout}>
-      <Sidebar />
-      
-      <div style={styles.mainArea}>
-        <Topbar onSearch={setSearchTerm} />
-        
-        <div style={styles.content}>
+    <div style={styles.content}>
           <div style={styles.headerRow}>
-            <h1 style={styles.pageTitle}>Machine Management</h1>
-            <Link to="/add">
-              <button style={styles.addButton}>
-                <span style={styles.addIcon}>+</span>
-                Add Machine
-              </button>
-            </Link>
+            <div>
+              <h1 style={styles.pageTitle}>Machine Management</h1>
+              <p style={styles.pageSubtitle}>Track, inspect, and maintain machine inventory.</p>
+            </div>
+            <div style={styles.headerActions}>
+              <input
+                style={styles.searchInput}
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by machine ID, type, or location"
+              />
+              <Link to="/add">
+                <button style={styles.addButton}>
+                  <span style={styles.addIcon}>+</span>
+                  Add Machine
+                </button>
+              </Link>
+            </div>
           </div>
           
           <StatsCards />
@@ -146,19 +150,16 @@ function MachineList() {
               </div>
             </div>
           </div>
+      <footer style={styles.footer}>
+        <p style={styles.footerText}>© 2024 Concord Apparel Pvt Ltd. Machine Replacement Location System.</p>
+        <div style={styles.footerLinks}>
+          <a href="#" style={styles.footerLink}>Privacy Policy</a>
+          <span style={styles.separator}>|</span>
+          <a href="#" style={styles.footerLink}>System Manual</a>
+          <span style={styles.separator}>|</span>
+          <a href="#" style={styles.footerLink}>Technical Support</a>
         </div>
-
-        <footer style={styles.footer}>
-          <p style={styles.footerText}>© 2024 Concord Apparel Pvt Ltd. Machine Replacement Location System.</p>
-          <div style={styles.footerLinks}>
-            <a href="#" style={styles.footerLink}>Privacy Policy</a>
-            <span style={styles.separator}>|</span>
-            <a href="#" style={styles.footerLink}>System Manual</a>
-            <span style={styles.separator}>|</span>
-            <a href="#" style={styles.footerLink}>Technical Support</a>
-          </div>
-        </footer>
-      </div>
+      </footer>
     </div>
   );
 }
@@ -177,14 +178,34 @@ const styles = {
     minHeight: "100vh"
   },
   content: {
-    padding: "30px 40px",
+    padding: "6px 8px",
     flex: 1
   },
   headerRow: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "30px"
+    marginBottom: "30px",
+    gap: "16px",
+    flexWrap: "wrap"
+  },
+  pageSubtitle: {
+    margin: "8px 0 0 0",
+    color: "#64748b"
+  },
+  headerActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    flexWrap: "wrap"
+  },
+  searchInput: {
+    width: "340px",
+    maxWidth: "100%",
+    padding: "11px 12px",
+    borderRadius: "8px",
+    border: "1px solid #cbd5e1",
+    background: "#fff"
   },
   pageTitle: {
     fontSize: "2rem",
