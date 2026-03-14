@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import ApprovedRequests from "./ApprovedRequests";
+import apiClient from "../services/api";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const Icon = ({ d, size = 18, stroke = 2, ...props }) => (
@@ -332,7 +333,7 @@ export default function UserManagement() {
   const [deleteUser, setDeleteUser] = useState(null);
 
   // Form state
-  const [form, setForm] = useState({ name: "", role: "Technician", location: "", email: "" });
+  const [form, setForm] = useState({ name: "", role: "Technician", location: "", email: "", password: "" });
   const [formErr, setFormErr] = useState({});
 
   // Toast
@@ -342,6 +343,23 @@ export default function UserManagement() {
     setToast({ msg, type, visible: true });
     setTimeout(() => setToast(t => ({ ...t, visible: false })), 3000);
   }, []);
+
+  // ── Load users from backend on mount ──
+  useEffect(() => {
+    apiClient.get("/users")
+      .then(res => {
+        const mapped = res.data.map(u => ({
+          id: String(u.id),
+          name: u.name,
+          role: u.role === "CHIEF_MANAGER" ? "Chief Manager" : u.role === "TECHNICIAN" ? "Technician" : u.role,
+          location: u.location || "",
+          email: u.email,
+          date: new Date().toISOString().slice(0, 10),
+        }));
+        setUsers(mapped);
+      })
+      .catch(() => showToast("Failed to load users", "error"));
+  }, [showToast]);
 
   // ── Derived data ──
   const filtered = users.filter(u => {
@@ -362,7 +380,7 @@ export default function UserManagement() {
   useEffect(() => { setPage(1); }, [activeTab, searchQ]);
 
   // ── Form helpers ──
-  const resetForm = () => { setForm({ name: "", role: "Technician", location: "", email: "" }); setFormErr({}); };
+  const resetForm = () => { setForm({ name: "", role: "Technician", location: "", email: "", password: "" }); setFormErr({}); };
 
   const validate = (f) => {
     const e = {};
@@ -376,40 +394,74 @@ export default function UserManagement() {
   const handleAdd = () => {
     const e = validate(form);
     if (Object.keys(e).length) { setFormErr(e); return; }
-    const newUser = {
-      id: generateUserId(),
+    const payload = {
       name: form.name.trim(),
-      role: form.role,
-      location: form.location.trim(),
       email: form.email.trim(),
-      date: today(),
+      password: form.password || "changeme123",
+      role: form.role === "Chief Manager" ? "CHIEF_MANAGER" : form.role.toUpperCase(),
+      location: form.location.trim(),
     };
-    setUsers(prev => [newUser, ...prev]);
-    setAddOpen(false);
-    resetForm();
-    showToast(`${newUser.name} added successfully`, "success");
+    apiClient.post("/users", payload)
+      .then(res => {
+        const u = res.data;
+        const newUser = {
+          id: String(u.id),
+          name: u.name,
+          role: u.role === "CHIEF_MANAGER" ? "Chief Manager" : u.role === "TECHNICIAN" ? "Technician" : u.role,
+          location: u.location || "",
+          email: u.email,
+          date: today(),
+        };
+        setUsers(prev => [newUser, ...prev]);
+        setAddOpen(false);
+        resetForm();
+        showToast(`${newUser.name} added successfully`, "success");
+      })
+      .catch(err => {
+        const msg = err.response?.data?.message || "Failed to add user";
+        showToast(msg, "error");
+      });
   };
 
   const handleEdit = () => {
     const e = validate(form);
     if (Object.keys(e).length) { setFormErr(e); return; }
-    setUsers(prev => prev.map(u => u.id === editUser.id
-      ? { ...u, name: form.name.trim(), role: form.role, location: form.location.trim(), email: form.email.trim() }
-      : u
-    ));
-    setEditUser(null);
-    resetForm();
-    showToast("User updated successfully", "success");
+    const payload = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      password: form.password || "",
+      role: form.role === "Chief Manager" ? "CHIEF_MANAGER" : form.role.toUpperCase(),
+      location: form.location.trim(),
+    };
+    apiClient.put(`/users/${editUser.id}`, payload)
+      .then(res => {
+        const u = res.data;
+        setUsers(prev => prev.map(x => x.id === editUser.id
+          ? { ...x, name: u.name, role: u.role === "CHIEF_MANAGER" ? "Chief Manager" : u.role === "TECHNICIAN" ? "Technician" : u.role, location: u.location || "", email: u.email }
+          : x
+        ));
+        setEditUser(null);
+        resetForm();
+        showToast("User updated successfully", "success");
+      })
+      .catch(err => {
+        const msg = err.response?.data?.message || "Failed to update user";
+        showToast(msg, "error");
+      });
   };
 
   const handleDelete = () => {
-    setUsers(prev => prev.filter(u => u.id !== deleteUser.id));
-    showToast(`${deleteUser.name} removed`, "error");
-    setDeleteUser(null);
+    apiClient.delete(`/users/${deleteUser.id}`)
+      .then(() => {
+        setUsers(prev => prev.filter(u => u.id !== deleteUser.id));
+        showToast(`${deleteUser.name} removed`, "error");
+        setDeleteUser(null);
+      })
+      .catch(() => showToast("Failed to delete user", "error"));
   };
 
   const openEdit = (u) => {
-    setForm({ name: u.name, role: u.role, location: u.location, email: u.email });
+    setForm({ name: u.name, role: u.role, location: u.location, email: u.email, password: "" });
     setFormErr({});
     setEditUser(u);
   };
@@ -757,6 +809,7 @@ function UserForm({ form, setForm, err, setErr }) {
         </div>
         {inp("location", "Assigned Location")}
       </div>
+      {inp("password", "Password (leave blank to keep existing)", "password")}
     </>
   );
 }
