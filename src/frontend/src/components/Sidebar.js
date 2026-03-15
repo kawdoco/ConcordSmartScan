@@ -19,6 +19,7 @@ function Sidebar() {
         <Link style={isActive("/dashboard") ? styles.activeLink : styles.link} to="/dashboard">Dashboard</Link>
         <Link style={isActive("/users") ? styles.activeLink : styles.link} to="/users">Users</Link>
         <Link style={isActive("/machines") ? styles.activeLink : styles.link} to="/machines">Machines</Link>
+        <Link style={isActive("/stores") ? styles.activeLink : styles.link} to="/stores">Stores</Link>
         <Link style={isActive("/add") ? styles.activeLink : styles.link} to="/add">Add Machine</Link>
       </nav>
 
