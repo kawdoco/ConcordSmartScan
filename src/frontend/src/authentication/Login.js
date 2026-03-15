@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import './Login.css';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,7 +17,6 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
       const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
@@ -25,17 +26,15 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        throw new Error('Invalid credentials');
+        throw new Error(data.message || data.error || 'Invalid credentials');
       }
 
-      const data = await response.json();
-      
-      // Store token
-      localStorage.setItem('token', data.token);
-      
-      // Update auth context
-      login(data.user);
+      // Update auth context and persist token
+      login(data.user, data.token);
+      navigate('/dashboard');
       
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.');
