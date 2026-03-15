@@ -1,66 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import Login from './authentication/Login';
-import AddUser from './users/AddUser';
-import './App.css';
-import UserManagement from './components/UserManagement';
+// App.js
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
+import Login from "./authentication/Login";
+import { useAuth } from "./authentication/AuthContext";
+import Dashboard from "./pages/Dashboard";
+import MachineList from "./pages/MachineList";
+import AddMachine from "./pages/AddMachine";
+import ViewMachine from "./pages/ViewMachine";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+import UserManagement from "./components/UserManagement";
+import AppLayout from "./components/AppLayout";
 
-function LandingPage() {
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
-    axios.get(`${apiUrl}/hello`)
-      .then(response => {
-        setMessage(response.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-        setMessage('Unable to connect to backend');
-        setLoading(false);
-      });
-  }, []);
-
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Welcome to React + Spring Boot</h1>
-
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          <p>{message}</p>
-        )}
-
-        <button
-          className="login-button"
-          onClick={() => navigate('/login')}
-        >
-          Login
-        </button>
-      </header>
-
-      <main>
-        <UserManagement />
-      </main>
-    </div>
-  );
+function RequireAuth({ children }) {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/" replace />;
 }
 
-// Main App with Routes
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/users/add" element={<AddUser />} />
+        <Route path="/" element={<Login />} />
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <AppLayout />
+            </RequireAuth>
+          }
+        >
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="machines" element={<MachineList />} />
+          <Route path="add" element={<AddMachine />} />
+          <Route path="machine/:id" element={<ViewMachine />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
 
