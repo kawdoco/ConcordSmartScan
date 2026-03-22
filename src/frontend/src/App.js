@@ -13,6 +13,8 @@ import AppLayout from "./components/AppLayout";
 import StoreManagement from "./stores/StoreManagement";
 import AddStore from "./stores/AddStore";
 import EditStore from "./stores/EditStore";
+import TransferRequests from "./requests/TransferRequests";
+import PurchaseRequest from "./requests/PurchaseRequest";
 
 
 function RequireAuth({ children }) {
@@ -41,6 +43,8 @@ function App() {
           <Route path="stores" element={<StoreManagement />} />
           <Route path="stores/add" element={<AddStore />} />
           <Route path="stores/edit" element={<EditStore />} />
+          <Route path="requests/transfer" element={<TransferRequests />} />
+          <Route path="requests/purchase" element={<PurchaseRequest />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
         </Route>

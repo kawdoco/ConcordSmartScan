@@ -17,6 +17,8 @@ function Topbar() {
     "/stores": "Store Management",
     "/stores/add": "Add Store",
     "/stores/edit": "Edit Store",
+    "/requests/transfer": "Transfer Requests",
+    "/requests/purchase": "Purchase Request",
     "/add": "Add Machine",
     "/profile": "Profile",
     "/settings": "Settings"
