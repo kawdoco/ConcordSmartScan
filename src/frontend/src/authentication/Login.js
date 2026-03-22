@@ -9,6 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
@@ -46,46 +47,90 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2>Welcome Back</h2>
-        <p className="login-subtitle">Please login to your account</p>
+        <div className="company-branding">
+          <div className="company-logo">
+            <span className="logo-icon">Σ</span>
+          </div>
+          <h1 className="company-name">Concord Apparel Pvt Ltd</h1>
+          <p className="system-name">Machine Replacement Locator System</p>
+        </div>
+
+        <h2>Sign in to your account</h2>
+        <p className="login-subtitle">Enter your credentials to access the locator system</p>
         
         <form onSubmit={handleSubmit} className="login-form">
           {error && <div className="error-message">{error}</div>}
           
           <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-              disabled={isLoading}
-            />
+            <label htmlFor="email">Email Address</label>
+            <div className="input-wrapper">
+              <span className="input-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </span>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="user@concordapparel.com"
+                required
+                disabled={isLoading}
+              />
+            </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-              disabled={isLoading}
-            />
+            <div className="label-row">
+              <label htmlFor="password">Password</label>
+              <a href="/forgot-password" className="forgot-password">
+                Forgot password?
+              </a>
+            </div>
+            <div className="input-wrapper">
+              <span className="input-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </span>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                )}
+              </button>
+
+            </div>
           </div>
 
           <div className="form-options">
             <label className="remember-me">
               <input type="checkbox" />
-              <span>Remember me</span>
+              <span>Remember this device</span>
             </label>
-            <a href="/forgot-password" className="forgot-password">
-              Forgot password?
-            </a>
           </div>
 
           <button 
@@ -93,13 +138,17 @@ const Login = () => {
             className="login-button"
             disabled={isLoading}
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? 'Signing in...' : 'Sign In'} <span className="arrow-icon">→</span>
           </button>
         </form>
 
-        <div className="signup-link">
-          Don't have an account? <a href="/signup">Sign up</a>
+        <div className="support-footer">
+          Need assistance? <a href="#" className="support-link">Contact IT Support</a> at ext. 404
         </div>
+      </div>
+      
+      <div className="copyright">
+        © 2023 CONCORD APPAREL PVT LTD. ALL RIGHTS RESERVED.
       </div>
     </div>
   );
