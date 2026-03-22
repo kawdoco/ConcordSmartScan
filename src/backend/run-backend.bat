@@ -18,11 +18,11 @@ echo.
 echo [INFO] Checking and downloading dependencies...
 
 REM Download dependencies if not present
-call mvn dependency:resolve
+call mvn dependency:resolve -Dmaven.wagon.http.ssl.insecure=true
 
 echo.
 echo [INFO] Building application...
-call mvn clean package -DskipTests
+call mvn clean package -DskipTests -Dmaven.wagon.http.ssl.insecure=true
 
 if errorlevel 1 (
     echo [ERROR] Build failed!
@@ -37,4 +37,4 @@ echo ====================================
 echo.
 
 REM Run the application
-call mvn spring-boot:run
+call mvn spring-boot:run -Dmaven.wagon.http.ssl.insecure=true

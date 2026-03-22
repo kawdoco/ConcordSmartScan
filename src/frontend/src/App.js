@@ -10,6 +10,8 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
 import AppLayout from "./components/AppLayout";
+import StoreManagement from "./stores/StoreManagement";
+
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuth();
@@ -34,6 +36,7 @@ function App() {
           <Route path="add" element={<AddMachine />} />
           <Route path="machine/:id" element={<ViewMachine />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="stores" element={<StoreManagement />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
         </Route>
