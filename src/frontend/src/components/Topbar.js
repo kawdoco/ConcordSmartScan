@@ -26,7 +26,9 @@ function Topbar() {
 
   const title = location.pathname.startsWith("/machine/")
     ? "Machine Details"
-    : (titleByPath[location.pathname] || "Concord Dashboard");
+    : location.pathname.startsWith("/edit/")
+      ? "Edit Machine"
+      : (titleByPath[location.pathname] || "Concord Dashboard");
 
   useEffect(() => {
     const onClickOutside = (event) => {

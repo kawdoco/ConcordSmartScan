@@ -27,7 +27,7 @@
 .app-shell-body {
   flex: 1;
   min-height: 0;
-  padding: 24px;
+  padding: 20px 22px 24px;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -38,6 +38,6 @@
   }
 
   .app-shell-body {
-    padding: 16px;
+    padding: 14px 16px 20px;
   }
 }

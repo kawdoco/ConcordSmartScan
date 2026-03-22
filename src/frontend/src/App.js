@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import MachineList from "./machines/MachineList";
 import AddMachine from "./machines/AddMachine";
 import ViewMachine from "./machines/ViewMachine";
+import EditMachine from "./machines/EditMachine";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
@@ -39,6 +40,7 @@ function App() {
           <Route path="machines" element={<MachineList />} />
           <Route path="add" element={<AddMachine />} />
           <Route path="machine/:id" element={<ViewMachine />} />
+          <Route path="edit/:id" element={<EditMachine />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="stores" element={<StoreManagement />} />
           <Route path="stores/add" element={<AddStore />} />
