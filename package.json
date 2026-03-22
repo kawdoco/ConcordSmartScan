@@ -1,12 +1,5 @@
 {
-  "name": "concordsmartscan",
-  "version": "1.0.0",
-  "description": "> **Enterprise Application Development - Group B**\r > *Automating Asset Recovery & Allocation for the Garment Industry*",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "dependencies": {
+    "react-router-dom": "^7.13.0"
+  }
 }
