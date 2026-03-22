@@ -3,12 +3,12 @@ import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import Login from "./authentication/Login";
 import { useAuth } from "./authentication/AuthContext";
 import Dashboard from "./pages/Dashboard";
-import MachineList from "./pages/MachineList";
-import AddMachine from "./pages/AddMachine";
-import ViewMachine from "./pages/ViewMachine";
+import MachineList from "./machines/MachineList";
+import AddMachine from "./machines/AddMachine";
+import ViewMachine from "./machines/ViewMachine";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
-import UserManagement from "./components/UserManagement";
+import UserManagement from "./users/UserManagement";
 import AppLayout from "./components/AppLayout";
 
 function RequireAuth({ children }) {
