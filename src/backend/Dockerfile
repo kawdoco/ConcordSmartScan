@@ -1,6 +1,7 @@
 # Backend Dockerfile
 # Using openjdk base image which is more commonly cached
-FROM openjdk:17-jdk-slim AS build
+#FROM openjdk:17-jdk-slim AS build
+FROM eclipse-temurin:17-jdk AS build
 
 WORKDIR /app
 
@@ -20,7 +21,9 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Runtime stage
-FROM openjdk:17-jre-slim
+#FROM openjdk:17-jre-slim
+FROM eclipse-temurin:17-jre
+
 
 WORKDIR /app
 

@@ -1,40 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './App.css';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import UserManagement from './components/UserManagement';
-import AddNewStore from './components/AddNewStore';
-import EditStore from './components/EditStore';
+// App.js
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
+import Login from "./authentication/Login";
+import { useAuth } from "./authentication/AuthContext";
+import Dashboard from "./pages/Dashboard";
+import MachineList from "./machines/MachineList";
+import AddMachine from "./machines/AddMachine";
+import ViewMachine from "./machines/ViewMachine";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+import UserManagement from "./users/UserManagement";
+import AppLayout from "./components/AppLayout";
+
+function RequireAuth({ children }) {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/" replace />;
+}
 
 function App() {
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
-    axios.get(`${apiUrl}/hello`)
-      .then(response => {
-        setMessage(response.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-        setMessage('Unable to connect to backend');
-        setLoading(false);
-      });
-  }, []);
-
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<Navigate to="/users" replace />} />
-          <Route path="/users" element={<UserManagement />} />
-          <Route path="/stores/add" element={<AddNewStore />} />
-          <Route path="/stores/edit" element={<EditStore />} />
-        </Routes>
-      </div>
-    </Router>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <AppLayout />
+            </RequireAuth>
+          }
+        >
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="machines" element={<MachineList />} />
+          <Route path="add" element={<AddMachine />} />
+          <Route path="machine/:id" element={<ViewMachine />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
