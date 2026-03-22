@@ -120,7 +120,7 @@ const EMPTY_FORM = () => ({
   longitude: "",
 });
 
-export default function AddNewStore() {
+export default function AddStore() {
   const navigate = useNavigate();
 
   const NAV_ITEMS = [
