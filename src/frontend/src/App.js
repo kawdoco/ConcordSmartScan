@@ -11,6 +11,8 @@ import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
 import AppLayout from "./components/AppLayout";
 import StoreManagement from "./stores/StoreManagement";
+import AddStore from "./stores/AddStore";
+import EditStore from "./stores/EditStore";
 
 
 function RequireAuth({ children }) {
@@ -37,6 +39,8 @@ function App() {
           <Route path="machine/:id" element={<ViewMachine />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="stores" element={<StoreManagement />} />
+          <Route path="stores/add" element={<AddStore />} />
+          <Route path="stores/edit" element={<EditStore />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
         </Route>
