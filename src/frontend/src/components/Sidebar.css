@@ -1,13 +1,11 @@
 .sidebar {
-  width: 256px;
+  width: 100%;
   background: white;
   border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
   height: 100vh;
-  position: fixed;
-  left: 0;
-  top: 0;
+  box-sizing: border-box;
 }
 
 .sidebar-header {
@@ -106,6 +104,10 @@
   transition: stroke 0.2s ease;
 }
 
+.sidebar-nav-item.active .sidebar-nav-icon svg {
+  stroke: white;
+}
+
 .sidebar-nav-label {
   font-size: 14px;
   font-weight: 500;
@@ -158,6 +160,25 @@
   text-overflow: ellipsis;
 }
 
+.sidebar-logout-button {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.sidebar-logout-button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
 /* Mobile overlay */
 .sidebar-overlay {
   display: none;
@@ -173,16 +194,6 @@
 /* Responsive design */
 @media (max-width: 1024px) {
   .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    z-index: 999;
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .sidebar-overlay {
-    display: block;
+    height: 100vh;
   }
 }
