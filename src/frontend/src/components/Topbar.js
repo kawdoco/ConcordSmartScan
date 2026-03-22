@@ -14,6 +14,9 @@ function Topbar() {
     "/dashboard": "Dashboard",
     "/users": "User Management",
     "/machines": "Machine Management",
+    "/stores": "Store Management",
+    "/stores/add": "Add Store",
+    "/stores/edit": "Edit Store",
     "/add": "Add Machine",
     "/profile": "Profile",
     "/settings": "Settings"
@@ -54,7 +57,6 @@ function Topbar() {
   return (
     <div style={styles.topbar}>
       <div>
-        <p style={styles.label}>Operations Console</p>
         <h1 style={styles.title}>{title}</h1>
       </div>
       <div style={styles.menuWrap} ref={menuRef}>
@@ -91,16 +93,8 @@ const styles = {
     top: 0,
     zIndex: 20
   },
-  label: {
-    margin: 0,
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.08em",
-    color: "#64748b",
-    fontWeight: "700"
-  },
   title: {
-    margin: "3px 0 0 0",
+    margin: 0,
     fontSize: "1.3rem",
     color: "#0f172a"
   },

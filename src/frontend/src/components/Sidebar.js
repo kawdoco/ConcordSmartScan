@@ -2,108 +2,107 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
+import "./Sidebar.css";
 
 function Sidebar() {
   const location = useLocation();
   const { logout, user } = useAuth();
 
+  const navItems = [
+    {
+      path: "/dashboard",
+      label: "Dashboard",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z" strokeWidth="1.8" />
+        </svg>
+      )
+    },
+    {
+      path: "/users",
+      label: "Users",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M18 8a3 3 0 1 1 0 6M11 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    },
+    {
+      path: "/machines",
+      label: "Machines",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 10h18v8H3zM7 10V6h10v4M7 18h.01M11 18h.01" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    },
+    {
+      path: "/stores",
+      label: "Stores",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 9l9-5 9 5v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    },
+    {
+      path: "/garments",
+      label: "Graments",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 4l2 4h8l2-4M9 8v12h6V8M9 12h6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    }
+  ];
+
   const isActive = (path) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
+  const displayName = user?.name || "Admin User";
+  const displayEmail = user?.email || "admin@concord.com";
+  const avatarLetter = (displayName?.trim()?.charAt(0) || "A").toUpperCase();
+
   return (
-    <div style={styles.sidebar}>
-      <h2 style={styles.logo}>Concord Apparel</h2>
-      <p style={styles.subtitle}>Machine Locator Suite</p>
-      <nav style={styles.nav}>
-        <Link style={isActive("/dashboard") ? styles.activeLink : styles.link} to="/dashboard">Dashboard</Link>
-        <Link style={isActive("/users") ? styles.activeLink : styles.link} to="/users">Users</Link>
-        <Link style={isActive("/machines") ? styles.activeLink : styles.link} to="/machines">Machines</Link>
-        <Link style={isActive("/stores") ? styles.activeLink : styles.link} to="/stores">Stores</Link>
-        <Link style={isActive("/add") ? styles.activeLink : styles.link} to="/add">Add Machine</Link>
+    <aside className="sidebar">
+      <div className="sidebar-header">
+        <div className="sidebar-logo">
+          <span className="sidebar-logo-icon">C</span>
+        </div>
+        <div className="sidebar-brand">
+          <h2 className="sidebar-brand-name">Concord Apparel</h2>
+          <p className="sidebar-brand-subtitle">Machine Locator Suite</p>
+        </div>
+      </div>
+
+      <nav className="sidebar-nav">
+        {navItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            className={`sidebar-nav-item ${isActive(item.path) ? "active" : ""}`.trim()}
+          >
+            <span className="sidebar-nav-icon">{item.icon}</span>
+            <span className="sidebar-nav-label">{item.label}</span>
+          </Link>
+        ))}
       </nav>
 
-      <div style={styles.footerBlock}>
-        <p style={styles.userEmail}>{user?.email || "admin@concord.com"}</p>
-        <button style={styles.logoutBtn} onClick={logout}>Logout</button>
+      <div className="sidebar-footer">
+        <div className="sidebar-user">
+          <div className="sidebar-user-avatar">{avatarLetter}</div>
+          <div className="sidebar-user-info">
+            <div className="sidebar-user-name">{displayName}</div>
+            <div className="sidebar-user-email">{displayEmail}</div>
+          </div>
+        </div>
+        <button type="button" className="sidebar-logout-button" onClick={logout}>
+          Logout
+        </button>
       </div>
-    </div>
+    </aside>
   );
 }
-
-const styles = {
-  sidebar: {
-    width: "260px",
-    minHeight: "100vh",
-    background: "linear-gradient(180deg, #0f172a, #172554)",
-    color: "white",
-    padding: "26px 16px",
-    boxSizing: "border-box",
-    display: "flex",
-    flexDirection: "column",
-    borderRight: "1px solid rgba(148, 163, 184, 0.2)"
-  },
-  logo: {
-    margin: "0",
-    fontSize: "1.25rem",
-    fontWeight: "700",
-    letterSpacing: "0.2px",
-    color: "#fff"
-  },
-  subtitle: {
-    margin: "6px 0 24px 0",
-    color: "#cbd5e1",
-    fontSize: "0.84rem"
-  },
-  nav: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px"
-  },
-  link: {
-    display: "block",
-    padding: "11px 12px",
-    color: "#cbd5e1",
-    textDecoration: "none",
-    borderRadius: "10px",
-    fontSize: "0.94rem",
-    transition: "all 0.2s",
-    border: "1px solid transparent"
-  },
-  activeLink: {
-    display: "block",
-    padding: "11px 12px",
-    color: "white",
-    textDecoration: "none",
-    borderRadius: "10px",
-    background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-    border: "1px solid rgba(255,255,255,0.2)",
-    fontSize: "0.94rem",
-    boxShadow: "0 6px 16px rgba(37,99,235,0.35)"
-  },
-  footerBlock: {
-    marginTop: "auto",
-    padding: "12px",
-    borderRadius: "10px",
-    background: "rgba(15, 23, 42, 0.35)",
-    border: "1px solid rgba(148, 163, 184, 0.2)"
-  },
-  userEmail: {
-    margin: "0 0 10px 0",
-    color: "#e2e8f0",
-    fontSize: "0.8rem",
-    overflowWrap: "anywhere"
-  },
-  logoutBtn: {
-    width: "100%",
-    padding: "9px 12px",
-    background: "#dc2626",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "600"
-  }
-};
 
 export default Sidebar;
