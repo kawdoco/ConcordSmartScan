@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import MachineList from "./machines/MachineList";
 import AddMachine from "./machines/AddMachine";
 import ViewMachine from "./machines/ViewMachine";
+import EditMachine from "./machines/EditMachine";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
@@ -13,6 +14,8 @@ import AppLayout from "./components/AppLayout";
 import StoreManagement from "./stores/StoreManagement";
 import AddStore from "./stores/AddStore";
 import EditStore from "./stores/EditStore";
+import TransferRequests from "./requests/TransferRequests";
+import PurchaseRequest from "./requests/PurchaseRequest";
 
 
 function RequireAuth({ children }) {
@@ -37,10 +40,13 @@ function App() {
           <Route path="machines" element={<MachineList />} />
           <Route path="add" element={<AddMachine />} />
           <Route path="machine/:id" element={<ViewMachine />} />
+          <Route path="edit/:id" element={<EditMachine />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="stores" element={<StoreManagement />} />
           <Route path="stores/add" element={<AddStore />} />
           <Route path="stores/edit" element={<EditStore />} />
+          <Route path="requests/transfer" element={<TransferRequests />} />
+          <Route path="requests/purchase" element={<PurchaseRequest />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
         </Route>

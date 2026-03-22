@@ -46,6 +46,24 @@ function Sidebar() {
       )
     },
     {
+      path: "/requests/transfer",
+      label: "Transfer Requests",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M7 7h13M7 12h13M7 17h13M3 7h.01M3 12h.01M3 17h.01" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    },
+    {
+      path: "/requests/purchase",
+      label: "Purchase Request",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6h15l-1.5 9h-11zM6 6 5 3H3M9 20a1 1 0 1 0 0 .01M18 20a1 1 0 1 0 0 .01" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    },
+    {
       path: "/garments",
       label: "Graments",
       icon: (

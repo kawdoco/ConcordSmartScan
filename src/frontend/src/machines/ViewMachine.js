@@ -1,10 +1,11 @@
 // pages/ViewMachine.js
 import React from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import AppFooter from "../components/AppFooter";
+import PagePath from "../components/PagePath";
 
 function ViewMachine() {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const machine = {
     id: "MAC-9021",
@@ -21,19 +22,14 @@ function ViewMachine() {
   };
 
   return (
-    <div style={styles.content}>
-          <div style={styles.header}>
-            <button onClick={() => navigate(-1)} style={styles.backButton}>
-              ← Back
-            </button>
-            <h1 style={styles.pageTitle}>Machine Details: {id}</h1>
-          </div>
-          
-          <div style={styles.detailsCard}>
-            <div style={styles.cardHeader}>
-              <h2 style={styles.cardTitle}>Machine Information</h2>
-              <Link to={`/edit/${id}`} style={styles.editButton}>Edit Machine</Link>
-            </div>
+    <section style={styles.page}>
+      <PagePath items={[{ label: "Machines", to: "/machines" }, { label: `Machine Details: ${id}` }]} />
+
+      <div style={styles.detailsCard}>
+        <div style={styles.cardHeader}>
+          <h2 style={styles.cardTitle}>{`Machine Information: ${id}`}</h2>
+          <Link to={`/edit/${id}`} style={styles.editButton}>Edit Machine</Link>
+        </div>
             
             <div style={styles.detailsGrid}>
               <div style={styles.detailItem}>
@@ -83,42 +79,12 @@ function ViewMachine() {
                   {machine.status}
                 </span>
               </div>
-              
-              <div style={styles.detailItem}>
-                <span style={styles.detailLabel}>Assigned Operator</span>
-                <span style={styles.detailValue}>{machine.assignedOperator}</span>
-              </div>
-              
-              <div style={styles.detailItem}>
-                <span style={styles.detailLabel}>Last Maintenance</span>
-                <span style={styles.detailValue}>{machine.lastMaintenance}</span>
-              </div>
-              
-              <div style={styles.detailItem}>
-                <span style={styles.detailLabel}>Next Maintenance</span>
-                <span style={styles.detailValue}>{machine.nextMaintenance}</span>
-              </div>
             </div>
-          </div>
+      </div>
 
-          <div style={styles.actionButtons}>
-            <button style={styles.maintenanceButton}>Schedule Maintenance</button>
-            <button style={styles.transferButton}>Transfer Location</button>
-            <button style={styles.deleteButton}>Delete Machine</button>
-          </div>
-      
-
-      <footer style={styles.footer}>
-        <p style={styles.footerText}>© 2024 Concord Apparel Pvt Ltd. Machine Replacement Location System.</p>
-        <div style={styles.footerLinks}>
-          <a href="#" style={styles.footerLink}>Privacy Policy</a>
-          <span style={styles.separator}>|</span>
-          <a href="#" style={styles.footerLink}>System Manual</a>
-          <span style={styles.separator}>|</span>
-          <a href="#" style={styles.footerLink}>Technical Support</a>
-        </div>
-      </footer>
-    </div>
+      <div style={styles.footerSpacer} />
+      <AppFooter />
+    </section>
   );
 }
 
@@ -135,27 +101,14 @@ const styles = {
     flexDirection: "column",
     minHeight: "100vh"
   },
-  content: {
-    padding: "6px 8px",
+  page: {
+    minHeight: "100%",
+    display: "flex",
+    flexDirection: "column",
+    padding: "6px 8px"
+  },
+  footerSpacer: {
     flex: 1
-  },
-  header: {
-    marginBottom: "30px"
-  },
-  backButton: {
-    background: "none",
-    border: "none",
-    color: "#2563eb",
-    cursor: "pointer",
-    fontSize: "1rem",
-    padding: "0 0 10px 0",
-    display: "block"
-  },
-  pageTitle: {
-    fontSize: "2rem",
-    margin: 0,
-    color: "#0f172a",
-    fontWeight: "600"
   },
   detailsCard: {
     background: "white",
@@ -221,68 +174,6 @@ const styles = {
     fontWeight: "500",
     display: "inline-block",
     width: "fit-content"
-  },
-  actionButtons: {
-    display: "flex",
-    gap: "15px",
-    marginTop: "25px"
-  },
-  maintenanceButton: {
-    background: "#2563eb",
-    color: "white",
-    border: "none",
-    padding: "12px 25px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "0.95rem",
-    fontWeight: "500"
-  },
-  transferButton: {
-    background: "white",
-    color: "#2563eb",
-    border: "1px solid #2563eb",
-    padding: "12px 25px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "0.95rem",
-    fontWeight: "500"
-  },
-  deleteButton: {
-    background: "white",
-    color: "#ef4444",
-    border: "1px solid #ef4444",
-    padding: "12px 25px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "0.95rem",
-    fontWeight: "500"
-  },
-  footer: {
-    background: "white",
-    padding: "25px 40px",
-    borderTop: "1px solid #e5e7eb",
-    textAlign: "center"
-  },
-  footerText: {
-    margin: "0 0 12px 0",
-    color: "#64748b",
-    fontSize: "0.95rem"
-  },
-  footerLinks: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "15px"
-  },
-  footerLink: {
-    color: "#2563eb",
-    textDecoration: "none",
-    fontSize: "0.95rem",
-    ':hover': {
-      textDecoration: "underline"
-    }
-  },
-  separator: {
-    color: "#cbd5e1"
   }
 };
 

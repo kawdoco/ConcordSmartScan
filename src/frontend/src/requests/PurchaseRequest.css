@@ -1,0 +1,219 @@
+.purchase-request-page {
+  font-family: "Sora", sans-serif;
+  color: #0f1623;
+  --pr-blue: #1a3fd4;
+  --pr-blue-dark: #1230a8;
+  --pr-text: #0f1623;
+  --pr-muted: #6b7280;
+  --pr-border: #e5e7eb;
+  --pr-bg: #f4f6fb;
+  --pr-white: #ffffff;
+  --pr-red: #ef4444;
+}
+
+.purchase-request-page *,
+.purchase-request-page *::before,
+.purchase-request-page *::after {
+  box-sizing: border-box;
+}
+
+.purchase-request-card {
+  background: var(--pr-white);
+  border: 1px solid var(--pr-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.purchase-request-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--pr-border);
+}
+
+.purchase-request-card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pr-text);
+}
+
+.purchase-request-table-wrap {
+  overflow-x: auto;
+}
+
+.purchase-request-table-wrap table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+.purchase-request-table-wrap thead th {
+  padding: 14px 12px;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--pr-muted);
+  background: var(--pr-bg);
+  border-bottom: 1px solid var(--pr-border);
+}
+
+.purchase-request-table-wrap tbody td {
+  padding: 15px 12px;
+  border-bottom: 1px solid var(--pr-border);
+  font-size: 13.5px;
+  color: var(--pr-text);
+  vertical-align: middle;
+}
+
+.purchase-request-table-wrap tbody tr:hover {
+  background: #f8f9ff;
+}
+
+.purchase-request-table-wrap tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.purchase-priority {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.purchase-priority.high {
+  color: #ef4444;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.purchase-priority.medium {
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+}
+
+.purchase-priority.low {
+  color: #64748b;
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+}
+
+.purchase-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.purchase-badge.approved {
+  color: #065f46;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+}
+
+.purchase-badge.declined {
+  color: var(--pr-red);
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.purchase-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.purchase-btn {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.purchase-btn.approve {
+  color: var(--pr-white);
+  background: var(--pr-blue);
+}
+
+.purchase-btn.approve:hover {
+  background: var(--pr-blue-dark);
+}
+
+.purchase-btn.decline {
+  color: var(--pr-red);
+  background: #fff5f5;
+  border-color: #fecaca;
+}
+
+.purchase-btn.decline:hover {
+  background: #fee2e2;
+}
+
+.purchase-request-footer {
+  border-top: 1px solid var(--pr-border);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--pr-muted);
+  font-size: 12px;
+}
+
+.purchase-pagination {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.purchase-page-btn {
+  min-width: 22px;
+  height: 22px;
+  border: 1px solid var(--pr-border);
+  border-radius: 6px;
+  background: var(--pr-white);
+  color: var(--pr-muted);
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.purchase-page-btn:hover:not(.active):not(:disabled) {
+  background: var(--pr-bg);
+  color: var(--pr-text);
+}
+
+.purchase-page-btn.active {
+  color: var(--pr-white);
+  background: var(--pr-blue);
+  border-color: var(--pr-blue);
+}
+
+.purchase-page-btn:disabled {
+  opacity: 0.6;
+}
+
+@media (max-width: 900px) {
+  .purchase-request-card-header {
+    padding: 16px;
+  }
+}

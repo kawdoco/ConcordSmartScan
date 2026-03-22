@@ -2,7 +2,16 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
-import "./AddMachine.css";
+import "./EditMachine.css";
+
+const machineTypes = [
+  "Single Needle",
+  "Double Needle",
+  "Overlock",
+  "Flatlock",
+  "Button Hole",
+  "Bar Tack",
+];
 
 function IconMachine() {
   return (
@@ -18,34 +27,32 @@ function IconMachine() {
 function IconMapPin() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" />
       <circle cx="12" cy="10" r="3" />
     </svg>
   );
 }
 
-function IconPlus() {
+function IconEdit() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
     </svg>
   );
 }
 
-const EMPTY_MACHINE = {
-  machineId: "MC-9042",
-  type: "",
-  brand: "",
-  model: "",
-  serialNumber: "",
-  location: "",
-  date: "2024-10-24"
-};
-
-function AddMachine() {
+function EditMachine() {
   const navigate = useNavigate();
-  const [machine, setMachine] = useState(EMPTY_MACHINE);
+  const [machine, setMachine] = useState({
+    machineId: "MC-9042",
+    type: "Single Needle",
+    brand: "JUKI",
+    model: "DDL-8700",
+    serialNumber: "SN-23910",
+    location: "ST010",
+    addedDate: "2024-10-24",
+  });
   const [errors, setErrors] = useState({});
   const [notification, setNotification] = useState(null);
 
@@ -57,172 +64,144 @@ function AddMachine() {
   const validate = () => {
     const nextErrors = {};
 
-    if (!machine.machineId.trim()) nextErrors.machineId = "Machine ID is required.";
     if (!machine.type.trim()) nextErrors.type = "Machine type is required.";
     if (!machine.brand.trim()) nextErrors.brand = "Brand is required.";
     if (!machine.model.trim()) nextErrors.model = "Model is required.";
     if (!machine.serialNumber.trim()) nextErrors.serialNumber = "Serial number is required.";
     if (!machine.location.trim()) nextErrors.location = "Location is required.";
-    if (!machine.date) nextErrors.date = "Added date is required.";
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setMachine((previous) => ({ ...previous, [name]: value }));
-    setErrors((previous) => ({ ...previous, [name]: "" }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setMachine((prev) => ({ ...prev, [name]: value }));
   };
 
-  const submit = (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     if (!validate()) return;
 
-    showNotification("Machine added successfully!", "success");
-    setMachine(EMPTY_MACHINE);
-    setErrors({});
+    showNotification("Machine updated successfully!", "success");
   };
 
   const handleCancel = () => {
-    setMachine(EMPTY_MACHINE);
     setErrors({});
     navigate("/machines");
   };
 
   return (
-    <section className="add-machine-page">
-      <PagePath items={[{ label: "Machines", to: "/machines" }, { label: "Add Machine" }]} />
+    <section className="edit-machine-page">
+      <PagePath items={[{ label: "Machines", to: "/machines" }, { label: "Edit Machine" }]} />
       {notification && (
-        <div className={`add-machine-notice ${notification.type === "success" ? "success" : "info"}`}>
+        <div className={`edit-machine-notice ${notification.type === "success" ? "success" : "info"}`}>
           {notification.message}
         </div>
       )}
 
-      <form className="add-machine-card" onSubmit={submit}>
-        <div className="add-machine-card-header">
-          <span className="add-machine-card-icon"><IconMachine /></span>
+      <form className="edit-machine-card" onSubmit={handleSubmit}>
+        <div className="edit-machine-card-header">
+          <span className="edit-machine-card-icon"><IconMachine /></span>
           <div>
             <h2>Machine Details</h2>
           </div>
         </div>
 
-        <div className="add-machine-card-body">
-          <div className="add-machine-grid-two">
-            <div className="add-machine-field">
+        <div className="edit-machine-card-body">
+          <div className="edit-machine-grid-two">
+            <div className="edit-machine-field">
               <label htmlFor="machineId">Machine ID</label>
-              <input
-                id="machineId"
-                name="machineId"
-                value={machine.machineId}
-                onChange={handleChange}
-                placeholder="MC-9042"
-                className={errors.machineId ? "error" : ""}
-              />
-              {errors.machineId && <span className="add-machine-error">{errors.machineId}</span>}
+              <input id="machineId" value={machine.machineId} disabled className="disabled" />
             </div>
 
-            <div className="add-machine-field">
+            <div className="edit-machine-field">
               <label htmlFor="type">Type</label>
               <select
                 id="type"
                 name="type"
-                onChange={handleChange}
                 value={machine.type}
+                onChange={handleChange}
                 className={errors.type ? "error" : ""}
               >
-                <option value="">Select Machine Type</option>
-                <option value="Lockstitch">Lockstitch</option>
-                <option value="Overlock">Overlock</option>
-                <option value="Button Hole">Button Hole</option>
-                <option value="Flatlock">Flatlock</option>
+                {machineTypes.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
               </select>
-              {errors.type && <span className="add-machine-error">{errors.type}</span>}
+              {errors.type && <span className="edit-machine-error">{errors.type}</span>}
             </div>
           </div>
 
-          <div className="add-machine-grid-two">
-            <div className="add-machine-field">
+          <div className="edit-machine-grid-two">
+            <div className="edit-machine-field">
               <label htmlFor="brand">Brand</label>
               <input
                 id="brand"
                 name="brand"
-                placeholder="e.g. JUKI"
-                onChange={handleChange}
                 value={machine.brand}
+                onChange={handleChange}
                 className={errors.brand ? "error" : ""}
               />
-              {errors.brand && <span className="add-machine-error">{errors.brand}</span>}
+              {errors.brand && <span className="edit-machine-error">{errors.brand}</span>}
             </div>
 
-            <div className="add-machine-field">
+            <div className="edit-machine-field">
               <label htmlFor="model">Model</label>
               <input
                 id="model"
                 name="model"
-                placeholder="e.g. DDL-8700"
-                onChange={handleChange}
                 value={machine.model}
+                onChange={handleChange}
                 className={errors.model ? "error" : ""}
               />
-              {errors.model && <span className="add-machine-error">{errors.model}</span>}
+              {errors.model && <span className="edit-machine-error">{errors.model}</span>}
             </div>
           </div>
 
-          <div className="add-machine-field">
+          <div className="edit-machine-field">
             <label htmlFor="serialNumber">Serial Number</label>
             <input
               id="serialNumber"
               name="serialNumber"
-              placeholder="e.g. SN12345678"
-              onChange={handleChange}
               value={machine.serialNumber}
+              onChange={handleChange}
               className={errors.serialNumber ? "error" : ""}
             />
-            {errors.serialNumber && <span className="add-machine-error">{errors.serialNumber}</span>}
+            {errors.serialNumber && <span className="edit-machine-error">{errors.serialNumber}</span>}
           </div>
 
-          <div className="add-machine-location-heading">
+          <div className="edit-machine-location-heading">
             <span><IconMapPin /></span>
             <div>
               <h3>Location & Tracking</h3>
             </div>
           </div>
 
-          <div className="add-machine-grid-two">
-            <div className="add-machine-field">
+          <div className="edit-machine-grid-two">
+            <div className="edit-machine-field">
               <label htmlFor="location">Location</label>
               <input
                 id="location"
                 name="location"
-                placeholder="e.g. ST010 or GR005"
-                onChange={handleChange}
                 value={machine.location}
+                onChange={handleChange}
                 className={errors.location ? "error" : ""}
               />
-              {errors.location && <span className="add-machine-error">{errors.location}</span>}
+              {errors.location && <span className="edit-machine-error">{errors.location}</span>}
             </div>
 
-            <div className="add-machine-field">
-              <label htmlFor="date">Added Date</label>
-              <input
-                id="date"
-                type="date"
-                name="date"
-                onChange={handleChange}
-                value={machine.date}
-                className={errors.date ? "error" : ""}
-              />
-              {errors.date && <span className="add-machine-error">{errors.date}</span>}
+            <div className="edit-machine-field">
+              <label htmlFor="addedDate">Added Date</label>
+              <input id="addedDate" value={machine.addedDate} disabled className="disabled" />
             </div>
           </div>
         </div>
 
-        <div className="add-machine-actions">
+        <div className="edit-machine-actions">
           <button type="button" className="btn-secondary" onClick={handleCancel}>Cancel</button>
           <button type="submit" className="btn-primary">
-            <IconPlus />
-            Add Machine
+            <IconEdit />
+            Update Machine
           </button>
         </div>
       </form>
@@ -232,4 +211,4 @@ function AddMachine() {
   );
 }
 
-export default AddMachine;
+export default EditMachine;
