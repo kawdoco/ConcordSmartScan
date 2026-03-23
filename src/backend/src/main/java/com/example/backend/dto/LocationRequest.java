@@ -18,6 +18,8 @@ public class LocationRequest {
 
     private String contactInfo;
 
+    private String address;
+
     public LocationRequest() {}
 
     public String getName() { return name; }
@@ -34,4 +36,7 @@ public class LocationRequest {
 
     public String getContactInfo() { return contactInfo; }
     public void setContactInfo(String contactInfo) { this.contactInfo = contactInfo; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 }

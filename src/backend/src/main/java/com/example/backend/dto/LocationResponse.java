@@ -11,6 +11,7 @@ public class LocationResponse {
     private Double longitude;
     private LocationType type;
     private String contactInfo;
+    private String address;
 
     public LocationResponse() {}
 
@@ -21,6 +22,7 @@ public class LocationResponse {
         this.longitude   = location.getLongitude();
         this.type        = location.getType();
         this.contactInfo = location.getContactInfo();
+        this.address     = location.getAddress();
     }
 
     // Getters
@@ -30,4 +32,5 @@ public class LocationResponse {
     public Double getLongitude() { return longitude; }
     public LocationType getType() { return type; }
     public String getContactInfo() { return contactInfo; }
+    public String getAddress() { return address; }
 }

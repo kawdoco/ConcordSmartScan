@@ -1,0 +1,189 @@
+/* ViewStore.css */
+
+.view-store-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100rem;
+  padding: 6px 8px;
+}
+
+.view-store-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  flex: 1;
+}
+
+.view-store-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.view-store-header-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.view-store-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  color: #0284c7;
+}
+
+.view-store-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.view-store-card-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.view-store-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.view-store-edit-btn:hover {
+  background: #1d4ed8;
+}
+
+.view-store-edit-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.view-store-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.view-store-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px 30px;
+}
+
+.view-store-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.view-store-detail-label {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.view-store-detail-value {
+  color: #1e293b;
+  font-size: 1.1rem;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.view-store-type-badge {
+  display: inline-block;
+  background: #dbeafe;
+  color: #0c4a6e;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.view-store-map-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.view-store-map-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.view-store-coordinates {
+  margin: 0;
+  color: #475569;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+}
+
+.view-store-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.view-store-back-btn {
+  padding: 10px 20px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #1e293b;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-store-back-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+@media (max-width: 768px) {
+  .view-store-card {
+    padding: 20px;
+  }
+
+  .view-store-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .view-store-edit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .view-store-details-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
