@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import apiClient from "../services/api";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -243,6 +244,7 @@ const ROWS_PER_PAGE = 8;
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function UserManagement() {
+  const navigate = useNavigate();
   const searchInputRef = useRef(null);
 
   const [users, setUsers] = useState([]);
@@ -461,7 +463,7 @@ export default function UserManagement() {
                     }}
                   />
                 </div>
-                <button className="btn-primary" onClick={() => { resetForm(); setAddOpen(true); }}>
+                <button className="btn-primary" onClick={() => navigate("/users/add")}>
                   <Icons.Plus /> Add New User
                 </button>
               </div>

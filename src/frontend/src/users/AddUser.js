@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppFooter from '../components/AppFooter';
 import PagePath from '../components/PagePath';
+import apiClient from '../services/api';
 import './AddUser.css';
 
 const AddUser = () => {
   const navigate = useNavigate();
+  const PASSWORD_RULE_TEXT = 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.';
+  const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
   const [formData, setFormData] = useState({
     fullName: '',
     dateOfBirth: '',
@@ -21,6 +24,9 @@ const AddUser = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,12 +34,63 @@ const AddUser = () => {
       ...formData,
       [name]: value,
     });
+
+    setFormErrors((prev) => ({
+      ...prev,
+      [name]: '',
+    }));
+    setSubmitError('');
   };
 
-  const handleSubmit = (e) => {
+  const validateSecurityFields = () => {
+    const nextErrors = {};
+
+    if (!PASSWORD_REGEX.test(formData.password || '')) {
+      nextErrors.password = PASSWORD_RULE_TEXT;
+    }
+
+    if (formData.confirmPassword !== formData.password) {
+      nextErrors.confirmPassword = 'Password does not match.';
+    }
+
+    setFormErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement API call to add user
-    console.log('Form submitted:', formData);
+    if (!validateSecurityFields()) {
+      return;
+    }
+
+    if (formData.garmentId && Number.isNaN(Number(formData.garmentId))) {
+      setSubmitError('Garment ID must be a valid number.');
+      return;
+    }
+
+    const payload = {
+      fullName: formData.fullName.trim(),
+      dateOfBirth: formData.dateOfBirth,
+      phoneNumber: formData.phoneNumber.trim(),
+      email: formData.email.trim(),
+      address: formData.address.trim(),
+      companyEmail: formData.companyEmail.trim(),
+      userType: formData.userType,
+      password: formData.password,
+      garmentId: formData.garmentId ? Number(formData.garmentId) : null,
+    };
+
+    try {
+      setIsSubmitting(true);
+      setSubmitError('');
+      await apiClient.post('/users', payload);
+      navigate('/users');
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to add user. Please try again.';
+      setSubmitError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -181,7 +238,7 @@ const AddUser = () => {
                     value={formData.garmentId}
                     onChange={handleInputChange}
                     placeholder="Select or search Garment ID"
-                    required
+                    //required
                   />
                 </div>
 
@@ -228,6 +285,7 @@ const AddUser = () => {
                       type={showPassword ? 'text' : 'password'}
                       id="password"
                       name="password"
+                      className={formErrors.password ? 'field-error' : ''}
                       value={formData.password}
                       onChange={handleInputChange}
                       placeholder="••••••••"
@@ -251,6 +309,7 @@ const AddUser = () => {
                       )}
                     </button>
                   </div>
+                  {formErrors.password && <span className="field-error-text">{formErrors.password}</span>}
                 </div>
 
                 <div className="add-user-field">
@@ -260,6 +319,7 @@ const AddUser = () => {
                       type={showConfirmPassword ? 'text' : 'password'}
                       id="confirmPassword"
                       name="confirmPassword"
+                      className={formErrors.confirmPassword ? 'field-error' : ''}
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       placeholder="••••••••"
@@ -283,6 +343,7 @@ const AddUser = () => {
                       )}
                     </button>
                   </div>
+                  {formErrors.confirmPassword && <span className="field-error-text">{formErrors.confirmPassword}</span>}
                 </div>
               </div>
             </div>
@@ -290,17 +351,18 @@ const AddUser = () => {
 
             {/* Form Actions */}
             <div className="add-user-actions">
+              {submitError && <div className="add-user-submit-error">{submitError}</div>}
               <button type="button" className="btn-secondary" onClick={handleCancel}>
                 Cancel
               </button>
-              <button type="submit" className="btn-primary">
+              <button type="submit" className="btn-primary" disabled={isSubmitting}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                   <circle cx="9" cy="7" r="4"></circle>
                   <line x1="19" y1="8" x2="19" y2="14"></line>
                   <line x1="22" y1="11" x2="16" y2="11"></line>
                 </svg>
-                Add User
+                {isSubmitting ? 'Adding...' : 'Add User'}
               </button>
             </div>
       </form>
