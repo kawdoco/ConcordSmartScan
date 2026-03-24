@@ -18,6 +18,9 @@ import ViewStore from "./stores/ViewStore";
 import EditStore from "./stores/EditStore";
 import TransferRequests from "./requests/TransferRequests";
 import PurchaseRequest from "./requests/PurchaseRequest";
+import GarmentManagement from "./garments/GarmentManagement";
+import AddGarment from "./garments/AddGarment";
+import EditGarment from "./garments/EditGarment";
 
 
 function RequireAuth({ children }) {
@@ -51,6 +54,9 @@ function App() {
           <Route path="stores/edit" element={<EditStore />} />
           <Route path="requests/transfer" element={<TransferRequests />} />
           <Route path="requests/purchase" element={<PurchaseRequest />} />
+          <Route path="garments" element={<GarmentManagement />} />
+          <Route path="garments/add" element={<AddGarment />} />
+          <Route path="garments/edit" element={<EditGarment />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
         </Route>
