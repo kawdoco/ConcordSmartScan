@@ -1,58 +1,7 @@
 import { useState, useCallback } from "react";
-
-/* ─── Extra styles (extends UserManagement's shared styles) ──────────────────── */
-const extraStyle = `
-  /* ── Request-specific styles ── */
-  .req-section-title { font-size:24px; font-weight:700; margin-bottom:6px; letter-spacing:-.4px; }
-  .req-section-sub   { font-size:13px; color:var(--muted); margin-bottom:24px; }
-
-  .btn-export {
-    display:flex; align-items:center; gap:8px;
-    background:var(--white); color:var(--text);
-    border:1.5px solid var(--border); border-radius:8px;
-    padding:9px 16px; font-family:inherit; font-size:13px;
-    font-weight:600; cursor:pointer; transition:all .15s;
-  }
-  .btn-export:hover { background:var(--bg); border-color:#bdc8e8; }
-
-  .th-sub { font-size:10px; font-weight:500; color:var(--muted); text-transform:none;
-            letter-spacing:0; display:block; margin-top:2px; }
-
-  .req-id  { font-family:'JetBrains Mono',monospace; font-size:12.5px; font-weight:700; color:var(--text); }
-  .mc-id   { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--muted); }
-  .store-id { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--muted); }
-  .approval-date  { font-size:13px; }
-  .approval-cm    { font-size:11.5px; color:var(--muted); margin-top:1px; }
-
-  .btn-edit-machine {
-    display:inline-flex; align-items:center; gap:6px;
-    padding:7px 14px; border-radius:7px;
-    border:1.5px solid var(--blue); background:var(--white);
-    color:var(--blue); font-family:inherit; font-size:12.5px;
-    font-weight:600; cursor:pointer; transition:all .15s;
-  }
-  .btn-edit-machine:hover { background:var(--blue-lt); }
-
-  /* Purchase requests */
-  .btn-add-machine {
-    display:inline-flex; align-items:center; gap:6px;
-    padding:7px 14px; border-radius:7px;
-    border:none; background:var(--blue);
-    color:#fff; font-family:inherit; font-size:12.5px;
-    font-weight:600; cursor:pointer; transition:background .15s;
-  }
-  .btn-add-machine:hover { background:var(--blue-dk); }
-
-  .machine-added {
-    display:inline-flex; align-items:center; gap:6px;
-    padding:7px 14px; border-radius:7px;
-    color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:600;
-  }
-  .machine-added svg { color:var(--muted); }
-
-  tr.row-done td { color:#9ca3af; }
-  tr.row-done .prq-id { color:#9ca3af; }
-`;
+import { useNavigate } from "react-router-dom";
+import StatsCards from "../components/StatsCards";
+import "./ApprovedRequests.css";
 
 /* ─── Purchase mock data ────────────────────────────────────────────────────── */
 const ALL_PURCHASE_REQUESTS = [
@@ -166,12 +115,17 @@ function useToast() {
 
 /* ─── Main Component ─────────────────────────────────────────────────────────── */
 export default function ApprovedRequests() {
+  const navigate = useNavigate();
   const [requestTab, setRequestTab] = useState("transfer");
   const [page, setPage] = useState(1);
   const [purchasePage, setPurchasePage] = useState(1);
   const [searchQ, setSearchQ] = useState("");
   const [purchaseRequests, setPurchaseRequests] = useState(ALL_PURCHASE_REQUESTS);
   const [toast, showToast] = useToast();
+
+  const purchaseCount = purchaseRequests.length;
+  const transferCount = ALL_TRANSFER_REQUESTS.length;
+  const totalRequestCount = purchaseCount + transferCount;
 
   /* ── Filtering ── */
   const filtered = ALL_TRANSFER_REQUESTS.filter(r => {
@@ -221,10 +175,13 @@ export default function ApprovedRequests() {
   };
 
   const handleAddMachine = (id) => {
-    setPurchaseRequests(prev =>
-      prev.map(r => r.id === id ? { ...r, added: true } : r)
-    );
-    showToast(`Machine added for ${id}`, "success");
+    const selectedRequest = purchaseRequests.find(r => r.id === id);
+    navigate("/add", {
+      state: {
+        from: "approved-requests",
+        request: selectedRequest || null,
+      },
+    });
   };
 
   const handleTabChange = (tab) => {
@@ -250,11 +207,16 @@ export default function ApprovedRequests() {
   };
 
   return (
-    <>
-      <style>{extraStyle}</style>
-
+    <div className="approved-requests-page">
       <div className="content">
-        <h1 className="req-section-title">Approved Requests</h1>
+        <StatsCards
+          mode="requests"
+          counts={{
+            total: totalRequestCount,
+            purchase: purchaseCount,
+            transfer: transferCount,
+          }}
+        />
 
         {/* ── Tabs ── */}
         <div className="tabs">
@@ -307,8 +269,8 @@ export default function ApprovedRequests() {
                           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                           <polyline points="22 4 12 14.01 9 11.01" />
                         </svg>
-                        <p style={{ marginTop: 12, fontWeight: 600 }}>No approved requests found</p>
-                        <p style={{ fontSize: 13, marginTop: 4 }}>
+                        <p className="empty-title">No approved requests found</p>
+                        <p className="empty-sub">
                           {searchQ ? "Try a different search term." : "No transfer requests have been approved yet."}
                         </p>
                       </div>
@@ -327,7 +289,7 @@ export default function ApprovedRequests() {
                     <td>
                       <button
                         className="btn-edit-machine"
-                        onClick={() => showToast(`Editing machine ${r.machineId}`, "info")}>
+                        onClick={() => navigate(`/edit/${r.machineId}`)}>
                         <PencilIcon /> Edit Machine
                       </button>
                     </td>
@@ -397,7 +359,10 @@ export default function ApprovedRequests() {
                   <th>Request ID</th>
                   <th>Machine Type</th>
                   <th>Garment Requested</th>
-                  <th>Approval (Date | CM ID)</th>
+                  <th>
+                    Approval
+                    <span className="th-sub">Date | CM ID</span>
+                  </th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -407,8 +372,8 @@ export default function ApprovedRequests() {
                     <td colSpan={5}>
                       <div className="empty">
                         <ShoppingIcon />
-                        <p style={{ marginTop: 12, fontWeight: 600 }}>No purchase requests found</p>
-                        <p style={{ fontSize: 13, marginTop: 4 }}>
+                        <p className="empty-title">No purchase requests found</p>
+                        <p className="empty-sub">
                           {searchQ ? "Try a different search term." : "No purchase requests have been approved yet."}
                         </p>
                       </div>
@@ -420,7 +385,8 @@ export default function ApprovedRequests() {
                     <td>{r.machineType}</td>
                     <td>{r.garment}</td>
                     <td>
-                      <div className="approval-date">{r.approvalDate} | {r.cmId}</div>
+                      <div className="approval-date">{r.approvalDate}</div>
+                      <div className="approval-cm">{r.cmId}</div>
                     </td>
                     <td>
                       {r.added ? (
@@ -473,6 +439,6 @@ export default function ApprovedRequests() {
 
       {/* ── Toast ── */}
       <div className={`toast toast-${toast.type}${toast.visible ? " visible" : ""}`}>{toast.msg}</div>
-    </>
+    </div>
   );
 }

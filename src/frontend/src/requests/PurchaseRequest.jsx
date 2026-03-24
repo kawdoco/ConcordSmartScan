@@ -58,7 +58,10 @@ function PurchaseRequest() {
     <section className="purchase-request-page">
       <div className="purchase-request-card">
         <div className="purchase-request-card-header">
-          <h2 className="purchase-request-card-title">Requests Sent for Purchasing Machines</h2>
+          <div>
+            <h2 className="purchase-request-card-title">Requests Sent for Purchasing Machines</h2>
+            <p className="purchase-request-card-description">Review and process purchase requests for new machines.</p>
+          </div>
         </div>
 
         <div className="purchase-request-table-wrap">
