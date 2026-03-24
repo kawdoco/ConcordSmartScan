@@ -126,7 +126,7 @@ const style = `
   .actions { display:flex; align-items:center; gap:6px; }
   .ic-btn {
     width:32px; height:32px; border-radius:7px;
-    border:1.5px solid var(--border); background:var(--white);
+    border:1.5px solid transparent; background:var(--white);
     cursor:pointer; display:flex; align-items:center; justify-content:center;
     transition:all .15s; color:var(--muted);
   }

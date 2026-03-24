@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 .store-page {
   font-family: 'Sora', sans-serif;
   display: flex;
@@ -121,9 +123,9 @@
 }
 
 .store-action-icons button {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
   border: 1px solid transparent;
   background: #fff;
   cursor: pointer;
@@ -136,14 +138,20 @@
 }
 
 .store-action-icons button:hover {
-  color: #64748b;
-  background: #f8fafc;
-  border-color: #e5e7eb;
+  background: #eef1fd;
+  color: #1a3fd4;
+  border-color: #b8c8f8;
+}
+
+.store-action-icons button.delete:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
 }
 
 .store-action-icons button svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
 }
 
 .store-table-footer {

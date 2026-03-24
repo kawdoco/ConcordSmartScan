@@ -279,7 +279,7 @@
   width: 32px;
   height: 32px;
   border-radius: 7px;
-  border: 1.5px solid var(--ml-border);
+  border: 1.5px solid transparent;
   background: var(--ml-white);
   cursor: pointer;
   display: flex;
