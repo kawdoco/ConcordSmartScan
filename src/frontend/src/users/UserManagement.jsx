@@ -5,7 +5,6 @@ import apiClient from "../services/api";
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const Icons = {
   Users: () => <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
-  Search: () => <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>,
   Eye: () => <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>,
   Edit: () => <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>,
   Trash: () => <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>,
@@ -40,13 +39,6 @@ const style = `
   .av-name { font-weight:600; font-size:13px; line-height:1.3; }
   .av-email { font-size:11px; color:var(--muted); }
 
-  .search {
-    display:flex; align-items:center; gap:8px;
-    background:var(--bg); border:1.5px solid var(--border);
-    border-radius:9px; padding:8px 14px; width:340px; transition:border .15s;
-  }
-  .search:focus-within { border-color:var(--blue); }
-  .search input { border:none; background:none; outline:none; font-family:inherit; font-size:13px; color:var(--text); width:100%; }
   .users-page .content { padding:28px 28px; flex:1; }
   .users-page h1 { font-size:24px; font-weight:700; margin-bottom:24px; letter-spacing:-.4px; }
   .users-page .user-page-content { padding:8px; }
@@ -236,7 +228,7 @@ const style = `
 
   @media(max-width:768px) {
     .users-page .stats { grid-template-columns:1fr; }
-    .users-page .search { width:200px; }
+    .users-page .page-search { width:200px; }
   }
 `;
 
@@ -245,12 +237,10 @@ const ROWS_PER_PAGE = 8;
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function UserManagement() {
   const navigate = useNavigate();
-  const searchInputRef = useRef(null);
 
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
   const [page, setPage] = useState(1);
-  const [searchQ, setSearchQ] = useState("");
 
   // Modals
   const [addOpen, setAddOpen] = useState(false);
@@ -291,27 +281,10 @@ export default function UserManagement() {
     loadUsers();
   }, [loadUsers]);
 
-  // Some browsers/password managers inject email into text inputs on mount.
-  // Force-clear the search box so table filtering starts from "show all".
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (searchInputRef.current) searchInputRef.current.value = "";
-      setSearchQ("");
-    }, 80);
-    return () => clearTimeout(t);
-  }, []);
-
   // ── Derived data ──
   const filtered = users.filter(u => {
     const tabMatch = activeTab === "all" || u.role === activeTab;
-    const q = searchQ.toLowerCase();
-    const qMatch = !q
-      || u.name.toLowerCase().includes(q)
-      || u.id.toLowerCase().includes(q)
-      || u.location.toLowerCase().includes(q)
-      || (u.email || "").toLowerCase().includes(q)
-      || u.role.toLowerCase().includes(q);
-    return tabMatch && qMatch;
+    return tabMatch;
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
@@ -322,13 +295,7 @@ export default function UserManagement() {
   const managers = users.filter(u => u.role === "Chief Manager").length;
   const techs = users.filter(u => u.role === "Technician").length;
 
-  useEffect(() => { setPage(1); }, [activeTab, searchQ]);
-
-  const handleSearchChange = (e) => {
-    // Ignore non-focused synthetic/autofill updates.
-    if (document.activeElement !== e.target) return;
-    setSearchQ(e.target.value);
-  };
+  useEffect(() => { setPage(1); }, [activeTab]);
 
   // ── Form helpers ──
   const resetForm = () => { setForm({ name: "", role: "Technician", location: "", email: "", password: "" }); setFormErr({}); };
@@ -367,7 +334,6 @@ export default function UserManagement() {
         setAddOpen(false);
         resetForm();
         setActiveTab("all");
-        setSearchQ("");
         setPage(1);
         loadUsers();
         showToast(`${newUser.name} added successfully`, "success");
@@ -436,39 +402,6 @@ export default function UserManagement() {
     <>
       <style>{style}</style>
       <div className="users-page content user-page-content">
-            <div className="page-head">
-              <div>
-                <h1>User Management</h1>
-                <p className="page-sub">Manage registered users, roles, and assigned locations.</p>
-              </div>
-              <div className="page-tools">
-                <div className="search page-search">
-                  <Icons.Search />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    name="users-filter-q"
-                    autoComplete="off"
-                    autoCorrect="off"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                    placeholder="Search by name, user ID, or location..."
-                    value={searchQ}
-                    onChange={handleSearchChange}
-                    onFocus={(e) => {
-                      // Clear previously injected autofill text if state is empty.
-                      if (!searchQ && e.target.value) {
-                        e.target.value = "";
-                      }
-                    }}
-                  />
-                </div>
-                <button className="btn-primary" onClick={() => navigate("/users/add")}>
-                  <Icons.Plus /> Add New User
-                </button>
-              </div>
-            </div>
-
             {/* Stats */}
             <div className="stats">
               {[
@@ -502,6 +435,9 @@ export default function UserManagement() {
                   <div className="ct">Registered Users</div>
                   <div className="cs">Manage user permissions and location assignments.</div>
                 </div>
+                <button className="btn-primary" onClick={() => navigate("/users/add")}>
+                  <Icons.Plus /> Add New User
+                </button>
               </div>
 
               <table>
@@ -523,7 +459,7 @@ export default function UserManagement() {
                           <Icons.Users />
                           <p style={{ marginTop: 12, fontWeight: 600 }}>No users found</p>
                           <p style={{ fontSize: 13, marginTop: 4 }}>
-                            {searchQ ? "Try a different search term." : 'Click "Add New User" to get started.'}
+                            Click "Add New User" to get started.
                           </p>
                         </div>
                       </td>

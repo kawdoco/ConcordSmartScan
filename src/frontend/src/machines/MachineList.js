@@ -70,7 +70,6 @@ function IconChevRight() {
 
 function MachineList() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   
   const machines = [
@@ -98,11 +97,7 @@ function MachineList() {
     return true;
   });
 
-  const filteredMachines = tabFilteredMachines.filter(machine =>
-    machine.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getLocationValue(machine).toLowerCase().includes(searchTerm.toLowerCase()) ||
-    machine.type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredMachines = tabFilteredMachines;
 
   const handleViewMachine = (id) => {
     navigate(`/machine/${id}`);
@@ -126,24 +121,6 @@ function MachineList() {
 
   return (
     <section className="machine-list-page">
-      <div className="machine-list-header-row">
-        <div className="machine-list-header-actions">
-          <div className="machine-list-search">
-            <IconSearch />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by machine ID, type, or location/name"
-            />
-          </div>
-          <button className="machine-list-btn-primary" type="button" onClick={() => navigate("/add")}>
-            <IconPlus />
-            Add Machine
-          </button>
-        </div>
-      </div>
-
       <StatsCards />
 
       <div className="machine-list-tabs">
@@ -176,7 +153,10 @@ function MachineList() {
             <div className="machine-list-card-title">Machine Inventory</div>
             <div className="machine-list-card-subtitle">Detected list of all machines in the replacement location system.</div>
           </div>
-          <span className="machine-list-total-pill">Total: 4,821 machines</span>
+          <button className="machine-list-btn-primary" type="button" onClick={() => navigate("/add")}>
+            <IconPlus />
+            Add Machine
+          </button>
         </div>
 
         <div className="machine-list-table-wrap">
@@ -234,7 +214,7 @@ function MachineList() {
               ) : (
                 <tr>
                   <td colSpan="5" className="machine-list-empty">
-                    No machines found matching your search.
+                    No machines found.
                   </td>
                 </tr>
               )}

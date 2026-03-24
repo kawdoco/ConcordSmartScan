@@ -47,7 +47,7 @@ function GarmentManagement() {
   const paginated = garments.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
-    <section className="garment-page garment-page-content">
+    <section className="garment-page">
       <div className="garment-table-card">
         <div className="garment-card-header">
           <div>

@@ -90,11 +90,12 @@ const StoreManagement = () => {
   const totalStores = stores.length;
 
   return (
-    <section className="store-page store-page-content">
+    <section className="store-page">
       <div className="store-table-card">
         <div className="store-card-header">
           <div>
             <h2 className="store-card-title">Registered Stores</h2>
+            <p className="store-card-description">Manage all store branches and location records.</p>
           </div>
           <button className="store-add-btn" type="button" onClick={() => navigate('/stores/add')}>
             <span className="store-add-icon" aria-hidden="true">+</span>
