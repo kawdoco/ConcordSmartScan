@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import { createStore } from "../services/locationService";
 import "./AddStore.css";
 
 function IconStores() {
@@ -32,7 +34,6 @@ function IconPlus() {
 
 const EMPTY_FORM = {
   storeName: "",
-  storeId: "",
   phoneNumber: "",
   address: "",
   latitude: "",
@@ -40,9 +41,11 @@ const EMPTY_FORM = {
 };
 
 export default function AddStore() {
+  const navigate = useNavigate();
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [notification, setNotification] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const showNotification = (message, type) => {
     setNotification({ message, type });
@@ -75,16 +78,39 @@ export default function AddStore() {
     setErrors((previous) => ({ ...previous, [name]: "" }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return;
-    showNotification("Store added successfully!", "success");
-    setForm(EMPTY_FORM);
-    setErrors({});
+    
+    setIsSubmitting(true);
+    
+    try {
+      const payload = {
+        name: form.storeName.trim(),
+        contactInfo: form.phoneNumber.trim(),
+        address: form.address.trim(),
+        latitude: form.latitude ? Number(form.latitude) : null,
+        longitude: form.longitude ? Number(form.longitude) : null,
+      };
+
+      await createStore(payload);
+      showNotification("Store added successfully!", "success");
+      
+      // Redirect after a short delay to show the success message
+      setTimeout(() => {
+        navigate('/stores');
+      }, 1500);
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || "Failed to add store. Please try again.";
+      showNotification(errorMsg, "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
     setForm(EMPTY_FORM);
     setErrors({});
+    navigate('/stores');
   };
 
   return (
@@ -119,33 +145,18 @@ export default function AddStore() {
             {errors.storeName && <span className="add-store-error">{errors.storeName}</span>}
           </div>
 
-          <div className="add-store-grid-two">
-            <div className="add-store-field">
-              <label htmlFor="storeId">Store ID</label>
-              <input
-                id="storeId"
-                name="storeId"
-                value={form.storeId}
-                onChange={handleChange}
-                placeholder="Enter store ID"
-                className={errors.storeId ? "error" : ""}
-              />
-              {errors.storeId && <span className="add-store-error">{errors.storeId}</span>}
-            </div>
-
-            <div className="add-store-field">
-              <label htmlFor="phoneNumber">Phone Number</label>
-              <input
-                id="phoneNumber"
-                name="phoneNumber"
-                value={form.phoneNumber}
-                onChange={handleChange}
-                maxLength={10}
-                placeholder="Enter phone number"
-                className={errors.phoneNumber ? "error" : ""}
-              />
-              {errors.phoneNumber && <span className="add-store-error">{errors.phoneNumber}</span>}
-            </div>
+          <div className="add-store-field">
+            <label htmlFor="phoneNumber">Phone Number</label>
+            <input
+              id="phoneNumber"
+              name="phoneNumber"
+              value={form.phoneNumber}
+              onChange={handleChange}
+              maxLength={10}
+              placeholder="Enter phone number"
+              className={errors.phoneNumber ? "error" : ""}
+            />
+            {errors.phoneNumber && <span className="add-store-error">{errors.phoneNumber}</span>}
           </div>
 
           <div className="add-store-field">
@@ -200,10 +211,10 @@ export default function AddStore() {
         </div>
 
         <div className="add-store-actions">
-          <button type="button" className="btn-secondary" onClick={handleCancel}>Cancel</button>
-          <button type="button" className="btn-primary" onClick={handleSubmit}>
+          <button type="button" className="btn-secondary" onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
+          <button type="button" className="btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
             <IconPlus />
-            Add Store
+            {isSubmitting ? "Adding..." : "Add Store"}
           </button>
         </div>
       </div>

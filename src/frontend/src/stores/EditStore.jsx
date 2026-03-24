@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import { updateStore } from "../services/locationService";
 import "./EditStore.css";
 
 function IconStores() {
@@ -53,28 +54,47 @@ const FALLBACK_STORE = {
 function mapStoreToForm(store) {
 	if (!store) return { ...FALLBACK_STORE };
 
-	const [latitude = "", longitude = ""] = (store.latLong || "")
-		.split(",")
-		.map((value) => value.trim());
+	// Handle both old and new data formats
+	const isNewFormat = store.locationId !== undefined;
 
-	return {
-		storeName: store.name || FALLBACK_STORE.storeName,
-		storeId: store.id || FALLBACK_STORE.storeId,
-		phoneNumber: store.phone || FALLBACK_STORE.phoneNumber,
-		address: store.address || FALLBACK_STORE.address,
-		latitude: latitude || FALLBACK_STORE.latitude,
-		longitude: longitude || FALLBACK_STORE.longitude
-	};
+	if (isNewFormat) {
+		// New format from API (Location model)
+		return {
+			storeName: store.name || FALLBACK_STORE.storeName,
+			storeId: store.locationId || FALLBACK_STORE.storeId,
+			phoneNumber: store.contactInfo || FALLBACK_STORE.phoneNumber,
+			address: store.address || FALLBACK_STORE.address,
+			latitude: store.latitude ? String(store.latitude) : FALLBACK_STORE.latitude,
+			longitude: store.longitude ? String(store.longitude) : FALLBACK_STORE.longitude
+		};
+	} else {
+		// Old format (for backward compatibility)
+		const [latitude = "", longitude = ""] = (store.latLong || "")
+			.split(",")
+			.map((value) => value.trim());
+
+		return {
+			storeName: store.name || FALLBACK_STORE.storeName,
+			storeId: store.id || FALLBACK_STORE.storeId,
+			phoneNumber: store.phone || FALLBACK_STORE.phoneNumber,
+			address: store.address || FALLBACK_STORE.address,
+			latitude: latitude || FALLBACK_STORE.latitude,
+			longitude: longitude || FALLBACK_STORE.longitude
+		};
+	}
 }
 
 export default function EditStore() {
 	const location = useLocation();
+	const navigate = useNavigate();
 
 	const initialForm = useMemo(() => mapStoreToForm(location.state?.store), [location.state?.store]);
 
 	const [form, setForm] = useState(initialForm);
 	const [errors, setErrors] = useState({});
 	const [notification, setNotification] = useState(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const storeId = location.state?.store?.locationId;
 
 	useEffect(() => {
 		setForm(initialForm);
@@ -115,14 +135,43 @@ export default function EditStore() {
 		setErrors((previous) => ({ ...previous, [name]: "" }));
 	};
 
-	const handleUpdate = () => {
+	const handleUpdate = async () => {
 		if (!validate()) return;
-		showNotification("Store updated successfully!", "success");
+		if (!storeId) {
+			showNotification("Error: Store ID not found", "error");
+			return;
+		}
+
+		setIsSubmitting(true);
+
+		try {
+			const payload = {
+				name: form.storeName.trim(),
+				contactInfo: form.phoneNumber.trim(),
+				address: form.address.trim(),
+				latitude: form.latitude ? Number(form.latitude) : null,
+				longitude: form.longitude ? Number(form.longitude) : null,
+			};
+
+			await updateStore(storeId, payload);
+			showNotification("Store updated successfully!", "success");
+
+			// Redirect after a short delay to show the success message
+			setTimeout(() => {
+				navigate('/stores');
+			}, 1500);
+		} catch (err) {
+			const errorMsg = err.response?.data?.message || err.message || "Failed to update store. Please try again.";
+			showNotification(errorMsg, "error");
+		} finally {
+			setIsSubmitting(false);
+		}
 	};
 
 	const handleCancel = () => {
 		setForm(initialForm);
 		setErrors({});
+		navigate('/stores');
 	};
 
 	return (
@@ -227,10 +276,10 @@ export default function EditStore() {
 				</div>
 
 				<div className="edit-store-actions">
-					<button type="button" className="btn-secondary" onClick={handleCancel}>Cancel</button>
-					<button type="button" className="btn-primary" onClick={handleUpdate}>
-						<IconEdit />
-						Update Store
+				<button type="button" className="btn-secondary" onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
+				<button type="button" className="btn-primary" onClick={handleUpdate} disabled={isSubmitting}>
+					<IconEdit />
+					{isSubmitting ? "Updating..." : "Update Store"}
 					</button>
 				</div>
 			</div>

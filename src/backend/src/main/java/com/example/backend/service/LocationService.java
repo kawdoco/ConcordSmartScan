@@ -33,7 +33,8 @@ public class LocationService {
                 request.getLatitude(),
                 request.getLongitude(),
                 request.getType(),
-                request.getContactInfo()
+                request.getContactInfo(),
+                request.getAddress()
         );
 
         return new LocationResponse(locationRepository.save(location));
@@ -85,6 +86,7 @@ public class LocationService {
         location.setLongitude(request.getLongitude());
         location.setType(request.getType());
         location.setContactInfo(request.getContactInfo());
+        location.setAddress(request.getAddress());
 
         return new LocationResponse(locationRepository.save(location));
     }

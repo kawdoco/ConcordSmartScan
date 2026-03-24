@@ -13,6 +13,7 @@ import UserManagement from "./users/UserManagement";
 import AppLayout from "./components/AppLayout";
 import StoreManagement from "./stores/StoreManagement";
 import AddStore from "./stores/AddStore";
+import ViewStore from "./stores/ViewStore";
 import EditStore from "./stores/EditStore";
 import TransferRequests from "./requests/TransferRequests";
 import PurchaseRequest from "./requests/PurchaseRequest";
@@ -44,6 +45,7 @@ function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="stores" element={<StoreManagement />} />
           <Route path="stores/add" element={<AddStore />} />
+          <Route path="stores/view/:id" element={<ViewStore />} />
           <Route path="stores/edit" element={<EditStore />} />
           <Route path="requests/transfer" element={<TransferRequests />} />
           <Route path="requests/purchase" element={<PurchaseRequest />} />
