@@ -27,12 +27,48 @@ function IconGarment() {
   );
 }
 
-function StatsCards() {
-  const cards = [
-    { label: "Total Machines", value: "4,821", icon: <IconMachines />, tone: "machines" },
-    { label: "At Stores", value: "2,140", icon: <IconStore />, tone: "stores" },
-    { label: "At Garments", value: "2,681", icon: <IconGarment />, tone: "garments" }
-  ];
+function IconTotalRequests() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+      <path d="M8 8h8M8 12h8M8 16h5" />
+    </svg>
+  );
+}
+
+function IconPurchaseRequests() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="9" cy="20" r="1" />
+      <circle cx="17" cy="20" r="1" />
+      <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L22 7H7" />
+    </svg>
+  );
+}
+
+function IconTransferRequests() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M7 8h11" />
+      <path d="M14 5l4 3-4 3" />
+      <path d="M17 16H6" />
+      <path d="M10 13l-4 3 4 3" />
+    </svg>
+  );
+}
+
+function StatsCards({ mode = "machines", counts }) {
+  const cards = mode === "requests"
+    ? [
+        { label: "Total Requests", value: counts?.total ?? 0, icon: <IconTotalRequests />, tone: "requests-total" },
+        { label: "Purchase Requests", value: counts?.purchase ?? 0, icon: <IconPurchaseRequests />, tone: "requests-purchase" },
+        { label: "Transfer Requests", value: counts?.transfer ?? 0, icon: <IconTransferRequests />, tone: "requests-transfer" }
+      ]
+    : [
+        { label: "Total Machines", value: "4,821", icon: <IconMachines />, tone: "machines" },
+        { label: "At Stores", value: "2,140", icon: <IconStore />, tone: "stores" },
+        { label: "At Garments", value: "2,681", icon: <IconGarment />, tone: "garments" }
+      ];
 
   return (
     <div className="stats-cards-grid">
@@ -41,7 +77,7 @@ function StatsCards() {
           <div className={`stats-card-icon ${card.tone}`}>{card.icon}</div>
           <div className="stats-card-body">
             <p className="stats-card-label">{card.label}</p>
-            <h2 className="stats-card-value">{card.value}</h2>
+            <h2 className="stats-card-value">{typeof card.value === "number" ? card.value.toLocaleString() : card.value}</h2>
           </div>
         </div>
       ))}

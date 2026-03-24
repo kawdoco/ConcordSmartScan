@@ -18,6 +18,8 @@ import ViewStore from "./stores/ViewStore";
 import EditStore from "./stores/EditStore";
 import TransferRequests from "./requests/TransferRequests";
 import PurchaseRequest from "./requests/PurchaseRequest";
+import ApprovedRequests from "./requests/ApprovedRequests";
+import NewRequest from "./requests/NewRequest";
 import GarmentManagement from "./garments/GarmentManagement";
 import AddGarment from "./garments/AddGarment";
 import EditGarment from "./garments/EditGarment";
@@ -54,6 +56,8 @@ function App() {
           <Route path="stores/edit" element={<EditStore />} />
           <Route path="requests/transfer" element={<TransferRequests />} />
           <Route path="requests/purchase" element={<PurchaseRequest />} />
+          <Route path="requests/approved" element={<ApprovedRequests />} />
+          <Route path="requests/new" element={<NewRequest />} />
           <Route path="garments" element={<GarmentManagement />} />
           <Route path="garments/add" element={<AddGarment />} />
           <Route path="garments/edit" element={<EditGarment />} />

@@ -40,6 +40,17 @@
   background: #f2eaff;
 }
 
+.stats-card-icon.requests-total,
+.stats-card-icon.requests-purchase {
+  color: #2563eb;
+  background: #eaf1ff;
+}
+
+.stats-card-icon.requests-transfer {
+  color: #7c3aed;
+  background: #f2eaff;
+}
+
 .stats-card-label {
   margin: 0 0 5px;
   color: #64748b;
