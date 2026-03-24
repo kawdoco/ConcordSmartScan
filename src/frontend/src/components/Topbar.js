@@ -13,6 +13,7 @@ function Topbar() {
   const titleByPath = {
     "/dashboard": "Dashboard",
     "/users": "User Management",
+    "/users/add": "Add New User",
     "/machines": "Machine Management",
     "/stores": "Store Management",
     "/stores/add": "Add Store",

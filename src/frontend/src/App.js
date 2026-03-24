@@ -10,6 +10,7 @@ import EditMachine from "./machines/EditMachine";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
+import AddUser from "./users/AddUser";
 import AppLayout from "./components/AppLayout";
 import StoreManagement from "./stores/StoreManagement";
 import AddStore from "./stores/AddStore";
@@ -43,6 +44,7 @@ function App() {
           <Route path="machine/:id" element={<ViewMachine />} />
           <Route path="edit/:id" element={<EditMachine />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="users/add" element={<AddUser />} />
           <Route path="stores" element={<StoreManagement />} />
           <Route path="stores/add" element={<AddStore />} />
           <Route path="stores/view/:id" element={<ViewStore />} />
