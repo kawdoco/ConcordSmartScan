@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
+import { useNavigate } from 'react-router-dom';
+import AppFooter from '../components/AppFooter';
+import PagePath from '../components/PagePath';
+import apiClient from '../services/api';
 import './AddUser.css';
 
 const AddUser = () => {
+  const navigate = useNavigate();
+  const PASSWORD_RULE_TEXT = 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.';
+  const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     dateOfBirth: '',
     phoneNumber: '',
     email: '',
@@ -20,7 +24,9 @@ const AddUser = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,17 +34,67 @@ const AddUser = () => {
       ...formData,
       [name]: value,
     });
+
+    setFormErrors((prev) => ({
+      ...prev,
+      [name]: '',
+    }));
+    setSubmitError('');
   };
 
-  const handleSubmit = (e) => {
+  const validateSecurityFields = () => {
+    const nextErrors = {};
+
+    if (!PASSWORD_REGEX.test(formData.password || '')) {
+      nextErrors.password = PASSWORD_RULE_TEXT;
+    }
+
+    if (formData.confirmPassword !== formData.password) {
+      nextErrors.confirmPassword = 'Password does not match.';
+    }
+
+    setFormErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement API call to add user
-    console.log('Form submitted:', formData);
+    if (!validateSecurityFields()) {
+      return;
+    }
+
+    if (formData.garmentId && Number.isNaN(Number(formData.garmentId))) {
+      setSubmitError('Garment ID must be a valid number.');
+      return;
+    }
+
+    const payload = {
+      fullName: formData.fullName.trim(),
+      dateOfBirth: formData.dateOfBirth,
+      phoneNumber: formData.phoneNumber.trim(),
+      email: formData.email.trim(),
+      address: formData.address.trim(),
+      companyEmail: formData.companyEmail.trim(),
+      userType: formData.userType,
+      password: formData.password,
+      garmentId: formData.garmentId ? Number(formData.garmentId) : null,
+    };
+
+    try {
+      setIsSubmitting(true);
+      setSubmitError('');
+      await apiClient.post('/users', payload);
+      navigate('/users');
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to add user. Please try again.';
+      setSubmitError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
-    // TODO: Navigate back to users list
-    window.history.back();
+    navigate('/users');
   };
 
   const getCurrentDate = () => {
@@ -47,25 +103,29 @@ const AddUser = () => {
   };
 
   return (
-    <div className="add-user-layout">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      
-      <div className="add-user-main">
-        <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+    <section className="add-user-page">
+      <PagePath items={[{ label: 'Users', to: '/users' }, { label: 'Add User' }]} />
 
-        <div className="add-user-content">
-          <div className="breadcrumb">
-            <a href="/users">Users</a>
-            <span className="breadcrumb-separator">›</span>
-            <span>Add New User</span>
+      <form onSubmit={handleSubmit} className="add-user-card">
+        <div className="add-user-card-header">
+          <span className="add-user-card-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <line x1="20" y1="8" x2="20" y2="14" />
+              <line x1="23" y1="11" x2="17" y2="11" />
+            </svg>
+          </span>
+          <div>
+            <h2>User Details</h2>
+            <p>Fill in the details to register a new user.</p>
           </div>
+        </div>
 
-          <h1 className="page-title">Add New User</h1>
-
-          <form onSubmit={handleSubmit} className="add-user-form">
+        <div className="add-user-card-body">
             {/* Personal Details Section */}
-            <div className="form-section">
-              <div className="section-header">
+            <div className="add-user-section">
+              <div className="add-user-section-header">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
@@ -73,36 +133,38 @@ const AddUser = () => {
                 <h2>Personal Details</h2>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="firstName">First Name</label>
+              <div className="add-user-grid-two">
+                <div className="add-user-field">
+                  <label htmlFor="fullName">Full Name</label>
                   <input
                     type="text"
-                    id="firstName"
-                    name="firstName"
-                    value={formData.firstName}
+                    id="fullName"
+                    name="fullName"
+                    value={formData.fullName}
                     onChange={handleInputChange}
-                    placeholder="e.g. John"
+                    placeholder="e.g. John Doe"
                     required
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="lastName">Last Name</label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    value={formData.lastName}
+                <div className="add-user-field">
+                  <label htmlFor="userType">User Type</label>
+                  <select
+                    id="userType"
+                    name="userType"
+                    value={formData.userType}
                     onChange={handleInputChange}
-                    placeholder="e.g. Doe"
                     required
-                  />
+                  >
+                    <option value=""></option>
+                    <option value="TECHNICIAN">Technician</option>
+                    <option value="CHIEF_MANAGER">Chief Manager</option>
+                  </select>
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
+              <div className="add-user-grid-two">
+                <div className="add-user-field">
                   <label htmlFor="dateOfBirth">Date of Birth</label>
                   <input
                     type="date"
@@ -115,7 +177,7 @@ const AddUser = () => {
                   />
                 </div>
 
-                <div className="form-group">
+                <div className="add-user-field">
                   <label htmlFor="phoneNumber">Phone Number</label>
                   <input
                     type="tel"
@@ -129,7 +191,7 @@ const AddUser = () => {
                 </div>
               </div>
 
-              <div className="form-group">
+              <div className="add-user-field">
                 <label htmlFor="email">Email Address</label>
                 <input
                   type="email"
@@ -142,7 +204,7 @@ const AddUser = () => {
                 />
               </div>
 
-              <div className="form-group">
+              <div className="add-user-field">
                 <label htmlFor="address">Address</label>
                 <textarea
                   id="address"
@@ -157,8 +219,8 @@ const AddUser = () => {
             </div>
 
             {/* Company Details Section */}
-            <div className="form-section">
-              <div className="section-header">
+            <div className="add-user-section">
+              <div className="add-user-section-header">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
                   <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
                   <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
@@ -166,8 +228,8 @@ const AddUser = () => {
                 <h2>Company Details</h2>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
+              <div className="add-user-grid-two">
+                <div className="add-user-field">
                   <label htmlFor="garmentId">Garment ID</label>
                   <input
                     type="text"
@@ -176,11 +238,11 @@ const AddUser = () => {
                     value={formData.garmentId}
                     onChange={handleInputChange}
                     placeholder="Select or search Garment ID"
-                    required
+                    //required
                   />
                 </div>
 
-                <div className="form-group">
+                <div className="add-user-field">
                   <label htmlFor="companyEmail">Company Email</label>
                   <input
                     type="email"
@@ -194,25 +256,7 @@ const AddUser = () => {
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="userType">User Type</label>
-                  <select
-                    id="userType"
-                    name="userType"
-                    value={formData.userType}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select Role</option>
-                    <option value="admin">Admin</option>
-                    <option value="manager">Manager</option>
-                    <option value="operator">Operator</option>
-                    <option value="viewer">Viewer</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
+              <div className="add-user-field add-user-narrow-field">
                   <label htmlFor="userAddedDate">User Added Date</label>
                   <input
                     type="date"
@@ -221,27 +265,27 @@ const AddUser = () => {
                     value={getCurrentDate()}
                     disabled
                   />
-                </div>
               </div>
             </div>
 
             {/* Account Security Section */}
-            <div className="form-section">
-              <div className="section-header">
+            <div className="add-user-section">
+              <div className="add-user-section-header">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
                 <h2>Account Security</h2>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
+              <div className="add-user-grid-two">
+                <div className="add-user-field">
                   <label htmlFor="password">Password</label>
                   <div className="password-input-wrapper">
                     <input
                       type={showPassword ? 'text' : 'password'}
                       id="password"
                       name="password"
+                      className={formErrors.password ? 'field-error' : ''}
                       value={formData.password}
                       onChange={handleInputChange}
                       placeholder="••••••••"
@@ -265,15 +309,17 @@ const AddUser = () => {
                       )}
                     </button>
                   </div>
+                  {formErrors.password && <span className="field-error-text">{formErrors.password}</span>}
                 </div>
 
-                <div className="form-group">
+                <div className="add-user-field">
                   <label htmlFor="confirmPassword">Confirm Password</label>
                   <div className="password-input-wrapper">
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       id="confirmPassword"
                       name="confirmPassword"
+                      className={formErrors.confirmPassword ? 'field-error' : ''}
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       placeholder="••••••••"
@@ -297,38 +343,32 @@ const AddUser = () => {
                       )}
                     </button>
                   </div>
+                  {formErrors.confirmPassword && <span className="field-error-text">{formErrors.confirmPassword}</span>}
                 </div>
               </div>
             </div>
+        </div>
 
             {/* Form Actions */}
-            <div className="form-actions">
-              <button type="button" className="btn-cancel" onClick={handleCancel}>
+            <div className="add-user-actions">
+              {submitError && <div className="add-user-submit-error">{submitError}</div>}
+              <button type="button" className="btn-secondary" onClick={handleCancel}>
                 Cancel
               </button>
-              <button type="submit" className="btn-submit">
+              <button type="submit" className="btn-primary" disabled={isSubmitting}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                   <circle cx="9" cy="7" r="4"></circle>
                   <line x1="19" y1="8" x2="19" y2="14"></line>
                   <line x1="22" y1="11" x2="16" y2="11"></line>
                 </svg>
-                Add User
+                {isSubmitting ? 'Adding...' : 'Add User'}
               </button>
             </div>
-          </form>
+      </form>
 
-          <footer className="page-footer">
-            <p>© 2024 Concord Apparel Pvt Ltd. Machine Replacement Locator System.</p>
-            <div className="footer-links">
-              <a href="/privacy">Privacy Policy</a>
-              <a href="/manual">System Manual</a>
-              <a href="/support">Technical Support</a>
-            </div>
-          </footer>
-        </div>
-      </div>
-    </div>
+      <AppFooter />
+    </section>
   );
 };
 

@@ -10,6 +10,7 @@ import EditMachine from "./machines/EditMachine";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
+import AddUser from "./users/AddUser";
 import AppLayout from "./components/AppLayout";
 import StoreManagement from "./stores/StoreManagement";
 import AddStore from "./stores/AddStore";
@@ -17,6 +18,11 @@ import ViewStore from "./stores/ViewStore";
 import EditStore from "./stores/EditStore";
 import TransferRequests from "./requests/TransferRequests";
 import PurchaseRequest from "./requests/PurchaseRequest";
+import ApprovedRequests from "./requests/ApprovedRequests";
+import NewRequest from "./requests/NewRequest";
+import GarmentManagement from "./garments/GarmentManagement";
+import AddGarment from "./garments/AddGarment";
+import EditGarment from "./garments/EditGarment";
 
 
 function RequireAuth({ children }) {
@@ -43,12 +49,18 @@ function App() {
           <Route path="machine/:id" element={<ViewMachine />} />
           <Route path="edit/:id" element={<EditMachine />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="users/add" element={<AddUser />} />
           <Route path="stores" element={<StoreManagement />} />
           <Route path="stores/add" element={<AddStore />} />
           <Route path="stores/view/:id" element={<ViewStore />} />
           <Route path="stores/edit" element={<EditStore />} />
           <Route path="requests/transfer" element={<TransferRequests />} />
           <Route path="requests/purchase" element={<PurchaseRequest />} />
+          <Route path="requests/approved" element={<ApprovedRequests />} />
+          <Route path="requests/new" element={<NewRequest />} />
+          <Route path="garments" element={<GarmentManagement />} />
+          <Route path="garments/add" element={<AddGarment />} />
+          <Route path="garments/edit" element={<EditGarment />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
         </Route>

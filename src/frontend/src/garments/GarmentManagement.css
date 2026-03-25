@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-.store-page {
+.garment-page {
   font-family: 'Sora', sans-serif;
   display: flex;
   flex-direction: column;
@@ -9,18 +9,18 @@
   color: #0f1623;
 }
 
-.store-page-content {
+.garment-page-content {
   padding: 8px;
 }
 
-.store-table-card {
+.garment-table-card {
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   overflow: hidden;
 }
 
-.store-card-header {
+.garment-card-header {
   padding: 18px 22px;
   border-bottom: 1px solid #e5e7eb;
   display: flex;
@@ -30,19 +30,19 @@
   flex-wrap: wrap;
 }
 
-.store-card-title {
+.garment-card-title {
   margin: 0;
   font-size: 15px;
   font-weight: 700;
 }
 
-.store-card-description {
+.garment-card-description {
   margin: 6px 0 0;
   font-size: 12px;
   color: #64748b;
 }
 
-.store-add-btn {
+.garment-add-btn {
   border: none;
   border-radius: 8px;
   background: #1a3fd4;
@@ -58,25 +58,25 @@
   gap: 7px;
 }
 
-.store-add-btn:hover {
+.garment-add-btn:hover {
   background: #1230a8;
 }
 
-.store-add-icon {
+.garment-add-icon {
   font-size: 14px;
   font-weight: 700;
 }
 
-.store-table-wrap {
+.garment-table-wrap {
   overflow-x: auto;
 }
 
-.store-table {
+.garment-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.store-table th {
+.garment-table th {
   background: #f4f6fb;
   text-align: left;
   padding: 11px 20px;
@@ -88,41 +88,41 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.store-table td {
+.garment-table td {
   padding: 15px 20px;
   font-size: 13.5px;
   color: #475569;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.store-table tbody tr:last-child td {
+.garment-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.store-id {
+.garment-id {
   color: #6b7280;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
 }
 
-.store-name {
+.garment-branch {
   color: #1f2937;
   font-weight: 600;
 }
 
-.store-lat-long {
+.garment-lat-long {
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
   color: #6b7280;
 }
 
-.store-action-icons {
+.garment-action-icons {
   display: flex;
   gap: 6px;
   align-items: center;
 }
 
-.store-action-icons button {
+.garment-action-icons button {
   width: 32px;
   height: 32px;
   border-radius: 7px;
@@ -137,24 +137,24 @@
   transition: all 0.15s ease;
 }
 
-.store-action-icons button:hover {
+.garment-action-icons button:hover {
   background: #eef1fd;
   color: #1a3fd4;
   border-color: #b8c8f8;
 }
 
-.store-action-icons button.delete:hover {
+.garment-action-icons button.delete:hover {
   background: #fee2e2;
   color: #ef4444;
   border-color: #fca5a5;
 }
 
-.store-action-icons button svg {
+.garment-action-icons button svg {
   width: 15px;
   height: 15px;
 }
 
-.store-table-footer {
+.garment-table-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -166,13 +166,13 @@
   color: #6b7280;
 }
 
-.store-pagination {
+.garment-pagination {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.store-page-btn {
+.garment-page-btn {
   min-width: 24px;
   height: 24px;
   border: none;
@@ -186,28 +186,33 @@
   padding: 0 7px;
 }
 
-.store-page-btn:hover {
+.garment-page-btn:hover:not(:disabled) {
   background: #eef2ff;
   color: #1f2937;
 }
 
-.store-page-active,
-.store-page-active:hover {
+.garment-page-btn:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.garment-page-active,
+.garment-page-active:hover {
   background: #1a3fd4;
   color: #fff;
 }
 
 @media (max-width: 768px) {
-  .store-card-header {
+  .garment-card-header {
     padding: 14px 14px;
   }
 
-  .store-table th,
-  .store-table td {
+  .garment-table th,
+  .garment-table td {
     padding: 12px 12px;
   }
 
-  .store-table-footer {
+  .garment-table-footer {
     padding-left: 12px;
     padding-right: 12px;
   }

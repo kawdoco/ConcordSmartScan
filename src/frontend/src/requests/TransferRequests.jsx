@@ -65,7 +65,10 @@ function TransferRequests() {
     <section className="transfer-requests-page">
       <div className="transfer-requests-card">
         <div className="transfer-requests-card-header">
-          <h2 className="transfer-requests-card-title">Requests Sent for Transfering Mchines</h2>
+          <div>
+            <h2 className="transfer-requests-card-title">Requests Sent for Transfering Mchines</h2>
+            <p className="transfer-requests-card-description">Review and process transfer requests between stores and garment units.</p>
+          </div>
         </div>
 
         <div className="transfer-requests-table-wrap">

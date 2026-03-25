@@ -2,23 +2,31 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
+import SearchBar from "./SearchBar";
 
 function Topbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [searchQ, setSearchQ] = useState("");
   const menuRef = useRef(null);
 
   const titleByPath = {
     "/dashboard": "Dashboard",
     "/users": "User Management",
+    "/users/add": "Add New User",
     "/machines": "Machine Management",
     "/stores": "Store Management",
+    "/garments": "Garment Management",
     "/stores/add": "Add Store",
+    "/garments/add": "Add Garment",
+    "/garments/edit": "Edit Garment",
     "/stores/edit": "Edit Store",
     "/requests/transfer": "Transfer Requests",
     "/requests/purchase": "Purchase Request",
+    "/requests/approved": "Approved Requests",
+    "/requests/new": "Create Request",
     "/add": "Add Machine",
     "/profile": "Profile",
     "/settings": "Settings"
@@ -60,8 +68,17 @@ function Topbar() {
 
   return (
     <div style={styles.topbar}>
-      <div>
+      <div style={styles.leftWrap}>
         <h1 style={styles.title}>{title}</h1>
+      </div>
+      <div style={styles.centerWrap}>
+        <SearchBar
+          size="sm"
+          value={searchQ}
+          onChange={(e) => setSearchQ(e.target.value)}
+          placeholder={`Search in ${title.toLowerCase()}...`}
+          className="topbar-search"
+        />
       </div>
       <div style={styles.menuWrap} ref={menuRef}>
         <button style={styles.userBtn} onClick={() => setOpen(v => !v)}>
@@ -97,10 +114,28 @@ const styles = {
     top: 0,
     zIndex: 20
   },
+  leftWrap: {
+    display: "flex",
+    alignItems: "center",
+    minWidth: 0,
+    flex: "0 1 auto"
+  },
+  centerWrap: {
+    position: "absolute",
+    left: "50%",
+    transform: "translateX(-50%)",
+    display: "flex",
+    justifyContent: "center",
+    width: "280px",
+    maxWidth: "42vw",
+    minWidth: 0,
+    zIndex: 1
+  },
   title: {
     margin: 0,
     fontSize: "1.3rem",
-    color: "#0f172a"
+    color: "#0f172a",
+    whiteSpace: "nowrap"
   },
   menuWrap: {
     position: "relative"
