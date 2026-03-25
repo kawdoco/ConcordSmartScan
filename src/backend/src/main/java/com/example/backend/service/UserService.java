@@ -112,6 +112,12 @@ public class UserService {
         }
 
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            if (request.getCurrentPassword() == null || request.getCurrentPassword().isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is required to set a new password");
+            }
+            if (!passwordMatches(request.getCurrentPassword(), user.getPassword())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is incorrect");
+            }
             validatePasswordStrength(request.getPassword());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
@@ -212,5 +218,19 @@ public class UserService {
                     "Password must be at least 8 characters and include uppercase, lowercase, number, and symbol"
             );
         }
+    }
+
+    private boolean passwordMatches(String rawPassword, String storedPassword) {
+        if (storedPassword == null || storedPassword.isBlank()) {
+            return false;
+        }
+        if (isBcryptHash(storedPassword)) {
+            return passwordEncoder.matches(rawPassword, storedPassword);
+        }
+        return rawPassword.equals(storedPassword);
+    }
+
+    private boolean isBcryptHash(String value) {
+        return value.startsWith("$2a$") || value.startsWith("$2b$") || value.startsWith("$2y$");
     }
 }

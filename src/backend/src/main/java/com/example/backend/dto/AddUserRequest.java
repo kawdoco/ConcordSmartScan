@@ -20,6 +20,9 @@ public class AddUserRequest {
     // Optional for update; required for create in service validation.
     private String password;
 
+    // Required on update only when changing password.
+    private String currentPassword;
+
     // TECHNICIAN | CHIEF_MANAGER | ADMIN — defaults to TECHNICIAN if omitted
     @JsonAlias("userType")
     private String role;
@@ -48,6 +51,9 @@ public class AddUserRequest {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getCurrentPassword() { return currentPassword; }
+    public void setCurrentPassword(String currentPassword) { this.currentPassword = currentPassword; }
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
