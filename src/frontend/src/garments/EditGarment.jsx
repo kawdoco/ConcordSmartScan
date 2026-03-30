@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import { updateGarment } from "../services/locationService";
 import "./EditGarment.css";
 
 function IconGarment() {
@@ -54,17 +55,29 @@ const FALLBACK_GARMENT = {
 function mapGarmentToForm(garment) {
   if (!garment) return { ...FALLBACK_GARMENT };
 
-  const [latitude = "", longitude = ""] = (garment.location || "")
-    .split(",")
-    .map((value) => value.trim());
+  // Handle both API format (locationId) and old format (id)
+  const garmentId = garment.locationId || garment.id || FALLBACK_GARMENT.garmentId;
+  
+  // Extract coordinates from location string or use individual fields
+  let latitude = "";
+  let longitude = "";
+  
+  if (garment.location) {
+    [latitude, longitude] = garment.location
+      .split(",")
+      .map((value) => value.trim());
+  } else {
+    latitude = garment.latitude || "";
+    longitude = garment.longitude || "";
+  }
 
   return {
-    branchName: garment.branch || FALLBACK_GARMENT.branchName,
-    garmentId: garment.id || FALLBACK_GARMENT.garmentId,
-    phoneNumber: garment.phone || FALLBACK_GARMENT.phoneNumber,
+    branchName: garment.name || garment.branch || FALLBACK_GARMENT.branchName,
+    garmentId: garmentId,
+    phoneNumber: garment.contactInfo || garment.phone || FALLBACK_GARMENT.phoneNumber,
     address: garment.address || FALLBACK_GARMENT.address,
-    latitude: latitude || FALLBACK_GARMENT.latitude,
-    longitude: longitude || FALLBACK_GARMENT.longitude
+    latitude: latitude.toString() || FALLBACK_GARMENT.latitude,
+    longitude: longitude.toString() || FALLBACK_GARMENT.longitude
   };
 }
 
@@ -77,6 +90,7 @@ export default function EditGarment() {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [notification, setNotification] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setForm(initialForm);
@@ -117,11 +131,34 @@ export default function EditGarment() {
     setErrors((previous) => ({ ...previous, [name]: "" }));
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!validate()) return;
 
-    showNotification("Garment updated successfully!", "success");
-    setTimeout(() => navigate("/garments"), 1200);
+    setIsSubmitting(true);
+
+    try {
+      const garmentId = form.garmentId;
+      
+      const payload = {
+        name: form.branchName.trim(),
+        contactInfo: form.phoneNumber.trim(),
+        address: form.address.trim(),
+        latitude: form.latitude ? Number(form.latitude) : null,
+        longitude: form.longitude ? Number(form.longitude) : null,
+      };
+
+      await updateGarment(garmentId, payload);
+      showNotification("Garment updated successfully!", "success");
+
+      setTimeout(() => {
+        navigate("/garments");
+      }, 1500);
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || "Failed to update garment. Please try again.";
+      showNotification(errorMsg, "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -233,10 +270,10 @@ export default function EditGarment() {
         </div>
 
         <div className="edit-garment-actions">
-          <button type="button" className="btn-secondary" onClick={handleCancel}>Cancel</button>
-          <button type="button" className="btn-primary" onClick={handleUpdate}>
+          <button type="button" className="btn-secondary" onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
+          <button type="button" className="btn-primary" onClick={handleUpdate} disabled={isSubmitting}>
             <IconEdit />
-            Update Garment
+            {isSubmitting ? "Updating..." : "Update Garment"}
           </button>
         </div>
       </div>
