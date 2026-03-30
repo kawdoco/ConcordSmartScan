@@ -106,7 +106,7 @@ export default function ViewGarment() {
           <div className="view-garment-details-grid">
             <div className="view-garment-detail-item">
               <span className="view-garment-detail-label">Garment ID</span>
-              <span className="view-garment-detail-value">{garment.locationId}</span>
+              <span className="view-garment-detail-value">GAR-{String(garment.locationId).padStart(3, '0')}</span>
             </div>
 
             <div className="view-garment-detail-item">
