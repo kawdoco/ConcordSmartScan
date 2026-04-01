@@ -105,7 +105,7 @@ export default function ViewStore() {
           <div className="view-store-details-grid">
             <div className="view-store-detail-item">
               <span className="view-store-detail-label">Store ID</span>
-              <span className="view-store-detail-value">{store.locationId}</span>
+              <span className="view-store-detail-value">STO-{String(store.locationId).padStart(3, '0')}</span>
             </div>
 
             <div className="view-store-detail-item">
