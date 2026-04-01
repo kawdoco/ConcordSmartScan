@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import { createGarment } from "../services/locationService";
 import "./AddGarment.css";
 
 function IconGarment() {
@@ -45,6 +46,7 @@ export default function AddGarment() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [notification, setNotification] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const showNotification = (message, type) => {
     setNotification({ message, type });
@@ -76,11 +78,32 @@ export default function AddGarment() {
     setErrors((previous) => ({ ...previous, [name]: "" }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return;
 
-    showNotification("Garment added successfully!", "success");
-    setTimeout(() => navigate("/garments"), 1200);
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        name: form.branchName.trim(),
+        contactInfo: form.phoneNumber.trim(),
+        address: form.address.trim(),
+        latitude: form.latitude ? Number(form.latitude) : null,
+        longitude: form.longitude ? Number(form.longitude) : null,
+      };
+
+      await createGarment(payload);
+      showNotification("Garment added successfully!", "success");
+
+      setTimeout(() => {
+        navigate("/garments");
+      }, 1500);
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || "Failed to add garment. Please try again.";
+      showNotification(errorMsg, "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {

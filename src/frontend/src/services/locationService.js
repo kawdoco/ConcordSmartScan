@@ -37,6 +37,34 @@ export const deleteLocation = (id) => apiClient.delete(`/locations/${id}`);
 export const getAllGarments = () => apiClient.get('/locations/garments');
 
 /**
+ * Get a single garment by ID
+ */
+export const getGarmentById = (id) => 
+  getLocationById(id).then(res => res.data);
+
+/**
+ * Create a new garment location
+ */
+export const createGarment = (data) => {
+  const payload = {
+    ...data,
+    type: 'GARMENT',
+  };
+  return createLocation(payload);
+};
+
+/**
+ * Update an existing garment location
+ */
+export const updateGarment = (id, data) => {
+  const payload = {
+    ...data,
+    type: 'GARMENT',
+  };
+  return updateLocation(id, payload);
+};
+
+/**
  * Get all store locations (filtered from all locations)
  */
 export const getAllStores = () =>
