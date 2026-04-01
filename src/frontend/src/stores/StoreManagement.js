@@ -129,7 +129,7 @@ const StoreManagement = () => {
               <tbody>
                 {stores.map((store) => (
                   <tr key={store.id}>
-                    <td className="store-id">{store.id}</td>
+                    <td className="store-id">STO-{String(store.id).padStart(3, '0')}</td>
                     <td className="store-name">{store.name}</td>
                     <td className="store-lat-long">{store.latLong}</td>
                     <td>{store.phone}</td>

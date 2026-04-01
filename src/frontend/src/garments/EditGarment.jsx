@@ -204,7 +204,7 @@ export default function EditGarment() {
               <label htmlFor="garmentId">
                 Garment ID <span className="edit-garment-inline-icon"><IconInfo /></span>
               </label>
-              <input id="garmentId" value={form.garmentId} disabled className="disabled" />
+              <input id="garmentId" value={`GAR-${String(form.garmentId).padStart(3, '0')}`} disabled className="disabled" />
               <span className="edit-garment-hint">Fixed system identifier</span>
             </div>
 

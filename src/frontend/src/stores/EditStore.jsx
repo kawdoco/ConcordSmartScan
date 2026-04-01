@@ -210,7 +210,7 @@ export default function EditStore() {
 							<label htmlFor="storeId">
 								Store ID <span className="edit-store-inline-icon"><IconInfo /></span>
 							</label>
-							<input id="storeId" value={form.storeId} disabled className="disabled" />
+							<input id="storeId" value={`STO-${String(form.storeId).padStart(3, '0')}`} disabled className="disabled" />
 							<span className="edit-store-hint">Fixed system identifier</span>
 						</div>
 

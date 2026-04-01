@@ -127,7 +127,7 @@ function GarmentManagement() {
               <tbody>
                 {paginated.map((row) => (
                   <tr key={row.id}>
-                    <td className="garment-id">{row.id}</td>
+                    <td className="garment-id">GAR-{String(row.id).padStart(3, '0')}</td>
                     <td className="garment-branch">{row.branch}</td>
                     <td className="garment-lat-long">{row.location}</td>
                     <td>{row.phone}</td>

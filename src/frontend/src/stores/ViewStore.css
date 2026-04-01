@@ -3,7 +3,7 @@
 .view-store-page {
   display: flex;
   flex-direction: column;
-  min-height: 100rem;
+  min-height: auto;
   padding: 6px 8px;
 }
 
