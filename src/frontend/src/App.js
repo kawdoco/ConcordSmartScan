@@ -22,6 +22,7 @@ import ApprovedRequests from "./requests/ApprovedRequests";
 import NewRequest from "./requests/NewRequest";
 import GarmentManagement from "./garments/GarmentManagement";
 import AddGarment from "./garments/AddGarment";
+import ViewGarment from "./garments/ViewGarment";
 import EditGarment from "./garments/EditGarment";
 
 
@@ -60,6 +61,7 @@ function App() {
           <Route path="requests/new" element={<NewRequest />} />
           <Route path="garments" element={<GarmentManagement />} />
           <Route path="garments/add" element={<AddGarment />} />
+          <Route path="garments/view/:id" element={<ViewGarment />} />
           <Route path="garments/edit" element={<EditGarment />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
