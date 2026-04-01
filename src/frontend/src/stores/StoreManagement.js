@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppFooter from '../components/AppFooter';
+import TableEmptyState from '../components/TableEmptyState';
 import { getAllStores, deleteLocation } from '../services/locationService';
 import './StoreManagement.css';
 
@@ -109,61 +110,63 @@ const StoreManagement = () => {
           </div>
         )}
 
-        {loading ? (
-          <div className="store-loading">Loading stores...</div>
-        ) : stores.length === 0 ? (
-          <div className="store-empty">No stores found.</div>
-        ) : (
-          <div className="store-table-wrap">
-            <table className="store-table">
-              <thead>
-                <tr>
-                  <th>STORE ID</th>
-                  <th>BRANCH NAME</th>
-                  <th>LOCATION (LAT, LONG)</th>
-                  <th>PHONE NUMBER</th>
-                  <th>ADDRESS</th>
-                  <th>ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stores.map((store) => (
-                  <tr key={store.id}>
-                    <td className="store-id">STO-{String(store.id).padStart(3, '0')}</td>
-                    <td className="store-name">{store.name}</td>
-                    <td className="store-lat-long">{store.latLong}</td>
-                    <td>{store.phone}</td>
-                    <td>{store.address}</td>
-                    <td className="store-action-icons">
-                      <button
-                        type="button"
-                        aria-label={`View ${store.name}`}
-                        onClick={() => navigate(`/stores/view/${store.id}`, { state: { store: store.originalData } })}
-                      >
-                        <EyeIcon />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Edit ${store.name}`}
-                        onClick={() => navigate('/stores/edit', { state: { store: store.originalData } })}
-                      >
-                        <EditIcon />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Delete ${store.name}`}
-                        className="delete"
-                        onClick={() => handleDelete(store.id, store.name)}
-                      >
-                        <DeleteIcon />
-                      </button>
-                    </td>
+        <div className="store-data-area">
+          {loading ? (
+            <div className="store-loading">Loading stores...</div>
+          ) : stores.length === 0 ? (
+            <TableEmptyState message="No store found" minHeight={392} />
+          ) : (
+            <div className="store-table-wrap">
+              <table className="store-table">
+                <thead>
+                  <tr>
+                    <th>STORE ID</th>
+                    <th>BRANCH NAME</th>
+                    <th>LOCATION (LAT, LONG)</th>
+                    <th>PHONE NUMBER</th>
+                    <th>ADDRESS</th>
+                    <th>ACTIONS</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {stores.map((store) => (
+                    <tr key={store.id}>
+                      <td className="store-id">STO-{String(store.id).padStart(3, '0')}</td>
+                      <td className="store-name">{store.name}</td>
+                      <td className="store-lat-long">{store.latLong}</td>
+                      <td>{store.phone}</td>
+                      <td>{store.address}</td>
+                      <td className="store-action-icons">
+                        <button
+                          type="button"
+                          aria-label={`View ${store.name}`}
+                          onClick={() => navigate(`/stores/view/${store.id}`, { state: { store: store.originalData } })}
+                        >
+                          <EyeIcon />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Edit ${store.name}`}
+                          onClick={() => navigate('/stores/edit', { state: { store: store.originalData } })}
+                        >
+                          <EditIcon />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Delete ${store.name}`}
+                          className="delete"
+                          onClick={() => handleDelete(store.id, store.name)}
+                        >
+                          <DeleteIcon />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
         <div className="store-table-footer">
           <span>Showing {stores.length} stores</span>
