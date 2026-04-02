@@ -26,7 +26,7 @@ function Topbar() {
     "/requests/transfer": "Transfer Requests",
     "/requests/purchase": "Purchase Request",
     "/requests/approved": "Approved Requests",
-    "/requests/new": "Create Request",
+    "/requests/new": "New Request",
     "/add": "Add Machine",
     "/profile": "Profile",
     "/settings": "Settings"
