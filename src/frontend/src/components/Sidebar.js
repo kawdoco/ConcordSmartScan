@@ -2,144 +2,120 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
-import "./Sidebar.css";
 
 function Sidebar() {
   const location = useLocation();
   const { logout, user } = useAuth();
 
-  const navItems = [
-    {
-      path: "/dashboard",
-      label: "Dashboard",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z" strokeWidth="1.8" />
-        </svg>
-      )
-    },
-    {
-      path: "/users",
-      label: "Users",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M18 8a3 3 0 1 1 0 6M11 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-    },
-    {
-      path: "/machines",
-      label: "Machines",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M3 10h18v8H3zM7 10V6h10v4M7 18h.01M11 18h.01" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-    },
-    {
-      path: "/stores",
-      label: "Stores",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M3 9l9-5 9 5v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-    },
-    {
-      path: "/requests/transfer",
-      label: "Transfer Requests",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M7 7h13M7 12h13M7 17h13M3 7h.01M3 12h.01M3 17h.01" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-    },
-    {
-      path: "/requests/purchase",
-      label: "Purchase Request",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M6 6h15l-1.5 9h-11zM6 6 5 3H3M9 20a1 1 0 1 0 0 .01M18 20a1 1 0 1 0 0 .01" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-    },
-    {
-      path: "/requests/approved",
-      label: "Approved Requests",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M9 12l2 2 4-4M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-    },
-    {
-      path: "/requests/new",
-      label: "New Request",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 5v14M5 12h14" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-    },
-    {
-      path: "/garments",
-      label: "Garments",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M6 4l2 4h8l2-4M9 8v12h6V8M9 12h6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )
-    }
-  ];
-
   const isActive = (path) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
-  const displayName = user?.name || "Admin User";
-  const displayEmail = user?.email || "admin@concord.com";
-  const avatarLetter = (displayName?.trim()?.charAt(0) || "A").toUpperCase();
-
   return (
-    <aside className="sidebar">
-      <div className="sidebar-header">
-        <div className="sidebar-logo">
-          <span className="sidebar-logo-icon">C</span>
-        </div>
-        <div className="sidebar-brand">
-          <h2 className="sidebar-brand-name">Concord Apparel</h2>
-          <p className="sidebar-brand-subtitle">Machine Locator Suite</p>
-        </div>
-      </div>
-
-      <nav className="sidebar-nav">
-        {navItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`sidebar-nav-item ${isActive(item.path) ? "active" : ""}`.trim()}
-          >
-            <span className="sidebar-nav-icon">{item.icon}</span>
-            <span className="sidebar-nav-label">{item.label}</span>
-          </Link>
-        ))}
+    <div style={styles.sidebar}>
+      <h2 style={styles.logo}>Concord Apparel</h2>
+      <p style={styles.subtitle}>Machine Locator Suite</p>
+      <nav style={styles.nav}>
+        <Link style={isActive("/dashboard") ? styles.activeLink : styles.link} to="/dashboard">Dashboard</Link>
+        <Link style={isActive("/users") ? styles.activeLink : styles.link} to="/users">Users</Link>
+        <Link style={isActive("/machines") ? styles.activeLink : styles.link} to="/machines">Machines</Link>
+        <Link style={isActive("/add") ? styles.activeLink : styles.link} to="/add">Add Machine</Link>
+        <div style={styles.sectionLabel}>Store Management</div>
+        <Link style={isActive("/stores/add") || isActive("/stores/edit") ? styles.activeLink : styles.link} to="/stores/add">Add Store</Link>
+        <Link style={isActive("/garments") ? styles.activeLink : styles.link} to="/garments">Garments</Link>
+        <Link style={isActive("/approved-requests") ? styles.activeLink : styles.link} to="/approved-requests">Approved Requests</Link>
       </nav>
 
-      <div className="sidebar-footer">
-        <div className="sidebar-user">
-          <div className="sidebar-user-avatar">{avatarLetter}</div>
-          <div className="sidebar-user-info">
-            <div className="sidebar-user-name">{displayName}</div>
-            <div className="sidebar-user-email">{displayEmail}</div>
-          </div>
-        </div>
-        <button type="button" className="sidebar-logout-button" onClick={logout}>
-          Logout
-        </button>
+      <div style={styles.footerBlock}>
+        <p style={styles.userEmail}>{user?.email || "admin@concord.com"}</p>
+        <button style={styles.logoutBtn} onClick={logout}>Logout</button>
       </div>
-    </aside>
+    </div>
   );
 }
+
+const styles = {
+  sidebar: {
+    width: "260px",
+    minHeight: "100vh",
+    background: "linear-gradient(180deg, #0f172a, #172554)",
+    color: "white",
+    padding: "26px 16px",
+    boxSizing: "border-box",
+    display: "flex",
+    flexDirection: "column",
+    borderRight: "1px solid rgba(148, 163, 184, 0.2)"
+  },
+  logo: {
+    margin: "0",
+    fontSize: "1.25rem",
+    fontWeight: "700",
+    letterSpacing: "0.2px",
+    color: "#fff"
+  },
+  subtitle: {
+    margin: "6px 0 24px 0",
+    color: "#cbd5e1",
+    fontSize: "0.84rem"
+  },
+  nav: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px"
+  },
+  sectionLabel: {
+    marginTop: "14px",
+    padding: "0 12px",
+    fontSize: "0.72rem",
+    fontWeight: "700",
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "#94a3b8"
+  },
+  link: {
+    display: "block",
+    padding: "11px 12px",
+    color: "#cbd5e1",
+    textDecoration: "none",
+    borderRadius: "10px",
+    fontSize: "0.94rem",
+    transition: "all 0.2s",
+    border: "1px solid transparent"
+  },
+  activeLink: {
+    display: "block",
+    padding: "11px 12px",
+    color: "white",
+    textDecoration: "none",
+    borderRadius: "10px",
+    background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+    border: "1px solid rgba(255,255,255,0.2)",
+    fontSize: "0.94rem",
+    boxShadow: "0 6px 16px rgba(37,99,235,0.35)"
+  },
+  footerBlock: {
+    marginTop: "auto",
+    padding: "12px",
+    borderRadius: "10px",
+    background: "rgba(15, 23, 42, 0.35)",
+    border: "1px solid rgba(148, 163, 184, 0.2)"
+  },
+  userEmail: {
+    margin: "0 0 10px 0",
+    color: "#e2e8f0",
+    fontSize: "0.8rem",
+    overflowWrap: "anywhere"
+  },
+  logoutBtn: {
+    width: "100%",
+    padding: "9px 12px",
+    background: "#dc2626",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "600"
+  }
+};
 
 export default Sidebar;

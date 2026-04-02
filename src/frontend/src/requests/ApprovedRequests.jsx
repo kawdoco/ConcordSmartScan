@@ -1,7 +1,181 @@
 import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import StatsCards from "../components/StatsCards";
-import "./ApprovedRequests.css";
+
+/* ─── Extra styles (extends UserManagement's shared styles) ──────────────────── */
+const extraStyle = `
+  :root {
+    --blue:#1a3fd4; --blue-dk:#1230a8; --blue-lt:#eef1fd;
+    --text:#0f1623; --muted:#6b7280; --border:#e5e7eb;
+    --bg:#f4f6fb; --white:#fff;
+  }
+
+  .content { padding: 28px 28px; flex: 1; color: var(--text); font-family: 'Sora', sans-serif; }
+
+  .tabs {
+    display:flex;
+    border-bottom:1.5px solid var(--border);
+    margin-bottom:20px;
+  }
+  .tab {
+    padding:10px 20px;
+    font-weight:500;
+    font-size:13.5px;
+    cursor:pointer;
+    border-bottom:2.5px solid transparent;
+    color:var(--muted);
+    transition:all .15s;
+    user-select:none;
+    background:none;
+    border-top:none;
+    border-left:none;
+    border-right:none;
+    font-family:inherit;
+    margin-bottom:-1.5px;
+  }
+  .tab:hover:not(.tab-active) { color:var(--text); }
+  .tab-active { color:var(--blue); border-bottom-color:var(--blue); }
+
+  .card {
+    background:var(--white);
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .card-hd {
+    padding:18px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid var(--border);
+  }
+  .card-hd .ct { font-weight:700; font-size:15px; }
+  .card-hd .cs { font-size:12px; color:var(--muted); margin-top:2px; }
+
+  table { width:100%; border-collapse:collapse; }
+  thead th {
+    font-size:11px;
+    font-weight:600;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    padding:11px 20px;
+    text-align:left;
+    border-bottom:1px solid var(--border);
+    background:var(--bg);
+  }
+  tbody tr { transition:background .12s; }
+  tbody tr:hover { background:#f8f9ff; }
+  tbody td {
+    padding:15px 20px;
+    border-bottom:1px solid var(--border);
+    font-size:13.5px;
+  }
+  tbody tr:last-child td { border-bottom:none; }
+
+  .tfoot {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:13px 20px;
+    border-top:1px solid var(--border);
+    font-size:13px;
+    color:var(--muted);
+  }
+  .pagination { display:flex; align-items:center; gap:4px; }
+  .pg-btn {
+    min-width:32px;
+    height:32px;
+    border-radius:7px;
+    border:1.5px solid var(--border);
+    background:var(--white);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:500;
+    color:var(--muted);
+    transition:all .12s;
+    padding:0 8px;
+    font-family:inherit;
+  }
+  .pg-btn.pg-active { background:var(--blue); color:#fff; border-color:var(--blue); }
+  .pg-btn:hover:not(.pg-active):not(:disabled) { background:var(--bg); color:var(--text); }
+  .pg-btn:disabled { opacity:.35; cursor:default; }
+
+  .empty { text-align:center; padding:60px 20px; color:var(--muted); }
+
+  .toast {
+    position:fixed;
+    bottom:24px;
+    right:24px;
+    z-index:400;
+    padding:13px 20px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:600;
+    font-family:'Sora',sans-serif;
+    box-shadow:0 8px 28px rgba(0,0,0,.18);
+    transform:translateY(80px);
+    opacity:0;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    pointer-events:none;
+  }
+  .toast.visible { transform:translateY(0); opacity:1; }
+  .toast-success { background:#065f46; color:#fff; }
+  .toast-error { background:#991b1b; color:#fff; }
+  .toast-info { background:var(--blue-dk); color:#fff; }
+
+  /* ── Request-specific styles ── */
+  .req-section-title { font-size:24px; font-weight:700; margin-bottom:6px; letter-spacing:-.4px; }
+  .req-section-sub   { font-size:13px; color:var(--muted); margin-bottom:24px; }
+
+  .btn-export {
+    display:flex; align-items:center; gap:8px;
+    background:var(--white); color:var(--text);
+    border:1.5px solid var(--border); border-radius:8px;
+    padding:9px 16px; font-family:inherit; font-size:13px;
+    font-weight:600; cursor:pointer; transition:all .15s;
+  }
+  .btn-export:hover { background:var(--bg); border-color:#bdc8e8; }
+
+  .th-sub { font-size:10px; font-weight:500; color:var(--muted); text-transform:none;
+            letter-spacing:0; display:block; margin-top:2px; }
+
+  .req-id  { font-family:'JetBrains Mono',monospace; font-size:12.5px; font-weight:700; color:var(--text); }
+  .mc-id   { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--muted); }
+  .store-id { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--muted); }
+  .approval-date  { font-size:13px; }
+  .approval-cm    { font-size:11.5px; color:var(--muted); margin-top:1px; }
+
+  .btn-edit-machine {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:7px 14px; border-radius:7px;
+    border:1.5px solid var(--blue); background:var(--white);
+    color:var(--blue); font-family:inherit; font-size:12.5px;
+    font-weight:600; cursor:pointer; transition:all .15s;
+  }
+  .btn-edit-machine:hover { background:var(--blue-lt); }
+
+  /* Purchase requests */
+  .btn-add-machine {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:7px 14px; border-radius:7px;
+    border:none; background:var(--blue);
+    color:#fff; font-family:inherit; font-size:12.5px;
+    font-weight:600; cursor:pointer; transition:background .15s;
+  }
+  .btn-add-machine:hover { background:var(--blue-dk); }
+
+  .machine-added {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:7px 14px; border-radius:7px;
+    color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:600;
+  }
+  .machine-added svg { color:var(--muted); }
+
+  tr.row-done td { color:#9ca3af; }
+  tr.row-done .prq-id { color:#9ca3af; }
+`;
 
 /* ─── Purchase mock data ────────────────────────────────────────────────────── */
 const ALL_PURCHASE_REQUESTS = [
@@ -115,17 +289,12 @@ function useToast() {
 
 /* ─── Main Component ─────────────────────────────────────────────────────────── */
 export default function ApprovedRequests() {
-  const navigate = useNavigate();
   const [requestTab, setRequestTab] = useState("transfer");
   const [page, setPage] = useState(1);
   const [purchasePage, setPurchasePage] = useState(1);
   const [searchQ, setSearchQ] = useState("");
   const [purchaseRequests, setPurchaseRequests] = useState(ALL_PURCHASE_REQUESTS);
   const [toast, showToast] = useToast();
-
-  const purchaseCount = purchaseRequests.length;
-  const transferCount = ALL_TRANSFER_REQUESTS.length;
-  const totalRequestCount = purchaseCount + transferCount;
 
   /* ── Filtering ── */
   const filtered = ALL_TRANSFER_REQUESTS.filter(r => {
@@ -175,13 +344,10 @@ export default function ApprovedRequests() {
   };
 
   const handleAddMachine = (id) => {
-    const selectedRequest = purchaseRequests.find(r => r.id === id);
-    navigate("/add", {
-      state: {
-        from: "approved-requests",
-        request: selectedRequest || null,
-      },
-    });
+    setPurchaseRequests(prev =>
+      prev.map(r => r.id === id ? { ...r, added: true } : r)
+    );
+    showToast(`Machine added for ${id}`, "success");
   };
 
   const handleTabChange = (tab) => {
@@ -207,16 +373,11 @@ export default function ApprovedRequests() {
   };
 
   return (
-    <div className="approved-requests-page">
+    <>
+      <style>{extraStyle}</style>
+
       <div className="content">
-        <StatsCards
-          mode="requests"
-          counts={{
-            total: totalRequestCount,
-            purchase: purchaseCount,
-            transfer: transferCount,
-          }}
-        />
+        <h1 className="req-section-title">Approved Requests</h1>
 
         {/* ── Tabs ── */}
         <div className="tabs">
@@ -269,8 +430,8 @@ export default function ApprovedRequests() {
                           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                           <polyline points="22 4 12 14.01 9 11.01" />
                         </svg>
-                        <p className="empty-title">No approved requests found</p>
-                        <p className="empty-sub">
+                        <p style={{ marginTop: 12, fontWeight: 600 }}>No approved requests found</p>
+                        <p style={{ fontSize: 13, marginTop: 4 }}>
                           {searchQ ? "Try a different search term." : "No transfer requests have been approved yet."}
                         </p>
                       </div>
@@ -289,7 +450,7 @@ export default function ApprovedRequests() {
                     <td>
                       <button
                         className="btn-edit-machine"
-                        onClick={() => navigate(`/edit/${r.machineId}`)}>
+                        onClick={() => showToast(`Editing machine ${r.machineId}`, "info")}>
                         <PencilIcon /> Edit Machine
                       </button>
                     </td>
@@ -359,10 +520,7 @@ export default function ApprovedRequests() {
                   <th>Request ID</th>
                   <th>Machine Type</th>
                   <th>Garment Requested</th>
-                  <th>
-                    Approval
-                    <span className="th-sub">Date | CM ID</span>
-                  </th>
+                  <th>Approval (Date | CM ID)</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -372,8 +530,8 @@ export default function ApprovedRequests() {
                     <td colSpan={5}>
                       <div className="empty">
                         <ShoppingIcon />
-                        <p className="empty-title">No purchase requests found</p>
-                        <p className="empty-sub">
+                        <p style={{ marginTop: 12, fontWeight: 600 }}>No purchase requests found</p>
+                        <p style={{ fontSize: 13, marginTop: 4 }}>
                           {searchQ ? "Try a different search term." : "No purchase requests have been approved yet."}
                         </p>
                       </div>
@@ -385,8 +543,7 @@ export default function ApprovedRequests() {
                     <td>{r.machineType}</td>
                     <td>{r.garment}</td>
                     <td>
-                      <div className="approval-date">{r.approvalDate}</div>
-                      <div className="approval-cm">{r.cmId}</div>
+                      <div className="approval-date">{r.approvalDate} | {r.cmId}</div>
                     </td>
                     <td>
                       {r.added ? (
@@ -439,6 +596,6 @@ export default function ApprovedRequests() {
 
       {/* ── Toast ── */}
       <div className={`toast toast-${toast.type}${toast.visible ? " visible" : ""}`}>{toast.msg}</div>
-    </div>
+    </>
   );
 }

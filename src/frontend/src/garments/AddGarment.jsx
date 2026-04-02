@@ -1,224 +1,280 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import AppFooter from "../components/AppFooter";
-import PagePath from "../components/PagePath";
-import { createGarment } from "../services/locationService";
-import "./AddGarment.css";
 
-function IconGarment() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M6 4l2 4h8l2-4" />
-      <path d="M9 8v12h6V8" />
-      <path d="M9 12h6" />
-    </svg>
-  );
-}
-
-function IconMapPin() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
-
-function IconPlus() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-
-const EMPTY_FORM = {
-  branchName: "",
+const EMPTY_ADD = {
+  garmentName: "",
+  garmentId: "GR012",
   phoneNumber: "",
   address: "",
   latitude: "",
   longitude: ""
 };
 
-export default function AddGarment() {
-  const navigate = useNavigate();
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [errors, setErrors] = useState({});
-  const [notification, setNotification] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const EMPTY_EDIT = {
+  garmentName: "Concord - Colombo",
+  garmentId: "GR012",
+  phoneNumber: "0771234567",
+  address: "",
+  latitude: "",
+  longitude: ""
+};
 
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
-
-  const validate = () => {
-    const nextErrors = {};
-
-    if (!form.branchName.trim()) nextErrors.branchName = "Branch name is required.";
-    if (!form.phoneNumber.trim()) nextErrors.phoneNumber = "Phone number is required.";
-    if (!form.address.trim()) nextErrors.address = "Address is required.";
-
-    if (form.latitude !== "" && (isNaN(form.latitude) || Number(form.latitude) < -90 || Number(form.latitude) > 90)) {
-      nextErrors.latitude = "Latitude must be between -90 and 90.";
-    }
-
-    if (form.longitude !== "" && (isNaN(form.longitude) || Number(form.longitude) < -180 || Number(form.longitude) > 180)) {
-      nextErrors.longitude = "Longitude must be between -180 and 180.";
-    }
-
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
-  };
-
-  const handleChange = (event) => {
+function GarmentForm({ title, subtitle, form, setForm, buttonLabel }) {
+  const onChange = (event) => {
     const { name, value } = event.target;
-    setForm((previous) => ({ ...previous, [name]: value }));
-    setErrors((previous) => ({ ...previous, [name]: "" }));
-  };
-
-  const handleSubmit = async () => {
-    if (!validate()) return;
-
-    setIsSubmitting(true);
-
-    try {
-      const payload = {
-        name: form.branchName.trim(),
-        contactInfo: form.phoneNumber.trim(),
-        address: form.address.trim(),
-        latitude: form.latitude ? Number(form.latitude) : null,
-        longitude: form.longitude ? Number(form.longitude) : null,
-      };
-
-      await createGarment(payload);
-      showNotification("Garment added successfully!", "success");
-
-      setTimeout(() => {
-        navigate("/garments");
-      }, 1500);
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message || "Failed to add garment. Please try again.";
-      showNotification(errorMsg, "error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setForm(EMPTY_FORM);
-    setErrors({});
-    navigate("/garments");
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
-    <section className="add-garment-page">
-      <PagePath items={[{ label: "Garments", to: "/garments" }, { label: "Add Garment" }]} />
+    <form style={styles.formCard}>
+      <h2 style={styles.sectionTitle}>{title}</h2>
+      <p style={styles.sectionSubtitle}>{subtitle}</p>
 
-      {notification && (
-        <div className={`add-garment-notice ${notification.type}`}>
-          {notification.message}
+      <div style={styles.formGroup}>
+        <label style={styles.label}>Garment Name</label>
+        <input
+          name="garmentName"
+          value={form.garmentName}
+          onChange={onChange}
+          placeholder="Enter garment name"
+          style={styles.input}
+        />
+      </div>
+
+      <div style={styles.twoCol}>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Garment ID</label>
+          <input
+            name="garmentId"
+            value={form.garmentId}
+            onChange={onChange}
+            placeholder="GR012"
+            style={styles.input}
+          />
         </div>
-      )}
-
-      <div className="add-garment-card">
-        <div className="add-garment-card-header">
-          <span className="add-garment-card-icon"><IconGarment /></span>
-          <div>
-            <h2>Garment Details</h2>
-            <p>Fill in the details to register a new garment location.</p>
-          </div>
-        </div>
-
-        <div className="add-garment-card-body">
-          <div className="add-garment-field">
-            <label htmlFor="branchName">Branch Name</label>
-            <input
-              id="branchName"
-              name="branchName"
-              value={form.branchName}
-              onChange={handleChange}
-              placeholder="Enter branch name"
-              className={errors.branchName ? "error" : ""}
-            />
-            {errors.branchName && <span className="add-garment-error">{errors.branchName}</span>}
-          </div>
-
-          <div className="add-garment-field">
-            <label htmlFor="phoneNumber">Phone Number</label>
-            <input
-              id="phoneNumber"
-              name="phoneNumber"
-              value={form.phoneNumber}
-              onChange={handleChange}
-              placeholder="e.g. +94 11 234 5678"
-              className={errors.phoneNumber ? "error" : ""}
-            />
-            {errors.phoneNumber && <span className="add-garment-error">{errors.phoneNumber}</span>}
-          </div>
-
-          <div className="add-garment-field">
-            <label htmlFor="address">Address</label>
-            <textarea
-              id="address"
-              name="address"
-              rows={3}
-              value={form.address}
-              onChange={handleChange}
-              placeholder="Enter garment address"
-              className={errors.address ? "error" : ""}
-            />
-            {errors.address && <span className="add-garment-error">{errors.address}</span>}
-          </div>
-
-          <div className="add-garment-location-heading">
-            <span><IconMapPin /></span>
-            <div>
-              <h3>Location Coordinates</h3>
-              <p>Optional - GPS coordinates for map pinning.</p>
-            </div>
-          </div>
-
-          <div className="add-garment-grid-two">
-            <div className="add-garment-field">
-              <label htmlFor="latitude">Latitude</label>
-              <input
-                id="latitude"
-                name="latitude"
-                value={form.latitude}
-                onChange={handleChange}
-                placeholder="e.g. 6.9271"
-                className={errors.latitude ? "error" : ""}
-              />
-              {errors.latitude && <span className="add-garment-error">{errors.latitude}</span>}
-            </div>
-
-            <div className="add-garment-field">
-              <label htmlFor="longitude">Longitude</label>
-              <input
-                id="longitude"
-                name="longitude"
-                value={form.longitude}
-                onChange={handleChange}
-                placeholder="e.g. 79.8612"
-                className={errors.longitude ? "error" : ""}
-              />
-              {errors.longitude && <span className="add-garment-error">{errors.longitude}</span>}
-            </div>
-          </div>
-        </div>
-
-        <div className="add-garment-actions">
-          <button type="button" className="btn-secondary" onClick={handleCancel}>Cancel</button>
-          <button type="button" className="btn-primary" onClick={handleSubmit}>
-            <IconPlus />
-            Add Garment
-          </button>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Phone Number</label>
+          <input
+            name="phoneNumber"
+            value={form.phoneNumber}
+            onChange={onChange}
+            placeholder="e.g. 0771234567"
+            style={styles.input}
+          />
         </div>
       </div>
 
-      <AppFooter />
-    </section>
+      <div style={styles.formGroup}>
+        <label style={styles.label}>Address</label>
+        <textarea
+          name="address"
+          value={form.address}
+          onChange={onChange}
+          placeholder="Enter full manufacturing unit address"
+          rows={4}
+          style={styles.textarea}
+        />
+      </div>
+
+      <h3 style={styles.subSectionTitle}>Location Coordinates</h3>
+      <div style={styles.twoCol}>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Latitude</label>
+          <input
+            name="latitude"
+            value={form.latitude}
+            onChange={onChange}
+            placeholder="e.g. 6.9271"
+            style={styles.input}
+          />
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Longitude</label>
+          <input
+            name="longitude"
+            value={form.longitude}
+            onChange={onChange}
+            placeholder="e.g. 79.8612"
+            style={styles.input}
+          />
+        </div>
+      </div>
+
+      <div style={styles.buttonRow}>
+        <button type="button" style={styles.cancelBtn}>Cancel</button>
+        <button type="button" style={styles.primaryBtn}>{buttonLabel}</button>
+      </div>
+    </form>
   );
 }
+
+export default function GarmentPages() {
+  const [tab, setTab] = useState("add");
+  const [addForm, setAddForm] = useState(EMPTY_ADD);
+  const [editForm, setEditForm] = useState(EMPTY_EDIT);
+
+  return (
+    <div style={styles.content}>
+      <div style={styles.tabBar}>
+        <button
+          type="button"
+          onClick={() => setTab("add")}
+          style={{ ...styles.tabButton, ...(tab === "add" ? styles.tabButtonActive : {}) }}
+        >
+          Add Garment
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("edit")}
+          style={{ ...styles.tabButton, ...(tab === "edit" ? styles.tabButtonActive : {}) }}
+        >
+          Edit Garment
+        </button>
+      </div>
+
+      <div style={styles.breadcrumb}>Garments / {tab === "add" ? "Add New Garment" : "Edit Garment"}</div>
+      <h1 style={styles.pageTitle}>{tab === "add" ? "Add New Garment" : "Edit Garment"}</h1>
+
+      {tab === "add" ? (
+        <GarmentForm
+          title="Garment Details"
+          subtitle="Fill in the details to register a new garment unit."
+          form={addForm}
+          setForm={setAddForm}
+          buttonLabel="Add Garment"
+        />
+      ) : (
+        <GarmentForm
+          title="Garment Details"
+          subtitle="Update garment information."
+          form={editForm}
+          setForm={setEditForm}
+          buttonLabel="Update Garment"
+        />
+      )}
+    </div>
+  );
+}
+
+const styles = {
+  content: {
+    padding: "6px 8px",
+    flex: 1
+  },
+  tabBar: {
+    display: "flex",
+    gap: "12px",
+    background: "#1e3a8a",
+    padding: "12px",
+    borderRadius: "10px",
+    marginBottom: "18px"
+  },
+  tabButton: {
+    border: "1px solid transparent",
+    background: "transparent",
+    color: "#ffffff",
+    padding: "10px 16px",
+    borderRadius: "8px",
+    fontSize: "0.95rem",
+    fontWeight: 600,
+    cursor: "pointer"
+  },
+  tabButtonActive: {
+    background: "#ffffff",
+    color: "#1e293b",
+    borderColor: "#d1d5db"
+  },
+  breadcrumb: {
+    color: "#64748b",
+    fontSize: "0.92rem",
+    marginBottom: "6px"
+  },
+  pageTitle: {
+    margin: "0 0 20px 0",
+    color: "#0f172a",
+    fontSize: "2rem",
+    fontWeight: 600
+  },
+  formCard: {
+    background: "#ffffff",
+    padding: "28px",
+    borderRadius: "12px",
+    maxWidth: "980px",
+    border: "1px solid #e2e8f0"
+  },
+  sectionTitle: {
+    margin: 0,
+    color: "#1e293b",
+    fontSize: "1.45rem",
+    fontWeight: 700
+  },
+  sectionSubtitle: {
+    margin: "6px 0 18px 0",
+    color: "#64748b",
+    fontSize: "0.95rem"
+  },
+  subSectionTitle: {
+    margin: "10px 0 14px 0",
+    color: "#1e293b",
+    fontSize: "1.15rem",
+    fontWeight: 700
+  },
+  formGroup: {
+    marginBottom: "16px"
+  },
+  twoCol: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "14px"
+  },
+  label: {
+    display: "block",
+    marginBottom: "8px",
+    color: "#334155",
+    fontSize: "0.95rem",
+    fontWeight: 600
+  },
+  input: {
+    width: "100%",
+    border: "1px solid #cbd5e1",
+    borderRadius: "10px",
+    padding: "12px 14px",
+    fontSize: "0.95rem",
+    outline: "none",
+    boxSizing: "border-box"
+  },
+  textarea: {
+    width: "100%",
+    border: "1px solid #cbd5e1",
+    borderRadius: "10px",
+    padding: "12px 14px",
+    fontSize: "0.95rem",
+    outline: "none",
+    boxSizing: "border-box",
+    resize: "vertical",
+    fontFamily: "inherit"
+  },
+  buttonRow: {
+    marginTop: "20px",
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "10px"
+  },
+  cancelBtn: {
+    border: "1px solid #cbd5e1",
+    background: "#ffffff",
+    color: "#64748b",
+    borderRadius: "8px",
+    padding: "10px 16px",
+    cursor: "pointer",
+    fontWeight: 600
+  },
+  primaryBtn: {
+    border: "none",
+    background: "#2563eb",
+    color: "#ffffff",
+    borderRadius: "8px",
+    padding: "10px 18px",
+    cursor: "pointer",
+    fontWeight: 600
+  }
+};
