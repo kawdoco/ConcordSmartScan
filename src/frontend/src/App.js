@@ -11,7 +11,7 @@ import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
 import AppLayout from "./components/AppLayout";
 import AddNewStore from "./components/AddNewStore";
-import EditStore from "./components/EditStore";
+import EditStore from "./stores/EditStore";
 import GarmentPages from "./garments/AddGarment";
 import EditGarmentPage from "./garments/EditGarment";
 import ApprovedRequests from "./requests/ApprovedRequests";
