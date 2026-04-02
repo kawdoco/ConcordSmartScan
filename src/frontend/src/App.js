@@ -10,6 +10,11 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
 import AppLayout from "./components/AppLayout";
+import AddNewStore from "./components/AddNewStore";
+import EditStore from "./components/EditStore";
+import GarmentPages from "./garments/AddGarment";
+import EditGarmentPage from "./garments/EditGarment";
+import ApprovedRequests from "./requests/ApprovedRequests";
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuth();
@@ -36,6 +41,11 @@ function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="stores/add" element={<AddNewStore />} />
+          <Route path="stores/edit" element={<EditStore />} />
+          <Route path="garments" element={<GarmentPages />} />
+          <Route path="garments/edit" element={<EditGarmentPage />} />
+          <Route path="approved-requests" element={<ApprovedRequests />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

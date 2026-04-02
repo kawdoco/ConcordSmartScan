@@ -20,6 +20,10 @@ function Sidebar() {
         <Link style={isActive("/users") ? styles.activeLink : styles.link} to="/users">Users</Link>
         <Link style={isActive("/machines") ? styles.activeLink : styles.link} to="/machines">Machines</Link>
         <Link style={isActive("/add") ? styles.activeLink : styles.link} to="/add">Add Machine</Link>
+        <div style={styles.sectionLabel}>Store Management</div>
+        <Link style={isActive("/stores/add") || isActive("/stores/edit") ? styles.activeLink : styles.link} to="/stores/add">Add Store</Link>
+        <Link style={isActive("/garments") ? styles.activeLink : styles.link} to="/garments">Garments</Link>
+        <Link style={isActive("/approved-requests") ? styles.activeLink : styles.link} to="/approved-requests">Approved Requests</Link>
       </nav>
 
       <div style={styles.footerBlock}>
@@ -58,6 +62,15 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "8px"
+  },
+  sectionLabel: {
+    marginTop: "14px",
+    padding: "0 12px",
+    fontSize: "0.72rem",
+    fontWeight: "700",
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "#94a3b8"
   },
   link: {
     display: "block",
