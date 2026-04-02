@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../services/api";
 
@@ -245,7 +245,6 @@ export default function UserManagement() {
   // Modals
   const [addOpen, setAddOpen] = useState(false);
   const [viewUser, setViewUser] = useState(null);
-  const [editUser, setEditUser] = useState(null);
   const [deleteUser, setDeleteUser] = useState(null);
 
   // Form state
@@ -344,33 +343,6 @@ export default function UserManagement() {
       });
   };
 
-  const handleEdit = () => {
-    const e = validate(form);
-    if (Object.keys(e).length) { setFormErr(e); return; }
-    const payload = {
-      name: form.name.trim(),
-      email: form.email.trim(),
-      password: form.password || "",
-      role: form.role === "Chief Manager" ? "CHIEF_MANAGER" : form.role.toUpperCase(),
-      location: form.location.trim(),
-    };
-    apiClient.put(`/users/${editUser.id}`, payload)
-      .then(res => {
-        const u = res.data;
-        setUsers(prev => prev.map(x => x.id === editUser.id
-          ? { ...x, name: u.name, role: u.role === "CHIEF_MANAGER" ? "Chief Manager" : u.role === "TECHNICIAN" ? "Technician" : u.role, location: u.location || "", email: u.email }
-          : x
-        ));
-        setEditUser(null);
-        resetForm();
-        showToast("User updated successfully", "success");
-      })
-      .catch(err => {
-        const msg = err.response?.data?.message || "Failed to update user";
-        showToast(msg, "error");
-      });
-  };
-
   const handleDelete = () => {
     apiClient.delete(`/users/${deleteUser.id}`)
       .then(() => {
@@ -379,12 +351,6 @@ export default function UserManagement() {
         setDeleteUser(null);
       })
       .catch(() => showToast("Failed to delete user", "error"));
-  };
-
-  const openEdit = (u) => {
-    setForm({ name: u.name, role: u.role, location: u.location, email: u.email, password: "" });
-    setFormErr({});
-    setEditUser(u);
   };
 
   // ── Pagination pages ──
@@ -478,7 +444,7 @@ export default function UserManagement() {
                       <td>
                         <div className="actions">
                           <button className="ic-btn" title="View" onClick={() => setViewUser(u)}><Icons.Eye /></button>
-                          <button className="ic-btn" title="Edit" onClick={() => openEdit(u)}><Icons.Edit /></button>
+                          <button className="ic-btn" title="Edit" onClick={() => navigate(`/users/edit/${u.id}`)}><Icons.Edit /></button>
                           <button className="ic-btn del" title="Delete" onClick={() => setDeleteUser(u)}><Icons.Trash /></button>
                         </div>
                       </td>
@@ -523,29 +489,6 @@ export default function UserManagement() {
         </div>
       </div>
 
-      {/* ── Edit Modal ── */}
-      <div className={`overlay${editUser ? " open" : ""}`} onClick={e => e.target === e.currentTarget && setEditUser(null)}>
-        <div className="modal">
-          <div className="modal-hd">
-            <h2>Edit User</h2>
-            <button className="mc-btn" onClick={() => setEditUser(null)}><Icons.X /></button>
-          </div>
-          {editUser && (
-            <>
-              <div className="fg">
-                <label>User ID</label>
-                <input value={editUser.id} disabled style={{ background: "var(--bg)", color: "var(--muted)" }} />
-              </div>
-              <UserForm form={form} setForm={setForm} err={formErr} setErr={setFormErr} />
-              <div className="modal-actions">
-                <button className="btn-cancel" onClick={() => setEditUser(null)}>Cancel</button>
-                <button className="btn-save" onClick={handleEdit}>Save Changes</button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
       {/* ── View Modal ── */}
       <div className={`overlay${viewUser ? " open" : ""}`} onClick={e => e.target === e.currentTarget && setViewUser(null)}>
         <div className="modal">
@@ -576,7 +519,7 @@ export default function UserManagement() {
               </div>
               <div className="modal-actions">
                 <button className="btn-cancel" onClick={() => setViewUser(null)}>Close</button>
-                <button className="btn-save" onClick={() => { setViewUser(null); openEdit(viewUser); }}>Edit User</button>
+                <button className="btn-save" onClick={() => { setViewUser(null); navigate(`/users/edit/${viewUser.id}`); }}>Edit User</button>
               </div>
             </>
           )}
