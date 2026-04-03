@@ -71,6 +71,14 @@ function IconChevRight() {
   );
 }
 
+function IconCheck() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
 const PAGE_SIZE = 10;
 
 function MachineList() {
@@ -83,6 +91,12 @@ function MachineList() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [notification, setNotification] = useState(null);
+
+  const showNotification = (message, type) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   useEffect(() => {
     fetchMachines();
@@ -140,16 +154,18 @@ function MachineList() {
 
   const handleDeleteConfirm = async () => {
     if (!deleteConfirm) return;
+    const deletedId = deleteConfirm;
     try {
       const token = localStorage.getItem("token");
 
-      await axios.delete(`${API_URL}/${deleteConfirm}`, {
+      await axios.delete(`${API_URL}/${deletedId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      setMachines((prev) => prev.filter((m) => m.machineId !== deleteConfirm));
+      await fetchMachines();
+      showNotification(`Machine ${deletedId} was deleted successfully.`, "success");
     } catch (err) {
       alert(`Error deleting machine`);
     } finally {
@@ -167,6 +183,7 @@ function MachineList() {
     <section className="machine-list-page">
       <StatsCards machines={machines} />
 
+      {/* Delete confirmation modal */}
       {deleteConfirm && (
         <div className="machine-list-modal-overlay">
           <div className="machine-list-modal">
@@ -183,6 +200,12 @@ function MachineList() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {notification && (
+        <div className={`add-machine-notice ${notification.type}`}>
+          {notification.message}
         </div>
       )}
 
@@ -252,9 +275,9 @@ function MachineList() {
               <tbody>
                 {paginated.length > 0 ? (
                   paginated.map((machine) => (
-                    <tr key={machine.machineId}>
+                    <tr key={machine.id}>
                       <td>
-                        <Link to={`/machine/${machine.machineId}`} className="machine-list-machine-link">
+                        <Link to={`/machine/${machine.id}`} className="machine-list-machine-link">
                           {machine.machineId}
                         </Link>
                       </td>
