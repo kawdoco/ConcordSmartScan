@@ -105,7 +105,7 @@ function ViewMachine() {
         <div style={styles.detailsGrid}>
           <div style={styles.detailItem}>
             <span style={styles.detailLabel}>Machine ID</span>
-            <span style={styles.detailValue}>{machine.id}</span>
+            <span style={styles.detailValue}>{machine.machineId}</span>
           </div>
 
           <div style={styles.detailItem}>
