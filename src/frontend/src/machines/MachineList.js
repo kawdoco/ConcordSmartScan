@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
 import "./MachineList.css";
+import axios from "axios";
+
+const API_URL = "http://localhost:8080/api/machines";
 
 function IconSearch() {
   return (
@@ -68,16 +71,91 @@ function IconChevRight() {
   );
 }
 
+const PAGE_SIZE = 10;
+
 function MachineList() {
   const navigate = useNavigate();
+
+  const [machines, setMachines] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
-  
-  const machines = [
-    { id: "MAC-9021", type: "Single Needle Lockstitch", location: "ST-101", storeName: "Colombo 03", garmentName: "", date: "2024-03-15" },
-    { id: "MAC-8842", type: "Overlock Machine", location: "GR-202", storeName: "", garmentName: "Denim Jacket", date: "2024-04-02" },
-    { id: "MAC-4512", type: "Button Hole Machine", location: "ST-105", storeName: "Peradeniya", garmentName: "", date: "2024-04-18" },
-    { id: "MAC-7729", type: "Flatlock Machine", location: "GR-205", storeName: "", garmentName: "Cotton Crew", date: "2024-05-10" }
-  ];
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  useEffect(() => {
+    fetchMachines();
+  }, []);
+
+  const fetchMachines = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(API_URL, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setMachines(response.data);
+    } catch (err) {
+      setError("Failed to fetch machines");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const tabFiltered = machines.filter((m) => {
+    if (activeTab === "stores") return m.location?.toUpperCase().startsWith("ST");
+    if (activeTab === "garments") return m.location?.toUpperCase().startsWith("GR");
+    return true;
+  });
+
+  const filtered = tabFiltered.filter((m) => {
+    const q = search.toLowerCase();
+    return (
+      m.machineId?.toLowerCase().includes(q) ||
+      m.type?.toLowerCase().includes(q) ||
+      m.location?.toLowerCase().includes(q) ||
+      m.brand?.toLowerCase().includes(q) ||
+      m.model?.toLowerCase().includes(q)
+    );
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm) return;
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.delete(`${API_URL}/${deleteConfirm}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setMachines((prev) => prev.filter((m) => m.machineId !== deleteConfirm));
+    } catch (err) {
+      alert(`Error deleting machine`);
+    } finally {
+      setDeleteConfirm(null);
+    }
+  };
 
   const getLocationLabel = () => {
     if (activeTab === "stores") return "Store Name";
@@ -85,165 +163,176 @@ function MachineList() {
     return "Location";
   };
 
-  const getLocationValue = (machine) => {
-    if (activeTab === "stores") return machine.storeName;
-    if (activeTab === "garments") return machine.garmentName;
-    return machine.location;
-  };
-
-  const tabFilteredMachines = machines.filter((machine) => {
-    if (activeTab === "stores") return machine.location.toUpperCase().startsWith("ST");
-    if (activeTab === "garments") return machine.location.toUpperCase().startsWith("GR");
-    return true;
-  });
-
-  const filteredMachines = tabFilteredMachines;
-
-  const handleViewMachine = (id) => {
-    navigate(`/machine/${id}`);
-  };
-
-  const handleEditMachine = (id) => {
-    navigate(`/edit/${id}`);
-  };
-
-  const handleDeleteMachine = (id) => {
-    if (window.confirm(`Are you sure you want to delete machine ${id}?`)) {
-      alert(`Machine ${id} deleted successfully!`);
-      // Here you would actually delete the machine
-    }
-  };
-
-  const getPagesArr = () => {
-    const totalPages = 5;
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-  };
-
   return (
     <section className="machine-list-page">
-      <StatsCards />
+      <StatsCards machines={machines} />
+
+      {deleteConfirm && (
+        <div className="machine-list-modal-overlay">
+          <div className="machine-list-modal">
+            <h3 className="machine-list-modal-title">Delete machine?</h3>
+            <p className="machine-list-modal-body">
+              Are you sure you want to delete <strong>{deleteConfirm}</strong>? This action cannot be undone.
+            </p>
+            <div className="machine-list-modal-actions">
+              <button className="machine-list-btn-ghost" onClick={() => setDeleteConfirm(null)}>
+                Cancel
+              </button>
+              <button className="machine-list-btn-danger" onClick={handleDeleteConfirm}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="machine-list-tabs">
-        <button
-          type="button"
-          className={`machine-list-tab${activeTab === "all" ? " active" : ""}`}
-          onClick={() => setActiveTab("all")}
-        >
-          All Machines
-        </button>
-        <button
-          type="button"
-          className={`machine-list-tab${activeTab === "stores" ? " active" : ""}`}
-          onClick={() => setActiveTab("stores")}
-        >
-          At Stores
-        </button>
-        <button
-          type="button"
-          className={`machine-list-tab${activeTab === "garments" ? " active" : ""}`}
-          onClick={() => setActiveTab("garments")}
-        >
-          At Garments
-        </button>
+        {["all", "stores", "garments"].map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            className={`machine-list-tab${activeTab === tab ? " active" : ""}`}
+            onClick={() => handleTabChange(tab)}
+          >
+            {tab === "all" ? "All Machines" : tab === "stores" ? "At Stores" : "At Garments"}
+          </button>
+        ))}
       </div>
 
       <div className="machine-list-card">
         <div className="machine-list-card-header">
           <div>
             <div className="machine-list-card-title">Machine Inventory</div>
-            <div className="machine-list-card-subtitle">Detected list of all machines in the replacement location system.</div>
+            <div className="machine-list-card-subtitle">
+              Complete list of all machines in the replacement location system.
+            </div>
           </div>
-          <button className="machine-list-btn-primary" type="button" onClick={() => navigate("/add")}>
-            <IconPlus />
-            Add Machine
-          </button>
+          <div className="machine-list-header-actions">
+            <div className="machine-list-search">
+              <span className="machine-list-search-icon"><IconSearch /></span>
+              <input
+                type="text"
+                placeholder="Search machines..."
+                value={search}
+                onChange={handleSearch}
+                className="machine-list-search-input"
+              />
+            </div>
+            <button
+              className="machine-list-btn-primary"
+              type="button"
+              onClick={() => navigate("/add")}
+            >
+              <IconPlus />
+              Add Machine
+            </button>
+          </div>
         </div>
 
         <div className="machine-list-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Machine ID</th>
-                <th>Type</th>
-                <th>{getLocationLabel()}</th>
-                <th>Added Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredMachines.length > 0 ? (
-                filteredMachines.map((machine) => (
-                  <tr key={machine.id}>
-                    <td>
-                      <Link to={`/machine/${machine.id}`} className="machine-list-machine-link">
-                        {machine.id}
-                      </Link>
-                    </td>
-                    <td>{machine.type}</td>
-                    <td>
-                      <span className="machine-list-location-pill">{getLocationValue(machine)}</span>
-                    </td>
-                    <td>{machine.date}</td>
-                    <td>
-                      <div className="machine-list-actions">
-                        <Link
-                          to={`/machine/${machine.id}`}
-                          className="machine-list-icon-btn"
-                          title="View Machine"
-                        >
-                          <IconEye />
+          {loading ? (
+            <div className="machine-list-state">Loading machines...</div>
+          ) : error ? (
+            <div className="machine-list-state error">
+              {error}
+              <button className="machine-list-retry" onClick={fetchMachines}>Retry</button>
+            </div>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Machine ID</th>
+                  <th>Type</th>
+                  <th>Brand / Model</th>
+                  <th>{getLocationLabel()}</th>
+                  <th>Added Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginated.length > 0 ? (
+                  paginated.map((machine) => (
+                    <tr key={machine.machineId}>
+                      <td>
+                        <Link to={`/machine/${machine.machineId}`} className="machine-list-machine-link">
+                          {machine.machineId}
                         </Link>
-                        <button
-                          className="machine-list-icon-btn"
-                          onClick={() => handleEditMachine(machine.id)}
-                          title="Edit Machine"
-                        >
-                          <IconEdit />
-                        </button>
-                        <button
-                          className="machine-list-icon-btn delete"
-                          onClick={() => handleDeleteMachine(machine.id)}
-                          title="Delete Machine"
-                        >
-                          <IconTrash />
-                        </button>
-                      </div>
+                      </td>
+                      <td>{machine.type}</td>
+                      <td>
+                        <span className="machine-list-model-text">
+                          {machine.brand} {machine.model}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="machine-list-location-pill">{machine.location}</span>
+                      </td>
+                      <td>{machine.date}</td>
+                      <td>
+                        <div className="machine-list-actions">
+                          <Link to={`/machine/${machine.machineId}`} className="machine-list-icon-btn">
+                            <IconEye />
+                          </Link>
+                          <button className="machine-list-icon-btn" onClick={() => navigate(`/edit/${machine.machineId}`)}>
+                            <IconEdit />
+                          </button>
+                          <button className="machine-list-icon-btn delete" onClick={() => setDeleteConfirm(machine.machineId)}>
+                            <IconTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="machine-list-empty">
+                      No machines found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="machine-list-empty">
-                    No machines found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         <div className="machine-list-tfoot">
           <span>
-            {filteredMachines.length === 0
+            {filtered.length === 0
               ? "No machines"
-              : `Showing 1-${filteredMachines.length} of ${tabFilteredMachines.length} machines`}
+              : `Showing ${Math.min((currentPage - 1) * PAGE_SIZE + 1, filtered.length)}–${Math.min(
+                  currentPage * PAGE_SIZE,
+                  filtered.length
+                )} of ${filtered.length} machines`}
           </span>
           <div className="machine-list-pagination">
-            <button className="machine-list-pg-btn" disabled>
+            <button
+              className="machine-list-pg-btn"
+              onClick={() => setCurrentPage((p) => p - 1)}
+              disabled={currentPage === 1}
+            >
               <IconChevLeft />
             </button>
-            {getPagesArr().map((pageNum) => (
-              <button key={pageNum} className={`machine-list-pg-btn${pageNum === 1 ? " active" : ""}`}>
-                {pageNum}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                className={`machine-list-pg-btn${page === currentPage ? " active" : ""}`}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
               </button>
             ))}
-            <button className="machine-list-pg-btn">
+            <button
+              className="machine-list-pg-btn"
+              onClick={() => setCurrentPage((p) => p + 1)}
+              disabled={currentPage === totalPages}
+            >
               <IconChevRight />
             </button>
           </div>
         </div>
       </div>
 
+      <div style={{ flex: 1 }} />
       <AppFooter />
     </section>
   );
