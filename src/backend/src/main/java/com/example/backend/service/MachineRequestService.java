@@ -47,7 +47,7 @@ public class MachineRequestService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Machine not found for ID: " + machineId));
 
                 request.setMachineId(machine.getMachineCode());
-                request.setMachineType(normalizeOptional(machine.getName()));
+                request.setMachineType(normalizeOptional(machine.getBrand()));
                 request.setFromStoreId(normalizeOptional(machine.getLocation()));
             } else {
                 request.setMachineId(null);
