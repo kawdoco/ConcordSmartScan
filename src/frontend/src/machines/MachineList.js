@@ -270,7 +270,7 @@ function MachineList() {
                       <td>{machine.date}</td>
                       <td>
                         <div className="machine-list-actions">
-                          <Link to={`/machine/${machine.machineId}`} className="machine-list-icon-btn">
+                          <Link to={`/machine/${machine.id}`} className="machine-list-icon-btn">
                             <IconEye />
                           </Link>
                           <button className="machine-list-icon-btn" onClick={() => navigate(`/edit/${machine.machineId}`)}>
