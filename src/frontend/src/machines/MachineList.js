@@ -273,10 +273,10 @@ function MachineList() {
                           <Link to={`/machine/${machine.id}`} className="machine-list-icon-btn">
                             <IconEye />
                           </Link>
-                          <button className="machine-list-icon-btn" onClick={() => navigate(`/edit/${machine.machineId}`)}>
+                          <button className="machine-list-icon-btn" onClick={() => navigate(`/edit/${machine.id}`)}>
                             <IconEdit />
                           </button>
-                          <button className="machine-list-icon-btn delete" onClick={() => setDeleteConfirm(machine.machineId)}>
+                          <button className="machine-list-icon-btn delete" onClick={() => setDeleteConfirm(machine.id)}>
                             <IconTrash />
                           </button>
                         </div>
