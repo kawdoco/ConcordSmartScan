@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
+import "./MachineShared.css";
 import "./MachineList.css";
 import axios from "axios";
 
@@ -204,7 +205,7 @@ function MachineList() {
       )}
 
       {notification && (
-        <div className={`add-machine-notice ${notification.type}`}>
+        <div className={`machine-shared-notice ${notification.type}`}>
           {notification.message}
         </div>
       )}

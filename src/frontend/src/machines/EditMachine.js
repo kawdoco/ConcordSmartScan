@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
-import "./EditMachine.css";
+import "./MachineShared.css";
 
 const machineTypes = [
   "Single Needle",
@@ -160,7 +160,7 @@ function EditMachine() {
       <PagePath items={[{ label: "Machines", to: "/machines" }, { label: "Edit Machine" }]} />
 
       {notification && (
-        <div className={`edit-machine-notice ${notification.type === "success" ? "success" : "info"}`}>
+        <div className={`edit-machine-notice ${notification.type}`}>
           {notification.message}
         </div>
       )}

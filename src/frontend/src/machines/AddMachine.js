@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
-import "./AddMachine.css";
+import "./MachineShared.css";
 import axios from "axios";
 
 function IconMachine() {
