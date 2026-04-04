@@ -32,12 +32,35 @@ public class Machine {
     }
 
     // Getters & Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setMachineCode(String machineCode) {
-    this.machineCode = machineCode;
-}
+        this.machineCode = machineCode;
+    }
 
     public String getMachineCode() {
-    return this.machineCode;
-}
-    
+        return this.machineCode;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
 }

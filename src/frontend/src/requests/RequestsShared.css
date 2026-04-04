@@ -56,9 +56,27 @@
   color: #6b7280;
 }
 
+.request-new-btn {
+  border: none;
+  border-radius: 8px;
+  background: #1a3fd4;
+  color: #fff;
+  padding: 9px 14px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.request-new-btn:hover {
+  background: #1230a8;
+}
+
 .purchase-request-table-wrap,
 .transfer-requests-table-wrap {
-  overflow-x: auto;
+  height: 392px;
+  overflow: auto;
+  background: #fff;
 }
 
 .purchase-request-table-wrap table,
@@ -175,6 +193,10 @@
   font-weight: 600;
 }
 
+.new-request-notice.error {
+  background: #b91c1c;
+}
+
 .new-request-card-icon {
   color: #1a3fd4;
   display: inline-flex;
@@ -239,6 +261,13 @@
   font-size: 11px;
 }
 
+.new-request-hint {
+  margin-top: 4px;
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+}
+
 .new-request-grid-two {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -287,6 +316,11 @@
 
 .new-request-actions .btn-primary:hover {
   background: #1230a8;
+}
+
+.new-request-actions .btn-primary:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
 }
 
 @media (max-width: 900px) {
