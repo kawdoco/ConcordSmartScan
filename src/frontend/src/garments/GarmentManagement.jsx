@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
+import TableEmptyState from "../components/TableEmptyState";
 import { getAllGarments, deleteLocation } from "../services/locationService";
 import "./GarmentManagement.css";
 
@@ -107,64 +108,66 @@ function GarmentManagement() {
           </div>
         )}
 
-        {loading ? (
-          <div className="garment-loading">Loading garments...</div>
-        ) : garments.length === 0 ? (
-          <div className="garment-empty">No garments found.</div>
-        ) : (
-          <div className="garment-table-wrap">
-            <table className="garment-table">
-              <thead>
-                <tr>
-                  <th>GARMENT ID</th>
-                  <th>BRANCH NAME</th>
-                  <th>LOCATION (LAT, LONG)</th>
-                  <th>PHONE NUMBER</th>
-                  <th>ADDRESS</th>
-                  <th>ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginated.map((row) => (
-                  <tr key={row.id}>
-                    <td className="garment-id">GAR-{String(row.id).padStart(3, '0')}</td>
-                    <td className="garment-branch">{row.branch}</td>
-                    <td className="garment-lat-long">{row.location}</td>
-                    <td>{row.phone}</td>
-                    <td>{row.address}</td>
-                    <td className="garment-action-icons">
-                      <button
-                        type="button"
-                        title="View"
-                        aria-label={`View ${row.branch}`}
-                        onClick={() => navigate(`/garments/view/${row.id}`, { state: { garment: row.originalData } })}
-                      >
-                        <EyeIcon />
-                      </button>
-                      <button
-                        type="button"
-                        title="Edit"
-                        aria-label={`Edit ${row.branch}`}
-                        onClick={() => navigate("/garments/edit", { state: { garment: row.originalData } })}
-                      >
-                        <EditIcon />
-                      </button>
-                      <button
-                        type="button"
-                        title="Delete"
-                        aria-label={`Delete ${row.branch}`}
-                        className="delete"
-                        onClick={() => handleDelete(row.id, row.branch)}
-                      >
-                        <TrashIcon />
-                      </button>
-                    </td>
+        <div className="garment-data-area">
+          {loading ? (
+            <div className="garment-loading">Loading garments...</div>
+          ) : garments.length === 0 ? (
+            <TableEmptyState message="No garments found" minHeight={392} />
+          ) : (
+            <div className="garment-table-wrap">
+              <table className="garment-table">
+                <thead>
+                  <tr>
+                    <th>GARMENT ID</th>
+                    <th>BRANCH NAME</th>
+                    <th>LOCATION (LAT, LONG)</th>
+                    <th>PHONE NUMBER</th>
+                    <th>ADDRESS</th>
+                    <th>ACTIONS</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {paginated.map((row) => (
+                    <tr key={row.id}>
+                      <td className="garment-id">GAR-{String(row.id).padStart(3, '0')}</td>
+                      <td className="garment-branch">{row.branch}</td>
+                      <td className="garment-lat-long">{row.location}</td>
+                      <td>{row.phone}</td>
+                      <td>{row.address}</td>
+                      <td className="garment-action-icons">
+                        <button
+                          type="button"
+                          title="View"
+                          aria-label={`View ${row.branch}`}
+                          onClick={() => navigate(`/garments/view/${row.id}`, { state: { garment: row.originalData } })}
+                        >
+                          <EyeIcon />
+                        </button>
+                        <button
+                          type="button"
+                          title="Edit"
+                          aria-label={`Edit ${row.branch}`}
+                          onClick={() => navigate("/garments/edit", { state: { garment: row.originalData } })}
+                        >
+                          <EditIcon />
+                        </button>
+                        <button
+                          type="button"
+                          title="Delete"
+                          aria-label={`Delete ${row.branch}`}
+                          className="delete"
+                          onClick={() => handleDelete(row.id, row.branch)}
+                        >
+                          <TrashIcon />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
         <div className="garment-table-footer">
           <span>

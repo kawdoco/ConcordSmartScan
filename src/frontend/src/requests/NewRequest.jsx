@@ -1,21 +1,9 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import apiClient from "../services/api";
 import "./NewRequest.css";
-
-function IconRequest() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M8 6h13" />
-      <path d="M8 12h13" />
-      <path d="M8 18h13" />
-      <path d="M3 6h.01" />
-      <path d="M3 12h.01" />
-      <path d="M3 18h.01" />
-    </svg>
-  );
-}
 
 function IconFlow() {
   return (
@@ -42,7 +30,6 @@ const EMPTY_FORM = {
   requestType: "transfer",
   machineId: "",
   machineType: "",
-  fromStoreId: "",
   toGarmentId: "",
   priority: "medium",
   reason: "",
@@ -52,11 +39,24 @@ const EMPTY_FORM = {
 
 export default function NewRequest() {
   const navigate = useNavigate();
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [searchParams] = useSearchParams();
+  const [form, setForm] = useState(() => {
+    const urlType = searchParams.get("type");
+    const requestType = urlType === "purchase" ? "purchase" : "transfer";
+    return { ...EMPTY_FORM, requestType };
+  });
   const [errors, setErrors] = useState({});
   const [notification, setNotification] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResolvingMachine, setIsResolvingMachine] = useState(false);
 
   const isTransfer = form.requestType === "transfer";
+
+  useEffect(() => {
+    const urlType = searchParams.get("type");
+    const requestType = urlType === "purchase" ? "purchase" : "transfer";
+    setForm((previous) => ({ ...previous, requestType }));
+  }, [searchParams]);
 
   const showNotification = (message, type) => {
     setNotification({ message, type });
@@ -66,9 +66,7 @@ export default function NewRequest() {
   const validate = () => {
     const nextErrors = {};
 
-    if (!form.machineId.trim()) nextErrors.machineId = "Machine ID is required.";
-    if (!form.machineType.trim()) nextErrors.machineType = "Machine type is required.";
-    if (isTransfer && !form.fromStoreId.trim()) nextErrors.fromStoreId = "From Store ID is required for transfer requests.";
+    if (!isTransfer && !form.machineType.trim()) nextErrors.machineType = "Machine type is required for purchase requests.";
     if (!form.toGarmentId.trim()) nextErrors.toGarmentId = "To Garment ID is required.";
     if (!form.reason.trim()) nextErrors.reason = "Reason is required.";
     if (!form.requiredDate) nextErrors.requiredDate = "Required date is required.";
@@ -82,8 +80,8 @@ export default function NewRequest() {
 
     setForm((previous) => {
       const next = { ...previous, [name]: value };
-      if (name === "requestType" && value === "purchase") {
-        next.fromStoreId = "";
+      if (name === "requestType" && value === "transfer") {
+        next.machineType = "";
       }
       return next;
     });
@@ -91,15 +89,59 @@ export default function NewRequest() {
     setErrors((previous) => ({ ...previous, [name]: "" }));
   };
 
-  const handleSubmit = () => {
+  const resolveMachineDetails = async () => {
+    if (!isTransfer || !form.machineId.trim()) {
+      return;
+    }
+
+    setIsResolvingMachine(true);
+    try {
+      const response = await apiClient.get(`/machines/code/${encodeURIComponent(form.machineId.trim())}`);
+      const machine = response.data || {};
+      setForm((previous) => ({
+        ...previous,
+        machineId: machine.machineCode || previous.machineId,
+        machineType: machine.name || ""
+      }));
+      setErrors((previous) => ({ ...previous, machineId: "" }));
+    } catch {
+      setForm((previous) => ({
+        ...previous,
+        machineType: ""
+      }));
+      setErrors((previous) => ({ ...previous, machineId: "" }));
+    } finally {
+      setIsResolvingMachine(false);
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!validate()) return;
 
-    const successLabel = isTransfer ? "Transfer request created successfully!" : "Purchase request created successfully!";
-    showNotification(successLabel, "success");
+    setIsSubmitting(true);
+    try {
+      await apiClient.post("/requests", {
+        requestType: form.requestType,
+        machineId: form.machineId,
+        machineType: form.machineType,
+        toGarmentId: form.toGarmentId,
+        priority: form.priority,
+        reason: form.reason,
+        requiredDate: form.requiredDate,
+        notes: form.notes
+      });
 
-    setTimeout(() => {
-      navigate(isTransfer ? "/requests/transfer" : "/requests/purchase");
-    }, 1200);
+      const successLabel = isTransfer ? "Transfer request created successfully!" : "Purchase request created successfully!";
+      showNotification(successLabel, "success");
+
+      setTimeout(() => {
+        navigate(isTransfer ? "/requests/transfer" : "/requests/purchase");
+      }, 900);
+    } catch (requestError) {
+      showNotification(requestError.response?.data?.message || "Failed to create request.", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -120,7 +162,6 @@ export default function NewRequest() {
 
       <div className="new-request-card">
         <div className="new-request-card-header">
-          <span className="new-request-card-icon"><IconRequest /></span>
           <div>
             <h2>Create Request</h2>
             <p>Fill in the details to submit a transfer or purchase request.</p>
@@ -158,31 +199,37 @@ export default function NewRequest() {
           </div>
 
           <div className="new-request-grid-two">
-            <div className="new-request-field">
-              <label htmlFor="machineId">Machine ID</label>
-              <input
-                id="machineId"
-                name="machineId"
-                value={form.machineId}
-                onChange={handleChange}
-                placeholder="e.g. MAC-JUKI-442"
-                className={errors.machineId ? "error" : ""}
-              />
-              {errors.machineId && <span className="new-request-error">{errors.machineId}</span>}
-            </div>
+            {isTransfer && (
+              <div className="new-request-field">
+                <label htmlFor="machineId">Machine ID (Optional)</label>
+                <input
+                  id="machineId"
+                  name="machineId"
+                  value={form.machineId}
+                  onChange={handleChange}
+                  onBlur={resolveMachineDetails}
+                  placeholder="Optional (e.g. MAC-JUKI-442)"
+                  className={errors.machineId ? "error" : ""}
+                />
+                {isResolvingMachine && <span className="new-request-hint">Loading machine details...</span>}
+                {errors.machineId && <span className="new-request-error">{errors.machineId}</span>}
+              </div>
+            )}
 
-            <div className="new-request-field">
-              <label htmlFor="machineType">Machine Type</label>
-              <input
-                id="machineType"
-                name="machineType"
-                value={form.machineType}
-                onChange={handleChange}
-                placeholder="e.g. Lockstitch"
-                className={errors.machineType ? "error" : ""}
-              />
-              {errors.machineType && <span className="new-request-error">{errors.machineType}</span>}
-            </div>
+            {!isTransfer && (
+              <div className="new-request-field">
+                <label htmlFor="machineType">Machine Type</label>
+                <input
+                  id="machineType"
+                  name="machineType"
+                  value={form.machineType}
+                  onChange={handleChange}
+                  placeholder="e.g. Lockstitch"
+                  className={errors.machineType ? "error" : ""}
+                />
+                {errors.machineType && <span className="new-request-error">{errors.machineType}</span>}
+              </div>
+            )}
           </div>
 
           <div className="new-request-flow-heading">
@@ -194,20 +241,6 @@ export default function NewRequest() {
           </div>
 
           <div className="new-request-grid-two">
-            <div className="new-request-field">
-              <label htmlFor="fromStoreId">From Store ID</label>
-              <input
-                id="fromStoreId"
-                name="fromStoreId"
-                value={form.fromStoreId}
-                onChange={handleChange}
-                placeholder={isTransfer ? "e.g. STORE-CENTRAL" : "Not required for purchase request"}
-                disabled={!isTransfer}
-                className={errors.fromStoreId ? "error" : ""}
-              />
-              {errors.fromStoreId && <span className="new-request-error">{errors.fromStoreId}</span>}
-            </div>
-
             <div className="new-request-field">
               <label htmlFor="toGarmentId">To Garment ID</label>
               <input
@@ -265,9 +298,9 @@ export default function NewRequest() {
 
         <div className="new-request-actions">
           <button type="button" className="btn-secondary" onClick={handleCancel}>Cancel</button>
-          <button type="button" className="btn-primary" onClick={handleSubmit}>
+          <button type="button" className="btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
             <IconPlus />
-            Create Request
+            {isSubmitting ? "Creating..." : "Create Request"}
           </button>
         </div>
       </div>
