@@ -370,3 +370,30 @@ tbody tr:hover td {
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* ── Scan QR button ─────────────────────────────────── */
+.machine-list-btn-scan {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #0f172a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.machine-list-btn-scan:hover {
+  background: #1e293b;
+}
+
+/* ── QR icon button in table row ───────────────────── */
+.machine-list-icon-btn.qr:hover {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
