@@ -192,7 +192,7 @@ const AddUser = () => {
               </div>
 
               <div className="add-user-field">
-                <label htmlFor="email">Email Address</label>
+                <label htmlFor="email">Personal Email </label>
                 <input
                   type="email"
                   id="email"
@@ -205,7 +205,7 @@ const AddUser = () => {
               </div>
 
               <div className="add-user-field">
-                <label htmlFor="address">Address</label>
+                <label htmlFor="address">Home Address</label>
                 <textarea
                   id="address"
                   name="address"

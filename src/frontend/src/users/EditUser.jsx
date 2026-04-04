@@ -223,12 +223,12 @@ export default function EditUserPage() {
             </div>
 
             <div className="add-user-field">
-              <label htmlFor="email">Email Address</label>
+              <label htmlFor="email">Personal Email </label>
               <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} required />
             </div>
 
             <div className="add-user-field">
-              <label htmlFor="address">Address</label>
+              <label htmlFor="address">Home Address</label>
               <textarea id="address" name="address" value={formData.address} onChange={handleInputChange} rows="3" required />
             </div>
           </div>
