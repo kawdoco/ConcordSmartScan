@@ -63,8 +63,8 @@ Add the PostgreSQL server in pgAdmin:
 4. In Connection tab, use Host: localhost, Port: 5432, Username: postgres, Password: postgres.
 5. Save the server.
 
-<img src="docs/pgadmin-add-server.png" alt="Register server in pgAdmin" width="50%" />
-<img src="docs/pgadmin-server-connection.png" alt="pgAdmin server connection tab with localhost and postgres credentials" width="50%" />
+<img src="docs/References_for_README/pgadmin-add-server.png" alt="Register server in pgAdmin" width="50%" />
+<img src="docs/References_for_README/pgadmin-server-connection.png" alt="pgAdmin server connection tab with localhost and postgres credentials" width="50%" />
 
 Create the project database in pgAdmin:
 
@@ -73,7 +73,7 @@ Create the project database in pgAdmin:
 3. Set Database name to concord_db.
 4. Keep Owner as postgres, then save.
 
-<img src="docs/pgadmin-create-database.png" alt="Create concord_db database in pgAdmin" width="50%" />
+<img src="docs/References_for_README/pgadmin-create-database.png" alt="Create concord_db database in pgAdmin" width="50%" />
 
 Before running the backend, ensure PostgreSQL service is running and credentials match the values above.
 
@@ -91,7 +91,7 @@ cd src/backend
 run-backend.bat
 ```
 
-<img src="docs/backend-terminal-run.png" alt="Backend terminal running run-backend.bat" width="50%" />
+<img src="docs/References_for_README/backend-terminal-run.png" alt="Backend terminal running run-backend.bat" width="50%" />
 
 Terminal 2 (Frontend):
 
@@ -100,12 +100,16 @@ cd src/frontend
 run-frontend.bat
 ```
 
-<img src="docs/frontend-terminal-run.png" alt="Frontend terminal running run-frontend.bat" width="50%" />
+<img src="docs/References_for_README/frontend-terminal-run.png" alt="Frontend terminal running run-frontend.bat" width="50%" />
 
 ### 5. Access the application
 
 - Frontend: http://localhost:3000 (will open in browser once the project is up and running)
 - Backend: http://localhost:8080 (for testing APIs if needed)
+
+First page shown on opening the frontend:
+
+<img src="docs/References_for_README/login-page.png" alt="Login page shown first when opening frontend" width="50%" />
 
 Do not close the terminals while project is running. 
 To top running use below, in each terminal: 
@@ -121,6 +125,15 @@ Server > Your_Server_Name > Databases > concord_db > Schemas > Public > Tables
 Check if Admin details are in user table:
 
 Right Click users -> View/Edit Data -> All Rows 
+
+Seed Admin login details are initialized in:
+
+src/backend/src/main/java/com/example/backend/config/DataInitializer.java
+
+Default seed Admin credentials:
+
+- Email: admin@concord.com
+- Password: Admin@123
 
 ## Technologies Used
 
