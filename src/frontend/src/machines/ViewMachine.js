@@ -1,25 +1,96 @@
 // pages/ViewMachine.js
-import React from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 
 function ViewMachine() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
-  const machine = {
-    id: "MAC-9021",
-    type: "Single Needle Lockstitch",
-    model: "JUKI DDL-8700",
-    serialNumber: "SN12345678",
-    location: "ST-101",
-    addedDate: "2024-03-15",
-    status: "Active",
-    lastMaintenance: "2024-09-15",
-    nextMaintenance: "2024-12-15",
-    storeName: "Main Street Store",
-    assignedOperator: "John Doe"
+  const [machine, setMachine] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchMachine();
+  }, [id]);
+
+  const fetchMachine = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      const response = await fetch(`http://localhost:8080/api/machines/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // 🔐 handle auth issues
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/login");
+        return;
+      }
+
+      if (response.status === 403) {
+        throw new Error("Access denied (403)");
+      }
+
+      if (response.status === 404) {
+        throw new Error("Machine not found");
+      }
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setMachine(data);
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // ─── Loading UI ─────────────────────────
+  if (loading) {
+    return (
+      <section style={styles.page}>
+        <PagePath items={[{ label: "Machines", to: "/machines" }, { label: "Machine Details" }]} />
+        <div style={styles.detailsCard}>Loading machine...</div>
+      </section>
+    );
+  }
+
+  // ─── Error UI ───────────────────────────
+  if (error) {
+    return (
+      <section style={styles.page}>
+        <PagePath items={[{ label: "Machines", to: "/machines" }, { label: "Machine Details" }]} />
+        <div style={{ ...styles.detailsCard, color: "red" }}>
+          {error}
+          <br /><br />
+          <Link to="/machines">← Back</Link>
+        </div>
+      </section>
+    );
+  }
+
+  // ─── Safety check ───────────────────────
+  if (!machine) return null;
 
   return (
     <section style={styles.page}>
@@ -30,56 +101,56 @@ function ViewMachine() {
           <h2 style={styles.cardTitle}>{`Machine Information: ${id}`}</h2>
           <Link to={`/edit/${id}`} style={styles.editButton}>Edit Machine</Link>
         </div>
-            
-            <div style={styles.detailsGrid}>
-              <div style={styles.detailItem}>
-                <span style={styles.detailLabel}>Machine ID</span>
-                <span style={styles.detailValue}>{machine.id}</span>
-              </div>
-              
-              <div style={styles.detailItem}>
-                <span style={styles.detailLabel}>Type</span>
-                <span style={styles.detailValue}>{machine.type}</span>
-              </div>
-              
-              <div style={styles.detailItem}>
-                <span style={styles.detailLabel}>Model</span>
-                <span style={styles.detailValue}>{machine.model}</span>
-              </div>
-              
-              <div style={styles.detailItem}>
-                <span style={styles.detailLabel}>Serial Number</span>
-                <span style={styles.detailValue}>{machine.serialNumber}</span>
-              </div>
-              
-              <div style={styles.detailItem}>
-                <span style={styles.detailLabel}>Location</span>
-                <span style={styles.detailValue}>
-                  <span style={styles.location}>{machine.location}</span>
-                </span>
-              </div>
-              
-              <div style={styles.detailItem}>
-                <span style={styles.detailLabel}>Store/Garment</span>
-                <span style={styles.detailValue}>{machine.storeName}</span>
-              </div>
-              
-              <div style={styles.detailItem}>
-                <span style={styles.detailLabel}>Added Date</span>
-                <span style={styles.detailValue}>{machine.addedDate}</span>
-              </div>
-              
-              <div style={styles.detailItem}>
-                <span style={styles.detailLabel}>Status</span>
-                <span style={{
-                  ...styles.statusBadge,
-                  background: machine.status === "Active" ? "#10b981" : "#f59e0b",
-                  color: "white"
-                }}>
-                  {machine.status}
-                </span>
-              </div>
-            </div>
+
+        <div style={styles.detailsGrid}>
+          <div style={styles.detailItem}>
+            <span style={styles.detailLabel}>Machine ID</span>
+            <span style={styles.detailValue}>{machine.machineId}</span>
+          </div>
+
+          <div style={styles.detailItem}>
+            <span style={styles.detailLabel}>Type</span>
+            <span style={styles.detailValue}>{machine.type}</span>
+          </div>
+
+          <div style={styles.detailItem}>
+            <span style={styles.detailLabel}>Model</span>
+            <span style={styles.detailValue}>{machine.model}</span>
+          </div>
+
+          <div style={styles.detailItem}>
+            <span style={styles.detailLabel}>Serial Number</span>
+            <span style={styles.detailValue}>{machine.serialNumber}</span>
+          </div>
+
+          <div style={styles.detailItem}>
+            <span style={styles.detailLabel}>Location</span>
+            <span style={styles.detailValue}>
+              <span style={styles.location}>{machine.location}</span>
+            </span>
+          </div>
+
+          <div style={styles.detailItem}>
+            <span style={styles.detailLabel}>Store/Garment</span>
+            <span style={styles.detailValue}>{machine.storeName || "—"}</span>
+          </div>
+
+          <div style={styles.detailItem}>
+            <span style={styles.detailLabel}>Added Date</span>
+            <span style={styles.detailValue}>{machine.date}</span>
+          </div>
+
+          <div style={styles.detailItem}>
+            <span style={styles.detailLabel}>Status</span>
+            <span style={{
+              ...styles.statusBadge,
+              background: machine.status === "Active" ? "#10b981" : "#f59e0b",
+              color: "white"
+            }}>
+              {machine.status || "Unknown"}
+            </span>
+          </div>
+        </div>
       </div>
 
       <div style={styles.footerSpacer} />

@@ -43,11 +43,11 @@ public class MachineRequestService {
         if (requestType == RequestType.TRANSFER) {
             String machineId = normalizeOptional(dto.getMachineId());
             if (machineId != null) {
-                Machine machine = machineRepository.findByMachineCode(machineId)
+                Machine machine = machineRepository.findByMachineId(machineId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Machine not found for ID: " + machineId));
 
                 request.setMachineId(machine.getMachineCode());
-                request.setMachineType(normalizeOptional(machine.getName()));
+                request.setMachineType(normalizeOptional(machine.getBrand()));
                 request.setFromStoreId(normalizeOptional(machine.getLocation()));
             } else {
                 request.setMachineId(null);
