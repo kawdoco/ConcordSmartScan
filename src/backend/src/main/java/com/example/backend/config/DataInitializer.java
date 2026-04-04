@@ -14,16 +14,57 @@ public class DataInitializer {
     @Bean
     CommandLineRunner initDefaultAdmin(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            String adminEmail = "admin@concord.com";
-            if (!userRepository.existsByEmail(adminEmail)) {
-                User admin = new User();
-                admin.setName("System Admin");
-                admin.setEmail(adminEmail);
-                admin.setPassword(passwordEncoder.encode("Admin@123"));
-                admin.setRole(Role.ADMIN);
-                admin.setLocation("Head Office");
-                userRepository.save(admin);
-            }
+            createUserIfMissing(
+                    userRepository,
+                    passwordEncoder,
+                    "System Admin",
+                    "admin@concord.com",
+                    "Admin@123",
+                    Role.ADMIN,
+                    "Head Office"
+            );
+
+            createUserIfMissing(
+                    userRepository,
+                    passwordEncoder,
+                    "Chief Manager",
+                    "chiefmanager@concord.com",
+                    "Chief@123",
+                    Role.CHIEF_MANAGER,
+                    "Head Office"
+            );
+
+            createUserIfMissing(
+                    userRepository,
+                    passwordEncoder,
+                    "Technician",
+                    "technician@concord.com",
+                    "Tech@123",
+                    Role.TECHNICIAN,
+                    "Maintenance Unit"
+            );
         };
+    }
+
+    private void createUserIfMissing(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            String name,
+            String email,
+            String rawPassword,
+            Role role,
+            String location
+    ) {
+        if (userRepository.existsByEmail(email)) {
+            return;
+        }
+
+        User user = new User();
+        user.setName(name);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setRole(role);
+        user.setLocation(location);
+        userRepository.save(user);
     }
 }

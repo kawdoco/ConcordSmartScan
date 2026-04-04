@@ -2,11 +2,22 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import TableEmptyState from "../components/TableEmptyState";
+import { useAuth } from "../authentication/AuthContext";
 import apiClient from "../services/api";
 import "./PurchaseRequest.css";
 
+const STATUS_LABELS = {
+  pending: "Pending",
+  approved: "Approved",
+  declined: "Declined"
+};
+
 function PurchaseRequest() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const role = String(user?.role || "").toUpperCase();
+  const canManageStatus = role === "CHIEF_MANAGER";
+  const showHistoryView = role === "TECHNICIAN";
   const [purchaseRequests, setPurchaseRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -50,16 +61,15 @@ function PurchaseRequest() {
       <div className="purchase-request-card">
         <div className="purchase-request-card-header">
           <div>
-            <h2 className="purchase-request-card-title">Requests Sent for Purchasing Machines</h2>
-            <p className="purchase-request-card-description">Review and process purchase requests for new machines.</p>
+            <h2 className="purchase-request-card-title">
+              {showHistoryView ? "Purchase History" : "Requests Sent for Purchasing Machines"}
+            </h2>
+            <p className="purchase-request-card-description">
+              {showHistoryView
+                ? "Track purchase requests and their current status."
+                : "Review and process purchase requests for new machines."}
+            </p>
           </div>
-          <button
-            type="button"
-            className="request-new-btn"
-            onClick={() => navigate("/requests/new?type=purchase")}
-          >
-            New Purchase Request
-          </button>
         </div>
 
         <div className="purchase-request-table-wrap">
@@ -75,42 +85,50 @@ function PurchaseRequest() {
                   <th>Machine Type</th>
                   <th>To (Garment ID)</th>
                   <th>Priority</th>
-                  <th>Actions</th>
+                  <th>{canManageStatus ? "Actions" : "Status"}</th>
                 </tr>
               </thead>
               <tbody>
-                {purchaseRequests.map((row) => (
-                  <tr key={row.id}>
-                    <td>{row.requestCode}</td>
-                    <td>{row.machineType}</td>
-                    <td>{row.toGarmentId}</td>
-                    <td>
-                      <span className={`purchase-priority ${row.priority}`}>{row.priority}</span>
-                    </td>
-                    <td>
-                      {row.status === "approved" && <span className="purchase-badge approved">Approved</span>}
-                      {row.status === "declined" && <span className="purchase-badge declined">Declined</span>}
-                      {row.status === "pending" && (
-                        <div className="purchase-actions">
-                          <button
-                            type="button"
-                            className="purchase-btn approve"
-                            onClick={() => updateRequestStatus(row.id, "approved")}
-                          >
-                            Approve
-                          </button>
-                          <button
-                            type="button"
-                            className="purchase-btn decline"
-                            onClick={() => updateRequestStatus(row.id, "declined")}
-                          >
-                            Decline
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {purchaseRequests.map((row) => {
+                  const status = STATUS_LABELS[row.status] ? row.status : "pending";
+
+                  return (
+                    <tr key={row.id}>
+                      <td>{row.requestCode}</td>
+                      <td>{row.machineType}</td>
+                      <td>{row.toGarmentId}</td>
+                      <td>
+                        <span className={`purchase-priority ${row.priority}`}>{row.priority}</span>
+                      </td>
+                      <td>
+                        {!canManageStatus && (
+                          <span className={`purchase-badge ${status}`}>{STATUS_LABELS[status]}</span>
+                        )}
+                        {canManageStatus && status !== "pending" && (
+                          <span className={`purchase-badge ${status}`}>{STATUS_LABELS[status]}</span>
+                        )}
+                        {canManageStatus && status === "pending" && (
+                          <div className="purchase-actions">
+                            <button
+                              type="button"
+                              className="purchase-btn approve"
+                              onClick={() => updateRequestStatus(row.id, "approved")}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              className="purchase-btn decline"
+                              onClick={() => updateRequestStatus(row.id, "declined")}
+                            >
+                              Decline
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}

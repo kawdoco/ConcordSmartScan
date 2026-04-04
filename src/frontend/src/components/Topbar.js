@@ -8,6 +8,7 @@ function Topbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const role = String(user?.role || "").toUpperCase();
   const [open, setOpen] = useState(false);
   const [searchQ, setSearchQ] = useState("");
   const menuRef = useRef(null);
@@ -16,15 +17,15 @@ function Topbar() {
     "/dashboard": "Dashboard",
     "/users": "User Management",
     "/users/add": "Add New User",
-    "/machines": "Machine Management",
+    "/machines": role === "TECHNICIAN" || role === "CHIEF_MANAGER" ? "Inventory" : "Machine Management",
     "/stores": "Store Management",
     "/garments": "Garment Management",
     "/stores/add": "Add Store",
     "/garments/add": "Add Garment",
     "/garments/edit": "Edit Garment",
     "/stores/edit": "Edit Store",
-    "/requests/transfer": "Transfer Requests",
-    "/requests/purchase": "Purchase Request",
+    "/requests/transfer": role === "TECHNICIAN" ? "Transfer History" : "Transfer Requests",
+    "/requests/purchase": role === "TECHNICIAN" ? "Purchase History" : "Purchase Request",
     "/requests/approved": "Approved Requests",
     "/requests/new": "New Request",
     "/add": "Add Machine",
