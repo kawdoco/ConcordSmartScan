@@ -147,9 +147,8 @@ const GarmentSelector = ({ value, onChange, error }) => {
                   }`}
                   onClick={() => handleSelectGarment(garment)}
                 >
-                  <span className="garment-selector-item-name">{garment.name}</span>
-                  <span className="garment-selector-item-id">
-                    {String(garment.locationId).padStart(3, '0')}
+                  <span className="garment-selector-item-text">
+                    {garment.name} - {String(garment.locationId).padStart(3, '0')}
                   </span>
                 </div>
               ))
@@ -299,7 +298,6 @@ const GarmentSelector = ({ value, onChange, error }) => {
         .garment-selector-item {
           display: flex;
           align-items: center;
-          justify-content: space-between;
           padding: 10px 12px;
           cursor: pointer;
           transition: background-color 0.12s;
@@ -318,20 +316,10 @@ const GarmentSelector = ({ value, onChange, error }) => {
           background-color: #eef1fd;
         }
 
-        .garment-selector-item-name {
-          flex: 1;
-          font-weight: 500;
+        .garment-selector-item-text {
           color: #0f1623;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .garment-selector-item-id {
-          color: #6b7280;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 12px;
-          margin-left: 12px;
-          flex-shrink: 0;
+          font-weight: 500;
+          font-size: 13.5px;
         }
       `}</style>
     </div>
