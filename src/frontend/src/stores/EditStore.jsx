@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import MapSelector from "../components/MapSelector";
 import { updateStore } from "../services/locationService";
 import "./EditStore.css";
 
@@ -133,6 +134,15 @@ export default function EditStore() {
 		const { name, value } = event.target;
 		setForm((previous) => ({ ...previous, [name]: value }));
 		setErrors((previous) => ({ ...previous, [name]: "" }));
+	};
+
+	const handleLocationSelect = (latitude, longitude) => {
+		setForm((previous) => ({
+			...previous,
+			latitude: latitude.toFixed(6),
+			longitude: longitude.toFixed(6)
+		}));
+		setErrors((previous) => ({ ...previous, latitude: "", longitude: "" }));
 	};
 
 	const handleUpdate = async () => {
@@ -272,6 +282,16 @@ export default function EditStore() {
 							/>
 							{errors.longitude && <span className="edit-store-error">{errors.longitude}</span>}
 						</div>
+					</div>
+
+					<div className="edit-store-field">
+						<label>Location Map</label>
+						<p className="edit-store-help-text">Click on the map to select the store location. The coordinates will be automatically filled above.</p>
+						<MapSelector
+							latitude={form.latitude ? parseFloat(form.latitude) : null}
+							longitude={form.longitude ? parseFloat(form.longitude) : null}
+							onLocationSelect={handleLocationSelect}
+						/>
 					</div>
 				</div>
 
