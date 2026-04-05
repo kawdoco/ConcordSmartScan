@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import TableEmptyState from "../components/TableEmptyState";
 import { getAllGarments, deleteLocation } from "../services/locationService";
@@ -33,6 +34,9 @@ const PAGE_SIZE = 4;
 
 function GarmentManagement() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const role = String(user?.role || "").toUpperCase();
+  const canManageGarments = role === "ADMIN";
   const [garments, setGarments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -96,10 +100,12 @@ function GarmentManagement() {
             <h2 className="garment-card-title">Registered Garments</h2>
             <p className="garment-card-description">Manage all garment manufacturing and storage units.</p>
           </div>
-          <button className="garment-add-btn" type="button" onClick={() => navigate("/garments/add")}>
-            <span className="garment-add-icon" aria-hidden="true">+</span>
-            Add New Garment
-          </button>
+          {canManageGarments && (
+            <button className="garment-add-btn" type="button" onClick={() => navigate("/garments/add")}>
+              <span className="garment-add-icon" aria-hidden="true">+</span>
+              Add New Garment
+            </button>
+          )}
         </div>
 
         {error && (
@@ -143,23 +149,27 @@ function GarmentManagement() {
                         >
                           <EyeIcon />
                         </button>
-                        <button
-                          type="button"
-                          title="Edit"
-                          aria-label={`Edit ${row.branch}`}
-                          onClick={() => navigate("/garments/edit", { state: { garment: row.originalData } })}
-                        >
-                          <EditIcon />
-                        </button>
-                        <button
-                          type="button"
-                          title="Delete"
-                          aria-label={`Delete ${row.branch}`}
-                          className="delete"
-                          onClick={() => handleDelete(row.id, row.branch)}
-                        >
-                          <TrashIcon />
-                        </button>
+                        {canManageGarments && (
+                          <button
+                            type="button"
+                            title="Edit"
+                            aria-label={`Edit ${row.branch}`}
+                            onClick={() => navigate("/garments/edit", { state: { garment: row.originalData } })}
+                          >
+                            <EditIcon />
+                          </button>
+                        )}
+                        {canManageGarments && (
+                          <button
+                            type="button"
+                            title="Delete"
+                            aria-label={`Delete ${row.branch}`}
+                            className="delete"
+                            onClick={() => handleDelete(row.id, row.branch)}
+                          >
+                            <TrashIcon />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -205,7 +215,7 @@ function GarmentManagement() {
         </div>
       </div>
 
-      {deleteConfirm && (
+      {canManageGarments && deleteConfirm && (
         <div className="garment-delete-modal">
           <div className="garment-delete-modal-content">
             <h3>Delete Garment</h3>

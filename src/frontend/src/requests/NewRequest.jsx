@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import apiClient from "../services/api";
@@ -39,6 +40,7 @@ const EMPTY_FORM = {
 
 export default function NewRequest() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [form, setForm] = useState(() => {
     const urlType = searchParams.get("type");
@@ -51,6 +53,8 @@ export default function NewRequest() {
   const [isResolvingMachine, setIsResolvingMachine] = useState(false);
 
   const isTransfer = form.requestType === "transfer";
+  const role = String(user?.role || "").toUpperCase();
+  const requestsRootPath = role === "ADMIN" ? "/requests/approved" : "/requests/transfer";
 
   useEffect(() => {
     const urlType = searchParams.get("type");
@@ -147,12 +151,12 @@ export default function NewRequest() {
   const handleCancel = () => {
     setForm(EMPTY_FORM);
     setErrors({});
-    navigate("/requests/approved");
+    navigate(isTransfer ? "/requests/transfer" : "/requests/purchase");
   };
 
   return (
     <section className="new-request-page">
-      <PagePath items={[{ label: "Requests", to: "/requests/approved" }, { label: "New Request" }]} />
+      <PagePath items={[{ label: "Requests", to: requestsRootPath }, { label: "New Request" }]} />
 
       {notification && (
         <div className={`new-request-notice ${notification.type}`}>

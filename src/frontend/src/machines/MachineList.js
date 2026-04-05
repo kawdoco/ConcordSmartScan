@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
 import "./MachineShared.css";
@@ -84,6 +85,9 @@ const PAGE_SIZE = 10;
 
 function MachineList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const role = String(user?.role || "").toUpperCase();
+  const canManageMachines = role === "ADMIN";
 
   const [machines, setMachines] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -185,7 +189,7 @@ function MachineList() {
       <StatsCards machines={machines} />
 
       {/* Delete confirmation modal */}
-      {deleteConfirm && (
+      {canManageMachines && deleteConfirm && (
         <div className="machine-list-modal-overlay">
           <div className="machine-list-modal">
             <h3 className="machine-list-modal-title">Delete machine?</h3>
@@ -242,14 +246,16 @@ function MachineList() {
                 className="machine-list-search-input"
               />
             </div>
-            <button
-              className="machine-list-btn-primary"
-              type="button"
-              onClick={() => navigate("/add")}
-            >
-              <IconPlus />
-              Add Machine
-            </button>
+            {canManageMachines && (
+              <button
+                className="machine-list-btn-primary"
+                type="button"
+                onClick={() => navigate("/add")}
+              >
+                <IconPlus />
+                Add Machine
+              </button>
+            )}
           </div>
         </div>
 
@@ -297,12 +303,16 @@ function MachineList() {
                           <Link to={`/machine/${machine.id}`} className="machine-list-icon-btn">
                             <IconEye />
                           </Link>
-                          <button className="machine-list-icon-btn" onClick={() => navigate(`/edit/${machine.id}`)}>
-                            <IconEdit />
-                          </button>
-                          <button className="machine-list-icon-btn delete" onClick={() => setDeleteConfirm(machine.id)}>
-                            <IconTrash />
-                          </button>
+                          {canManageMachines && (
+                            <button className="machine-list-icon-btn" onClick={() => navigate(`/edit/${machine.id}`)}>
+                              <IconEdit />
+                            </button>
+                          )}
+                          {canManageMachines && (
+                            <button className="machine-list-icon-btn delete" onClick={() => setDeleteConfirm(machine.id)}>
+                              <IconTrash />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
