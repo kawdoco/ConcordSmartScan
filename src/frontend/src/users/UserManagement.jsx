@@ -18,7 +18,25 @@ const Icons = {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const today = () => new Date().toISOString().slice(0, 10);
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// Helper to format role display
+const formatRoleDisplay = (role) => {
+  if (role === "ADMIN") return "Admin";
+  if (role === "CHIEF_MANAGER") return "Chief Manager";
+  if (role === "TECHNICIAN") return "Technician";
+  return role;
+};
+
+// Get badge class based on role display string
+const getBadgeClass = (roleDisplay) => {
+  switch(roleDisplay) {
+    case "Admin": return "badge-admin";
+    case "Chief Manager": return "badge-chief";
+    case "Technician": return "badge-tech";
+    default: return "badge-default";
+  }
+};
+
+// ─── Styles (updated with new badge classes) ─────────────────────────────────
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
   *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -50,7 +68,7 @@ const style = `
   .page-tools { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .page-search { width:340px; max-width:100%; }
 
-  /* ── Stats ── */
+  /* Stats */
   .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:28px; }
   .stat-card {
     background:var(--white); border:1px solid var(--border);
@@ -67,7 +85,7 @@ const style = `
   .stat-lbl { font-size:11px; font-weight:600; color:var(--muted); letter-spacing:.07em; text-transform:uppercase; margin-bottom:5px; }
   .stat-val { font-size:30px; font-weight:700; letter-spacing:-.5px; }
 
-  /* ── Tabs ── */
+  /* Tabs */
   .tabs { display:flex; border-bottom:1.5px solid var(--border); margin-bottom:20px; }
   .tab {
     padding:10px 20px; font-weight:500; font-size:13.5px; cursor:pointer;
@@ -78,7 +96,7 @@ const style = `
   .tab:hover:not(.tab-active) { color:var(--text); }
   .tab-active { color:var(--blue); border-bottom-color:var(--blue); }
 
-  /* ── Card / Table ── */
+  /* Card / Table */
   .card { background:var(--white); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; }
   .card-hd {
     padding:18px 22px; display:flex; align-items:center; justify-content:space-between;
@@ -113,8 +131,11 @@ const style = `
     display:inline-flex; padding:4px 12px; border-radius:20px;
     font-size:11.5px; font-weight:600; letter-spacing:.02em;
   }
-  .badge-mgr { background:#ede9fe; color:#6d28d9; }
-  .badge-tech { background:#d1fae5; color:#065f46; }
+  /* Role-specific badges */
+  .badge-admin { background:#fee2e2; color:#b91c1c; }      /* red */
+  .badge-chief { background:#d1fae5; color:#065f46; }     /* green */
+  .badge-tech { background:#e0f2fe; color:#0369a1; }      /* blue/cyan */
+  .badge-default { background:#f3f4f6; color:#374151; }
   .actions { display:flex; align-items:center; gap:6px; }
   .ic-btn {
     width:32px; height:32px; border-radius:7px;
@@ -142,11 +163,11 @@ const style = `
   .pg-btn:hover:not(.pg-active):not(:disabled) { background:var(--bg); color:var(--text); }
   .pg-btn:disabled { opacity:.35; cursor:default; }
 
-  /* ── Empty state ── */
+  /* Empty state */
   .empty { text-align:center; padding:60px 20px; color:var(--muted); }
   .empty svg { width:48px; height:48px; margin-bottom:12px; opacity:.25; }
 
-  /* ── Modal ── */
+  /* Modal */
   .overlay {
     display:none; position:fixed; inset:0;
     background:rgba(15,22,35,.45); z-index:200;
@@ -265,7 +286,7 @@ export default function UserManagement() {
         const mapped = res.data.map(u => ({
           id: String(u.id),
           name: u.name,
-          role: u.role === "CHIEF_MANAGER" ? "Chief Manager" : u.role === "TECHNICIAN" ? "Technician" : u.role,
+          role: formatRoleDisplay(u.role),   // Use formatter: "ADMIN" -> "Admin", etc.
           location: u.location || "",
           email: u.email,
           date: new Date().toISOString().slice(0, 10),
@@ -324,7 +345,7 @@ export default function UserManagement() {
         const newUser = {
           id: String(u.id),
           name: u.name,
-          role: u.role === "CHIEF_MANAGER" ? "Chief Manager" : u.role === "TECHNICIAN" ? "Technician" : u.role,
+          role: formatRoleDisplay(u.role),
           location: u.location || "",
           email: u.email,
           date: today(),
@@ -435,7 +456,7 @@ export default function UserManagement() {
                       <td><span className="uid">{u.id}</span></td>
                       <td><span className="name-c">{u.name}</span></td>
                       <td>
-                        <span className={`badge ${u.role === "Chief Manager" ? "badge-mgr" : "badge-tech"}`}>
+                        <span className={`badge ${getBadgeClass(u.role)}`}>
                           {u.role}
                         </span>
                       </td>
@@ -511,7 +532,7 @@ export default function UserManagement() {
                     <div className="vf-lbl">{lbl}</div>
                     <div className="vf-val">
                       {lbl === "Role"
-                        ? <span className={`badge ${val === "Chief Manager" ? "badge-mgr" : "badge-tech"}`}>{val}</span>
+                        ? <span className={`badge ${getBadgeClass(val)}`}>{val}</span>
                         : val}
                     </div>
                   </div>
