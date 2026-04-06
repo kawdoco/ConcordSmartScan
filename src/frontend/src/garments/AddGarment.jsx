@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import MapSelector from "../components/MapSelector";
 import { createGarment } from "../services/locationService";
 import "./AddGarment.css";
 
@@ -76,6 +77,15 @@ export default function AddGarment() {
     const { name, value } = event.target;
     setForm((previous) => ({ ...previous, [name]: value }));
     setErrors((previous) => ({ ...previous, [name]: "" }));
+  };
+
+  const handleLocationSelect = (latitude, longitude) => {
+    setForm((previous) => ({
+      ...previous,
+      latitude: latitude.toFixed(6),
+      longitude: longitude.toFixed(6)
+    }));
+    setErrors((previous) => ({ ...previous, latitude: "", longitude: "" }));
   };
 
   const handleSubmit = async () => {
@@ -206,6 +216,16 @@ export default function AddGarment() {
               />
               {errors.longitude && <span className="add-garment-error">{errors.longitude}</span>}
             </div>
+          </div>
+
+          <div className="add-garment-field">
+            <label>Location Map</label>
+            <p className="add-garment-help-text">Click on the map to select the garment location. The coordinates will be automatically filled above.</p>
+            <MapSelector
+              latitude={form.latitude ? parseFloat(form.latitude) : null}
+              longitude={form.longitude ? parseFloat(form.longitude) : null}
+              onLocationSelect={handleLocationSelect}
+            />
           </div>
         </div>
 

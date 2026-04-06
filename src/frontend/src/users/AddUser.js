@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppFooter from '../components/AppFooter';
 import PagePath from '../components/PagePath';
+import GarmentSelector from './GarmentSelector';
 import apiClient from '../services/api';
 import './AddUser.css';
 
@@ -231,14 +232,14 @@ const AddUser = () => {
               <div className="add-user-grid-two">
                 <div className="add-user-field">
                   <label htmlFor="garmentId">Garment ID</label>
-                  <input
-                    type="text"
-                    id="garmentId"
-                    name="garmentId"
+                  <GarmentSelector
                     value={formData.garmentId}
-                    onChange={handleInputChange}
-                    placeholder="Select or search Garment ID"
-                    //required
+                    onChange={(garmentId) => {
+                      setFormData({ ...formData, garmentId });
+                      setFormErrors((prev) => ({ ...prev, garmentId: '' }));
+                      setSubmitError('');
+                    }}
+                    error={formErrors.garmentId}
                   />
                 </div>
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import MapSelector from "../components/MapSelector";
 import { createStore } from "../services/locationService";
 import "./AddStore.css";
 
@@ -76,6 +77,15 @@ export default function AddStore() {
     const { name, value } = event.target;
     setForm((previous) => ({ ...previous, [name]: value }));
     setErrors((previous) => ({ ...previous, [name]: "" }));
+  };
+
+  const handleLocationSelect = (latitude, longitude) => {
+    setForm((previous) => ({
+      ...previous,
+      latitude: latitude.toFixed(6),
+      longitude: longitude.toFixed(6)
+    }));
+    setErrors((previous) => ({ ...previous, latitude: "", longitude: "" }));
   };
 
   const handleSubmit = async () => {
@@ -207,6 +217,16 @@ export default function AddStore() {
               />
               {errors.longitude && <span className="add-store-error">{errors.longitude}</span>}
             </div>
+          </div>
+
+          <div className="add-store-field">
+            <label>Location Map</label>
+            <p className="add-store-help-text">Click on the map to select the store location. The coordinates will be automatically filled above.</p>
+            <MapSelector
+              latitude={form.latitude ? parseFloat(form.latitude) : null}
+              longitude={form.longitude ? parseFloat(form.longitude) : null}
+              onLocationSelect={handleLocationSelect}
+            />
           </div>
         </div>
 
