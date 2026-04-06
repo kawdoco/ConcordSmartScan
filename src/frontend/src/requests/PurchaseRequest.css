@@ -56,14 +56,20 @@
 
 .purchase-badge.approved {
   color: #065f46;
-  background: #d1fae5;
-  border: 1px solid #a7f3d0;
+  background: transparent;
+  border: 2px solid #a7f3d0;
+}
+
+.purchase-badge.pending {
+  color: #92400e;
+  background: transparent;
+  border: 2px solid #fde68a;
 }
 
 .purchase-badge.declined {
   color: var(--pr-red);
-  background: #fee2e2;
-  border: 1px solid #fecaca;
+  background: transparent;
+  border: 2px solid #fecaca;
 }
 
 .purchase-btn.approve {
