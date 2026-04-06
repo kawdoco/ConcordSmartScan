@@ -41,12 +41,6 @@ const PAGE_SIZE = 10;
 
 function MachineList() {
   const navigate = useNavigate();
-  const [machines, setMachines]           = useState([]);
-  const [loading, setLoading]             = useState(true);
-  const [error, setError]                 = useState(null);
-  const [activeTab, setActiveTab]         = useState("all");
-  const [search, setSearch]               = useState("");
-  const [currentPage, setCurrentPage]     = useState(1);
   const { user } = useAuth();
   const role = String(user?.role || "").toUpperCase();
   const canManageMachines = role === "ADMIN";
@@ -281,11 +275,6 @@ function MachineList() {
                       No machines found.
                     </td>
                   </tr>
-                )}
-                    </td>
-                  </tr>
-                )) : (
-                  <tr><td colSpan="6" className="machine-list-empty">No machines found.</td></tr>
                 )}
               </tbody>
             </table>
