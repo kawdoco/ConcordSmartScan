@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../authentication/AuthContext';
 import AppFooter from '../components/AppFooter';
 import TableEmptyState from '../components/TableEmptyState';
 import { getAllStores, deleteLocation } from '../services/locationService';
@@ -37,6 +38,9 @@ function DeleteIcon() {
 
 const StoreManagement = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const role = String(user?.role || '').toUpperCase();
+  const canManageStores = role === 'ADMIN';
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -98,10 +102,12 @@ const StoreManagement = () => {
             <h2 className="store-card-title">Registered Stores</h2>
             <p className="store-card-description">Manage all store branches and location records.</p>
           </div>
-          <button className="store-add-btn" type="button" onClick={() => navigate('/stores/add')}>
-            <span className="store-add-icon" aria-hidden="true">+</span>
-            Add New Store
-          </button>
+          {canManageStores && (
+            <button className="store-add-btn" type="button" onClick={() => navigate('/stores/add')}>
+              <span className="store-add-icon" aria-hidden="true">+</span>
+              Add New Store
+            </button>
+          )}
         </div>
 
         {error && (
@@ -144,21 +150,25 @@ const StoreManagement = () => {
                         >
                           <EyeIcon />
                         </button>
-                        <button
-                          type="button"
-                          aria-label={`Edit ${store.name}`}
-                          onClick={() => navigate('/stores/edit', { state: { store: store.originalData } })}
-                        >
-                          <EditIcon />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={`Delete ${store.name}`}
-                          className="delete"
-                          onClick={() => handleDelete(store.id, store.name)}
-                        >
-                          <DeleteIcon />
-                        </button>
+                        {canManageStores && (
+                          <button
+                            type="button"
+                            aria-label={`Edit ${store.name}`}
+                            onClick={() => navigate('/stores/edit', { state: { store: store.originalData } })}
+                          >
+                            <EditIcon />
+                          </button>
+                        )}
+                        {canManageStores && (
+                          <button
+                            type="button"
+                            aria-label={`Delete ${store.name}`}
+                            className="delete"
+                            onClick={() => handleDelete(store.id, store.name)}
+                          >
+                            <DeleteIcon />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -176,7 +186,7 @@ const StoreManagement = () => {
         </div>
       </div>
 
-      {deleteConfirm && (
+      {canManageStores && deleteConfirm && (
         <div className="store-delete-modal">
           <div className="store-delete-modal-content">
             <h3>Delete Store</h3>

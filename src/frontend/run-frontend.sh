@@ -23,18 +23,24 @@ fi
 echo "[INFO] npm found!"
 npm --version
 
-# Check if node_modules exists
-if [ ! -d "node_modules" ]; then
-    echo "[INFO] node_modules not found. Installing dependencies..."
-    npm install
-else
-    echo "[INFO] node_modules found. Checking for updates..."
-    npm install
-fi
+# Ensure map packages (and any declared QR packages) exist
+REQUIRED_PACKAGES=(leaflet react-leaflet)
+QR_PACKAGES=(qrcode.react react-qr-reader html5-qrcode jsqr qr-scanner)
+OPTIONAL_QR_PACKAGES=()
 
-if [ $? -ne 0 ]; then
-    echo "[ERROR] npm install failed!"
-    exit 1
+for pkg in "${QR_PACKAGES[@]}"; do
+    if grep -qi "\"$pkg\"" package.json; then
+        OPTIONAL_QR_PACKAGES+=("$pkg")
+    fi
+done
+
+CHECK_PACKAGES=("${REQUIRED_PACKAGES[@]}" "${OPTIONAL_QR_PACKAGES[@]}")
+
+if npm ls "${CHECK_PACKAGES[@]}" --depth=0 >/dev/null 2>&1; then
+    echo "[INFO] Map/QR packages already installed. Skipping install."
+else
+    echo "[INFO] Missing map/QR packages detected. Installing: ${CHECK_PACKAGES[*]}"
+    npm install "${CHECK_PACKAGES[@]}" || { echo "[ERROR] Package install failed!"; exit 1; }
 fi
 
 echo "[INFO] Starting frontend development server..."

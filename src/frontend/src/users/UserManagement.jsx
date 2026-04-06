@@ -268,7 +268,7 @@ export default function UserManagement() {
           role: u.role === "CHIEF_MANAGER" ? "Chief Manager" : u.role === "TECHNICIAN" ? "Technician" : u.role,
           location: u.location || "",
           email: u.email,
-          date: new Date().toISOString().slice(0, 10),
+          date: u.createdAt ? u.createdAt.slice(0, 10) : new Date().toISOString().slice(0, 10),
         }));
         setUsers(mapped);
       })
@@ -327,14 +327,13 @@ export default function UserManagement() {
           role: u.role === "CHIEF_MANAGER" ? "Chief Manager" : u.role === "TECHNICIAN" ? "Technician" : u.role,
           location: u.location || "",
           email: u.email,
-          date: today(),
+          date: u.createdAt ? u.createdAt.slice(0, 10) : today(),
         };
         setUsers(prev => [newUser, ...prev]);
         setAddOpen(false);
         resetForm();
         setActiveTab("all");
         setPage(1);
-        loadUsers();
         showToast(`${newUser.name} added successfully`, "success");
       })
       .catch(err => {

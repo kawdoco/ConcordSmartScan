@@ -84,7 +84,7 @@ export default function ViewGarment() {
 
   return (
     <section className="view-garment-page">
-      <PagePath items={[{ label: "Garments", to: "/garments" }, { label: `Garment Details: ${id}` }]} />
+      <PagePath items={[{ label: "Garments", to: "/garments" }, { label: "Garment Details" }]} />
 
       <div className="view-garment-card">
         <div className="view-garment-card-header">

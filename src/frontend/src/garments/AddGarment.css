@@ -186,6 +186,13 @@
   background: #1230a8;
 }
 
+.add-garment-help-text {
+  color: #6b7280;
+  font-size: 12px;
+  margin-bottom: 8px;
+  margin-top: 4px;
+}
+
 @media (max-width: 768px) {
   .add-garment-grid-two {
     grid-template-columns: 1fr;
