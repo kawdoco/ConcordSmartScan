@@ -92,6 +92,8 @@ function ViewMachine() {
   // ─── Safety check ───────────────────────
   if (!machine) return null;
 
+  const displayMachineId = `MAC-${String(machine.id ?? "").padStart(3, "0")}`;
+
   return (
     <section style={styles.page}>
       <PagePath items={[{ label: "Machines", to: "/machines" }, { label: `Machine Details: ${id}` }]} />
@@ -105,7 +107,7 @@ function ViewMachine() {
         <div style={styles.detailsGrid}>
           <div style={styles.detailItem}>
             <span style={styles.detailLabel}>Machine ID</span>
-            <span style={styles.detailValue}>{machine.machineId}</span>
+            <span style={styles.detailValue}>{displayMachineId}</span>
           </div>
 
           <div style={styles.detailItem}>

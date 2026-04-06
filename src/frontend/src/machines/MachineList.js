@@ -131,8 +131,10 @@ function MachineList() {
 
   const filtered = tabFiltered.filter((m) => {
     const q = search.toLowerCase();
+    const displayMachineId = `MAC-${String(m.id ?? "").padStart(3, "0")}`.toLowerCase();
     return (
       m.machineId?.toLowerCase().includes(q) ||
+      displayMachineId.includes(q) ||
       m.type?.toLowerCase().includes(q) ||
       m.location?.toLowerCase().includes(q) ||
       m.brand?.toLowerCase().includes(q) ||
@@ -275,11 +277,14 @@ function MachineList() {
               </thead>
               <tbody>
                 {paginated.length > 0 ? (
-                  paginated.map((machine) => (
+                  paginated.map((machine) => {
+                    const displayMachineId = `MAC-${String(machine.id ?? "").padStart(3, "0")}`;
+
+                    return (
                     <tr key={machine.id}>
                       <td>
                         <Link to={`/machine/${machine.id}`} className="machine-list-machine-link">
-                          {machine.machineId}
+                          {displayMachineId}
                         </Link>
                       </td>
                       <td>{machine.type}</td>
@@ -306,7 +311,8 @@ function MachineList() {
                         </div>
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan="6" className="machine-list-empty">
