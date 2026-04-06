@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
+import apiClient from "../services/api";
 import "./MachineShared.css";
 import "./MachineList.css";
-import axios from "axios";
-
-const API_URL = "http://localhost:8080/api/machines";
 
 function IconSearch() {
   return (
@@ -84,6 +83,9 @@ const PAGE_SIZE = 10;
 
 function MachineList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const role = String(user?.role || "").toUpperCase();
+  const canManageMachines = role === "ADMIN";
 
   const [machines, setMachines] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -107,17 +109,17 @@ function MachineList() {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem("token");
-
-      const response = await axios.get(API_URL, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await apiClient.get("/machines");
 
       setMachines(response.data);
     } catch (err) {
-      setError("Failed to fetch machines");
+      if (err.response?.status === 403) {
+        setError("Access denied. Your role does not have permission to view machines.");
+      } else if (err.response?.status === 401) {
+        setError("Your session has expired. Please sign in again.");
+      } else {
+        setError("Failed to fetch machines. Please check server connection and try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -159,13 +161,7 @@ function MachineList() {
     if (!deleteConfirm) return;
     const deletedId = deleteConfirm;
     try {
-      const token = localStorage.getItem("token");
-
-      await axios.delete(`${API_URL}/${deletedId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await apiClient.delete(`/machines/${deletedId}`);
 
       await fetchMachines();
       showNotification(`Machine ${deletedId} was deleted successfully.`, "success");
@@ -187,7 +183,7 @@ function MachineList() {
       <StatsCards machines={machines} />
 
       {/* Delete confirmation modal */}
-      {deleteConfirm && (
+      {canManageMachines && deleteConfirm && (
         <div className="machine-list-modal-overlay">
           <div className="machine-list-modal">
             <h3 className="machine-list-modal-title">Delete machine?</h3>
@@ -244,14 +240,16 @@ function MachineList() {
                 className="machine-list-search-input"
               />
             </div>
-            <button
-              className="machine-list-btn-primary"
-              type="button"
-              onClick={() => navigate("/add")}
-            >
-              <IconPlus />
-              Add Machine
-            </button>
+            {canManageMachines && (
+              <button
+                className="machine-list-btn-primary"
+                type="button"
+                onClick={() => navigate("/add")}
+              >
+                <IconPlus />
+                Add Machine
+              </button>
+            )}
           </div>
         </div>
 
@@ -302,12 +300,16 @@ function MachineList() {
                           <Link to={`/machine/${machine.id}`} className="machine-list-icon-btn">
                             <IconEye />
                           </Link>
-                          <button className="machine-list-icon-btn" onClick={() => navigate(`/edit/${machine.id}`)}>
-                            <IconEdit />
-                          </button>
-                          <button className="machine-list-icon-btn delete" onClick={() => setDeleteConfirm(machine.id)}>
-                            <IconTrash />
-                          </button>
+                          {canManageMachines && (
+                            <button className="machine-list-icon-btn" onClick={() => navigate(`/edit/${machine.id}`)}>
+                              <IconEdit />
+                            </button>
+                          )}
+                          {canManageMachines && (
+                            <button className="machine-list-icon-btn delete" onClick={() => setDeleteConfirm(machine.id)}>
+                              <IconTrash />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
