@@ -26,14 +26,20 @@
 
 .transfer-badge.approved {
   color: #065f46;
-  background: #d1fae5;
-  border: 1px solid #a7f3d0;
+  background: transparent;
+  border: 2px solid #a7f3d0;
+}
+
+.transfer-badge.pending {
+  color: #92400e;
+  background: transparent;
+  border: 2px solid #fde68a;
 }
 
 .transfer-badge.declined {
   color: var(--tr-red);
-  background: #fee2e2;
-  border: 1px solid #fecaca;
+  background: transparent;
+  border: 2px solid #fecaca;
 }
 
 .transfer-btn.approve {

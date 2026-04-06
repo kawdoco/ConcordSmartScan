@@ -1,0 +1,180 @@
+/* ViewMachine.css */
+
+.view-machine-page {
+  display: flex;
+  flex-direction: column;
+  min-height: auto;
+  padding: 6px 8px;
+}
+
+.view-machine-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  flex: 1;
+}
+
+.view-machine-error-card {
+  color: #dc2626;
+  text-align: center;
+}
+
+.view-machine-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.view-machine-header-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.view-machine-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #dcfce7;
+  border-radius: 8px;
+  color: #16a34a;
+}
+
+.view-machine-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.view-machine-card-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.view-machine-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.view-machine-edit-btn:hover {
+  background: #1d4ed8;
+}
+
+.view-machine-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.view-machine-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px 30px;
+}
+
+.view-machine-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.view-machine-detail-label {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.view-machine-detail-value {
+  color: #1e293b;
+  font-size: 1.1rem;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.view-machine-location {
+  display: inline-block;
+  background: #e2e8f0;
+  color: #1e293b;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.view-machine-status-badge {
+  display: inline-block;
+  background: #dcfce7;
+  color: #166534;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.view-machine-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.view-machine-back-btn {
+  padding: 10px 20px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #1e293b;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-machine-back-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+@media (max-width: 768px) {
+  .view-machine-card {
+    padding: 20px;
+  }
+
+  .view-machine-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .view-machine-edit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .view-machine-details-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}

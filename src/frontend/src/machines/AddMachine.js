@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
-import "./AddMachine.css";
+import "./MachineShared.css";
 import axios from "axios";
 
 function IconMachine() {
@@ -65,7 +65,6 @@ function IconPlus() {
 }
 
 const EMPTY_MACHINE = {
-  machineId: "",
   type: "",
   brand: "",
   model: "",
@@ -88,8 +87,6 @@ function AddMachine() {
 
   const validate = () => {
     const nextErrors = {};
-    if (!machine.machineId.trim())
-      nextErrors.machineId = "Machine ID is required.";
     if (!machine.type.trim()) nextErrors.type = "Machine type is required.";
     if (!machine.brand.trim()) nextErrors.brand = "Brand is required.";
     if (!machine.model.trim()) nextErrors.model = "Model is required.";
@@ -178,21 +175,6 @@ function AddMachine() {
         <div className="add-machine-card-body">
           <div className="add-machine-grid-two">
             <div className="add-machine-field">
-              <label htmlFor="machineId">Machine ID</label>
-              <input
-                id="machineId"
-                name="machineId"
-                value={machine.machineId}
-                onChange={handleChange}
-                placeholder="e.g. MC-9042"
-                className={errors.machineId ? "error" : ""}
-              />
-              {errors.machineId && (
-                <span className="add-machine-error">{errors.machineId}</span>
-              )}
-            </div>
-
-            <div className="add-machine-field">
               <label htmlFor="type">Type</label>
               <select
                 id="type"
@@ -217,9 +199,7 @@ function AddMachine() {
                 <span className="add-machine-error">{errors.type}</span>
               )}
             </div>
-          </div>
 
-          <div className="add-machine-grid-two">
             <div className="add-machine-field">
               <label htmlFor="brand">Brand</label>
               <input
@@ -234,7 +214,9 @@ function AddMachine() {
                 <span className="add-machine-error">{errors.brand}</span>
               )}
             </div>
+          </div>
 
+          <div className="add-machine-grid-two">
             <div className="add-machine-field">
               <label htmlFor="model">Model</label>
               <input
@@ -249,21 +231,21 @@ function AddMachine() {
                 <span className="add-machine-error">{errors.model}</span>
               )}
             </div>
-          </div>
 
-          <div className="add-machine-field">
-            <label htmlFor="serialNumber">Serial Number</label>
-            <input
-              id="serialNumber"
-              name="serialNumber"
-              value={machine.serialNumber}
-              onChange={handleChange}
-              placeholder="e.g. SN12345678"
-              className={errors.serialNumber ? "error" : ""}
-            />
-            {errors.serialNumber && (
-              <span className="add-machine-error">{errors.serialNumber}</span>
-            )}
+            <div className="add-machine-field">
+              <label htmlFor="serialNumber">Serial Number</label>
+              <input
+                id="serialNumber"
+                name="serialNumber"
+                value={machine.serialNumber}
+                onChange={handleChange}
+                placeholder="e.g. SN12345678"
+                className={errors.serialNumber ? "error" : ""}
+              />
+              {errors.serialNumber && (
+                <span className="add-machine-error">{errors.serialNumber}</span>
+              )}
+            </div>
           </div>
 
           <div className="add-machine-location-heading">
@@ -275,13 +257,13 @@ function AddMachine() {
 
           <div className="add-machine-grid-two">
             <div className="add-machine-field">
-              <label htmlFor="location">Location</label>
+              <label htmlFor="location">Location (Garment ID)</label>
               <input
                 id="location"
                 name="location"
                 value={machine.location}
                 onChange={handleChange}
-                placeholder="e.g. ST010 or GR005"
+                placeholder="e.g., GAR-001"
                 className={errors.location ? "error" : ""}
               />
               {errors.location && (

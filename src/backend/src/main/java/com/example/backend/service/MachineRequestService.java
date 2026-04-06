@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Service
 public class MachineRequestService {
@@ -43,7 +44,7 @@ public class MachineRequestService {
         if (requestType == RequestType.TRANSFER) {
             String machineId = normalizeOptional(dto.getMachineId());
             if (machineId != null) {
-                Machine machine = machineRepository.findByMachineId(machineId)
+                Machine machine = findMachineByFlexibleMachineId(machineId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Machine not found for ID: " + machineId));
 
                 request.setMachineId(machine.getMachineCode());
@@ -174,5 +175,35 @@ public class MachineRequestService {
     private String resolvePriority(String value) {
         String normalized = normalizeOptional(value);
         return normalized == null ? "medium" : normalized.toLowerCase(Locale.ROOT);
+    }
+
+    private Optional<Machine> findMachineByFlexibleMachineId(String inputMachineId) {
+        String trimmed = inputMachineId.trim();
+        Optional<Machine> directMatch = machineRepository.findByMachineId(trimmed);
+        if (directMatch.isPresent()) {
+            return directMatch;
+        }
+
+        String normalized = trimmed.toUpperCase(Locale.ROOT);
+        if (normalized.startsWith("MAC-")) {
+            normalized = normalized.substring(4);
+        }
+
+        normalized = normalized.replaceFirst("^0+(?!$)", "");
+        if (normalized.isBlank()) {
+            normalized = "0";
+        }
+
+        Optional<Machine> plainMatch = machineRepository.findByMachineId(normalized);
+        if (plainMatch.isPresent()) {
+            return plainMatch;
+        }
+
+        if (!normalized.matches("\\d+")) {
+            return Optional.empty();
+        }
+
+        String padded = String.format(Locale.ROOT, "%03d", Integer.parseInt(normalized));
+        return machineRepository.findByMachineId(padded);
     }
 }

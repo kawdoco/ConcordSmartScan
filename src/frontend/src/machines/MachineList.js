@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
 import QRModal from "./QRModal";
 import ScanModal from "./ScanModal";
+import apiClient from "../services/api";
+import "./MachineShared.css";
 import "./MachineList.css";
-import axios from "axios";
-
-const API_URL = "http://localhost:8080/api/machines";
 
 function IconSearch() {
   return (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>);
@@ -47,6 +47,16 @@ function MachineList() {
   const [activeTab, setActiveTab]         = useState("all");
   const [search, setSearch]               = useState("");
   const [currentPage, setCurrentPage]     = useState(1);
+  const { user } = useAuth();
+  const role = String(user?.role || "").toUpperCase();
+  const canManageMachines = role === "ADMIN";
+
+  const [machines, setMachines] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("all");
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [notification, setNotification]   = useState(null);
   const [qrMachine, setQrMachine]         = useState(null);
@@ -62,11 +72,20 @@ function MachineList() {
   const fetchMachines = async () => {
     setLoading(true); setError(null);
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(API_URL, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await apiClient.get("/machines");
+
       setMachines(response.data);
-    } catch { setError("Failed to fetch machines"); }
-    finally { setLoading(false); }
+    } catch (err) {
+      if (err.response?.status === 403) {
+        setError("Access denied. Your role does not have permission to view machines.");
+      } else if (err.response?.status === 401) {
+        setError("Your session has expired. Please sign in again.");
+      } else {
+        setError("Failed to fetch machines. Please check server connection and try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const tabFiltered = machines.filter((m) => {
@@ -77,9 +96,15 @@ function MachineList() {
 
   const filtered = tabFiltered.filter((m) => {
     const q = search.toLowerCase();
-    return m.machineId?.toLowerCase().includes(q) || m.type?.toLowerCase().includes(q) ||
-           m.location?.toLowerCase().includes(q)  || m.brand?.toLowerCase().includes(q) ||
-           m.model?.toLowerCase().includes(q);
+    const displayMachineId = `MAC-${String(m.id ?? "").padStart(3, "0")}`.toLowerCase();
+    return (
+      m.machineId?.toLowerCase().includes(q) ||
+      displayMachineId.includes(q) ||
+      m.type?.toLowerCase().includes(q) ||
+      m.location?.toLowerCase().includes(q) ||
+      m.brand?.toLowerCase().includes(q) ||
+      m.model?.toLowerCase().includes(q)
+    );
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -89,8 +114,7 @@ function MachineList() {
     if (!deleteConfirm) return;
     const deletedId = deleteConfirm;
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${API_URL}/${deletedId}`, { headers: { Authorization: `Bearer ${token}` } });
+      await apiClient.delete(`/machines/${deletedId}`);
       await fetchMachines();
       showNotification(`Machine ${deletedId} was deleted successfully.`, "success");
     } catch { alert("Error deleting machine"); }
@@ -107,7 +131,8 @@ function MachineList() {
     <section className="machine-list-page">
       <StatsCards machines={machines} />
 
-      {deleteConfirm && (
+      {/* Delete confirmation modal */}
+      {canManageMachines && deleteConfirm && (
         <div className="machine-list-modal-overlay">
           <div className="machine-list-modal">
             <h3 className="machine-list-modal-title">Delete machine?</h3>
@@ -130,7 +155,9 @@ function MachineList() {
       )}
 
       {notification && (
-        <div className={`add-machine-notice ${notification.type}`}>{notification.message}</div>
+        <div className={`machine-shared-notice ${notification.type}`}>
+          {notification.message}
+        </div>
       )}
 
       <div className="machine-list-tabs">
@@ -153,12 +180,25 @@ function MachineList() {
                 onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                 className="machine-list-search-input" />
             </div>
-            <button className="machine-list-btn-scan" type="button" onClick={() => setScanOpen(true)}>
-              <IconScan /> Scan QR
+            <button
+              className="machine-list-btn-scan"
+              type="button"
+              onClick={() => setScanOpen(true)}
+            >
+              <IconScan />
+              Scan QR
             </button>
-            <button className="machine-list-btn-primary" type="button" onClick={() => navigate("/add")}>
-              <IconPlus /> Add Machine
-            </button>
+
+            {canManageMachines && (
+              <button
+                className="machine-list-btn-primary"
+                type="button"
+                onClick={() => navigate("/add")}
+              >
+                <IconPlus />
+                Add Machine
+              </button>
+            )}
           </div>
         </div>
 
@@ -176,20 +216,72 @@ function MachineList() {
                 </tr>
               </thead>
               <tbody>
-                {paginated.length > 0 ? paginated.map((machine) => (
-                  <tr key={machine.id}>
-                    <td><Link to={`/machine/${machine.id}`} className="machine-list-machine-link">{machine.machineId}</Link></td>
-                    <td>{machine.type}</td>
-                    <td><span className="machine-list-model-text">{machine.brand} {machine.model}</span></td>
-                    <td><span className="machine-list-location-pill">{machine.location}</span></td>
-                    <td>{machine.date}</td>
-                    <td>
-                      <div className="machine-list-actions">
-                        <Link to={`/machine/${machine.id}`} className="machine-list-icon-btn" title="View"><IconEye /></Link>
-                        <button className="machine-list-icon-btn" title="Edit" onClick={() => navigate(`/edit/${machine.id}`)}><IconEdit /></button>
-                        <button className="machine-list-icon-btn qr" title="View / Download QR Code" onClick={() => setQrMachine(machine)}><IconQr /></button>
-                        <button className="machine-list-icon-btn delete" title="Delete" onClick={() => setDeleteConfirm(machine.id)}><IconTrash /></button>
-                      </div>
+                {paginated.length > 0 ? (
+                  paginated.map((machine) => {
+                    const displayMachineId = `MAC-${String(machine.id ?? "").padStart(3, "0")}`;
+
+                    return (
+                      <tr key={machine.id}>
+                        <td>
+                          <Link to={`/machine/${machine.id}`} className="machine-list-machine-link">
+                            {displayMachineId}
+                          </Link>
+                        </td>
+                        <td>{machine.type}</td>
+                        <td>
+                          <span className="machine-list-model-text">
+                            {machine.brand} {machine.model}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="machine-list-location-pill">{machine.location}</span>
+                        </td>
+                        <td>{machine.date}</td>
+                        <td>
+                          <div className="machine-list-actions">
+                            <Link to={`/machine/${machine.id}`} className="machine-list-icon-btn" title="View">
+                              <IconEye />
+                            </Link>
+
+                            {canManageMachines && (
+                              <button
+                                className="machine-list-icon-btn"
+                                title="Edit"
+                                onClick={() => navigate(`/edit/${machine.id}`)}
+                              >
+                                <IconEdit />
+                              </button>
+                            )}
+
+                            <button
+                              className="machine-list-icon-btn qr"
+                              title="View / Download QR Code"
+                              onClick={() => setQrMachine(machine)}
+                            >
+                              <IconQr />
+                            </button>
+
+                            {canManageMachines && (
+                              <button
+                                className="machine-list-icon-btn delete"
+                                title="Delete"
+                                onClick={() => setDeleteConfirm(machine.id)}
+                              >
+                                <IconTrash />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="machine-list-empty">
+                      No machines found.
+                    </td>
+                  </tr>
+                )}
                     </td>
                   </tr>
                 )) : (
