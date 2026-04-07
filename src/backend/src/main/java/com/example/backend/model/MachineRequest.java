@@ -48,6 +48,9 @@ public class MachineRequest {
     @Column(nullable = false)
     private RequestStatus status;
 
+    @Column(name = "approved_by_manager_id")
+    private Long approvedByManagerId;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -155,6 +158,14 @@ public class MachineRequest {
 
     public void setStatus(RequestStatus status) {
         this.status = status;
+    }
+
+    public Long getApprovedByManagerId() {
+        return approvedByManagerId;
+    }
+
+    public void setApprovedByManagerId(Long approvedByManagerId) {
+        this.approvedByManagerId = approvedByManagerId;
     }
 
     public LocalDateTime getCreatedAt() {
