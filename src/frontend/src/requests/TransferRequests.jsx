@@ -21,6 +21,29 @@ function TransferRequests() {
   const [transferRequests, setTransferRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedRequest, setSelectedRequest] = useState(null);
+
+  const truncateText = (text, maxLength = 20) => {
+    const value = String(text || "").trim();
+    if (value.length <= maxLength) {
+      return value || "-";
+    }
+    return `${value.slice(0, maxLength)}...`;
+  };
+
+  const formatTransferRequestCode = (requestCode) => {
+    const raw = String(requestCode || "").trim();
+    if (!raw) {
+      return "-";
+    }
+
+    const matched = raw.match(/^(?:TR|TRA)-(\d+)$/i);
+    if (matched) {
+      return `TRA-${String(Number(matched[1])).padStart(3, "0")}`;
+    }
+
+    return raw;
+  };
 
   const fetchTransferRequests = async () => {
     try {
@@ -32,6 +55,7 @@ function TransferRequests() {
         ? response.data.map((row) => ({
             ...row,
             fromStoreId: row.fromStoreId || null,
+            priority: String(row.priority || "medium").toLowerCase(),
             status: String(row.status || "pending").toLowerCase()
           }))
         : [];
@@ -58,6 +82,21 @@ function TransferRequests() {
 
   return (
     <section className="transfer-requests-page">
+      {selectedRequest && (
+        <div className="request-note-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="request-note-title">
+          <div className="request-note-modal">
+            <h3 id="request-note-title">Additional Note</h3>
+            <p className="request-note-label">Reason</p>
+            <p className="request-note-body">{selectedRequest.reason || "-"}</p>
+            <p className="request-note-label">Description</p>
+            <p className="request-note-body">{selectedRequest.notes || "No additional note provided."}</p>
+            <div className="request-note-actions">
+              <button type="button" className="request-note-close" onClick={() => setSelectedRequest(null)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="transfer-requests-card">
         <div className="transfer-requests-card-header">
           <div>
@@ -86,6 +125,7 @@ function TransferRequests() {
                   <th>From (Store ID)</th>
                   <th>To (Garment ID)</th>
                   <th>Reason</th>
+                  <th>Priority</th>
                   <th>{canManageStatus ? "Actions" : "Status"}</th>
                 </tr>
               </thead>
@@ -95,11 +135,25 @@ function TransferRequests() {
 
                   return (
                     <tr key={row.id}>
-                      <td>{row.requestCode}</td>
+                      <td>{formatTransferRequestCode(row.requestCode)}</td>
                       <td>{row.machineId}</td>
                       <td>{row.fromStoreId ?? "null"}</td>
                       <td>{row.toGarmentId}</td>
-                      <td>{row.reason}</td>
+                      <td>
+                        <div className="request-reason-cell">
+                          <span>{truncateText(row.reason)}</span>
+                          <button
+                            type="button"
+                            className="request-see-more"
+                            onClick={() => setSelectedRequest(row)}
+                          >
+                            See more
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`request-priority ${row.priority}`}>{row.priority}</span>
+                      </td>
                       <td>
                         {!canManageStatus && (
                           <span className={`transfer-badge ${status}`}>{STATUS_LABELS[status]}</span>

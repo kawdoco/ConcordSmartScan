@@ -21,6 +21,15 @@ function PurchaseRequest() {
   const [purchaseRequests, setPurchaseRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedRequest, setSelectedRequest] = useState(null);
+
+  const truncateText = (text, maxLength = 20) => {
+    const value = String(text || "").trim();
+    if (value.length <= maxLength) {
+      return value || "-";
+    }
+    return `${value.slice(0, maxLength)}...`;
+  };
 
   const fetchPurchaseRequests = async () => {
     try {
@@ -58,6 +67,21 @@ function PurchaseRequest() {
 
   return (
     <section className="purchase-request-page">
+      {selectedRequest && (
+        <div className="request-note-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="request-note-title">
+          <div className="request-note-modal">
+            <h3 id="request-note-title">Additional Note</h3>
+            <p className="request-note-label">Reason</p>
+            <p className="request-note-body">{selectedRequest.reason || "-"}</p>
+            <p className="request-note-label">Description</p>
+            <p className="request-note-body">{selectedRequest.notes || "No additional note provided."}</p>
+            <div className="request-note-actions">
+              <button type="button" className="request-note-close" onClick={() => setSelectedRequest(null)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="purchase-request-card">
         <div className="purchase-request-card-header">
           <div>
@@ -84,6 +108,8 @@ function PurchaseRequest() {
                   <th>Request ID</th>
                   <th>Machine Type</th>
                   <th>To (Garment ID)</th>
+                  <th>Required Date</th>
+                  <th>Reason</th>
                   <th>Priority</th>
                   <th>{canManageStatus ? "Actions" : "Status"}</th>
                 </tr>
@@ -97,8 +123,21 @@ function PurchaseRequest() {
                       <td>{row.requestCode}</td>
                       <td>{row.machineType}</td>
                       <td>{row.toGarmentId}</td>
+                      <td>{row.requiredDate || "-"}</td>
                       <td>
-                        <span className={`purchase-priority ${row.priority}`}>{row.priority}</span>
+                        <div className="request-reason-cell">
+                          <span>{truncateText(row.reason)}</span>
+                          <button
+                            type="button"
+                            className="request-see-more"
+                            onClick={() => setSelectedRequest(row)}
+                          >
+                            See more
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`request-priority ${row.priority}`}>{row.priority}</span>
                       </td>
                       <td>
                         {!canManageStatus && (

@@ -9,6 +9,17 @@
 
 .transfer-requests-table-wrap table {
   min-width: 980px;
+  width: 100%;
+  table-layout: auto;
+}
+
+.transfer-requests-table-wrap th:last-child,
+.transfer-requests-table-wrap td:last-child {
+  text-align: center;
+}
+
+.transfer-requests-table-wrap .transfer-actions {
+  justify-content: center;
 }
 
 .transfer-badge {
