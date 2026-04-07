@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
+import GenericLookupInput from "../components/GenericLookupInput";
+import MachineLookupInput from "../components/MachineLookupInput";
 import PagePath from "../components/PagePath";
 import apiClient from "../services/api";
 import "./NewRequest.css";
@@ -31,12 +33,22 @@ const EMPTY_FORM = {
   requestType: "transfer",
   machineId: "",
   machineType: "",
+  fromStoreId: "",
   toGarmentId: "",
   priority: "medium",
   reason: "",
   requiredDate: "",
   notes: ""
 };
+
+const MACHINE_TYPE_OPTIONS = [
+  "Single Needle Lockstitch",
+  "Double Needle Lockstitch",
+  "Overlock",
+  "Flatlock",
+  "Button Hole",
+  "Bar Tack"
+];
 
 export default function NewRequest() {
   const navigate = useNavigate();
@@ -50,11 +62,18 @@ export default function NewRequest() {
   const [errors, setErrors] = useState({});
   const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isResolvingMachine, setIsResolvingMachine] = useState(false);
 
   const isTransfer = form.requestType === "transfer";
   const role = String(user?.role || "").toUpperCase();
   const requestsRootPath = role === "ADMIN" ? "/requests/approved" : "/requests/transfer";
+  const todayIso = new Date().toISOString().split("T")[0];
+
+  const formatLocationCode = (prefix, locationId) => {
+    if (locationId === null || locationId === undefined || locationId === "") {
+      return "";
+    }
+    return `${prefix}-${String(locationId).padStart(3, "0")}`;
+  };
 
   useEffect(() => {
     const urlType = searchParams.get("type");
@@ -70,10 +89,16 @@ export default function NewRequest() {
   const validate = () => {
     const nextErrors = {};
 
+    if (isTransfer && !form.machineId.trim()) nextErrors.machineId = "Machine ID is required for transfer requests.";
     if (!isTransfer && !form.machineType.trim()) nextErrors.machineType = "Machine type is required for purchase requests.";
+    if (isTransfer && !form.fromStoreId.trim()) nextErrors.fromStoreId = "From Store ID is required for transfer requests.";
     if (!form.toGarmentId.trim()) nextErrors.toGarmentId = "To Garment ID is required.";
     if (!form.reason.trim()) nextErrors.reason = "Reason is required.";
-    if (!form.requiredDate) nextErrors.requiredDate = "Required date is required.";
+    if (!form.requiredDate) {
+      nextErrors.requiredDate = "Required date is required.";
+    } else if (form.requiredDate < todayIso) {
+      nextErrors.requiredDate = "Required date must be today or a future date.";
+    }
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -93,32 +118,6 @@ export default function NewRequest() {
     setErrors((previous) => ({ ...previous, [name]: "" }));
   };
 
-  const resolveMachineDetails = async () => {
-    if (!isTransfer || !form.machineId.trim()) {
-      return;
-    }
-
-    setIsResolvingMachine(true);
-    try {
-      const response = await apiClient.get(`/machines/code/${encodeURIComponent(form.machineId.trim())}`);
-      const machine = response.data || {};
-      setForm((previous) => ({
-        ...previous,
-        machineId: machine.machineCode || previous.machineId,
-        machineType: machine.name || ""
-      }));
-      setErrors((previous) => ({ ...previous, machineId: "" }));
-    } catch {
-      setForm((previous) => ({
-        ...previous,
-        machineType: ""
-      }));
-      setErrors((previous) => ({ ...previous, machineId: "" }));
-    } finally {
-      setIsResolvingMachine(false);
-    }
-  };
-
   const handleSubmit = async () => {
     if (!validate()) return;
 
@@ -128,6 +127,7 @@ export default function NewRequest() {
         requestType: form.requestType,
         machineId: form.machineId,
         machineType: form.machineType,
+        fromStoreId: form.fromStoreId,
         toGarmentId: form.toGarmentId,
         priority: form.priority,
         reason: form.reason,
@@ -204,33 +204,38 @@ export default function NewRequest() {
 
           <div className="new-request-grid-two">
             {isTransfer && (
-              <div className="new-request-field">
-                <label htmlFor="machineId">Machine ID (Optional)</label>
-                <input
-                  id="machineId"
-                  name="machineId"
-                  value={form.machineId}
-                  onChange={handleChange}
-                  onBlur={resolveMachineDetails}
-                  placeholder="Optional (e.g. MAC-JUKI-442)"
-                  className={errors.machineId ? "error" : ""}
-                />
-                {isResolvingMachine && <span className="new-request-hint">Loading machine details...</span>}
-                {errors.machineId && <span className="new-request-error">{errors.machineId}</span>}
-              </div>
+              <MachineLookupInput
+                id="machineId"
+                name="machineId"
+                label="Machine ID"
+                value={form.machineId}
+                onChange={handleChange}
+                onSelectMachine={(machine) => {
+                  setForm((previous) => ({
+                    ...previous,
+                    machineType: machine?.type || previous.machineType
+                  }));
+                }}
+                error={errors.machineId}
+                placeholder="e.g. MAC-001"
+              />
             )}
 
             {!isTransfer && (
               <div className="new-request-field">
                 <label htmlFor="machineType">Machine Type</label>
-                <input
+                <select
                   id="machineType"
                   name="machineType"
                   value={form.machineType}
                   onChange={handleChange}
-                  placeholder="e.g. Lockstitch"
                   className={errors.machineType ? "error" : ""}
-                />
+                >
+                  <option value="">Select Machine Type</option>
+                  {MACHINE_TYPE_OPTIONS.map((typeOption) => (
+                    <option key={typeOption} value={typeOption}>{typeOption}</option>
+                  ))}
+                </select>
                 {errors.machineType && <span className="new-request-error">{errors.machineType}</span>}
               </div>
             )}
@@ -245,18 +250,43 @@ export default function NewRequest() {
           </div>
 
           <div className="new-request-grid-two">
-            <div className="new-request-field">
-              <label htmlFor="toGarmentId">To Garment ID</label>
-              <input
-                id="toGarmentId"
-                name="toGarmentId"
-                value={form.toGarmentId}
+            {isTransfer && (
+              <GenericLookupInput
+                id="fromStoreId"
+                name="fromStoreId"
+                label="From Store (ID)"
+                value={form.fromStoreId}
                 onChange={handleChange}
-                placeholder="e.g. UNIT-D4-PROD"
-                className={errors.toGarmentId ? "error" : ""}
+                error={errors.fromStoreId}
+                placeholder="e.g. STO-001"
+                endpoint="/locations/stores"
+                searchFields={[(store) => formatLocationCode("STO", store?.locationId), "name"]}
+                getOptionKey={(store) => store.locationId || store.name}
+                getOptionValue={(store) => formatLocationCode("STO", store.locationId)}
+                getPrimaryText={(store) => formatLocationCode("STO", store.locationId) || "-"}
+                getSecondaryText={(store) => `Branch: ${store.name || "-"}`}
+                emptyMessage="No stores found"
+                loadingMessage="Loading stores..."
               />
-              {errors.toGarmentId && <span className="new-request-error">{errors.toGarmentId}</span>}
-            </div>
+            )}
+
+            <GenericLookupInput
+              id="toGarmentId"
+              name="toGarmentId"
+              label="To Garment (ID)"
+              value={form.toGarmentId}
+              onChange={handleChange}
+              error={errors.toGarmentId}
+              placeholder="e.g. GAR-001"
+              endpoint="/locations/garments"
+              searchFields={[(garment) => formatLocationCode("GAR", garment?.locationId), "name"]}
+              getOptionKey={(garment) => garment.locationId || garment.name}
+              getOptionValue={(garment) => formatLocationCode("GAR", garment.locationId)}
+              getPrimaryText={(garment) => formatLocationCode("GAR", garment.locationId) || "-"}
+              getSecondaryText={(garment) => `Branch: ${garment.name || "-"}`}
+              emptyMessage="No garments found"
+              loadingMessage="Loading garments..."
+            />
           </div>
 
           <div className="new-request-grid-two">
@@ -268,6 +298,7 @@ export default function NewRequest() {
                 type="date"
                 value={form.requiredDate}
                 onChange={handleChange}
+                min={todayIso}
                 className={errors.requiredDate ? "error" : ""}
               />
               {errors.requiredDate && <span className="new-request-error">{errors.requiredDate}</span>}
