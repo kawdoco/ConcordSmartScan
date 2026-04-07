@@ -83,7 +83,7 @@ export default function ViewStore() {
 
   return (
     <section className="view-store-page">
-      <PagePath items={[{ label: "Stores", to: "/stores" }, { label: `Store Details: ${id}` }]} />
+      <PagePath items={[{ label: "Stores", to: "/stores" }, { label: "Store Details" }]} />
 
       <div className="view-store-card">
         <div className="view-store-card-header">

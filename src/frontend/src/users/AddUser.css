@@ -260,3 +260,10 @@
     max-width: 100%;
   }
 }
+
+.field-error-text {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}

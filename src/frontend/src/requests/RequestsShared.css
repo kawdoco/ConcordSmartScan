@@ -56,6 +56,17 @@
   color: #6b7280;
 }
 
+.request-inline-error {
+  margin: 10px 12px 0;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .request-new-btn {
   border: none;
   border-radius: 8px;
@@ -120,6 +131,117 @@
 .transfer-actions {
   display: flex;
   gap: 8px;
+}
+
+.request-priority {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.request-priority.high {
+  color: #ef4444;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.request-priority.medium {
+  color: #6d28d9;
+  background: #ede9fe;
+  border: 1px solid #ddd6fe;
+}
+
+.request-priority.low {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+
+.request-see-more {
+  margin: 4px 0 0;
+  border: none;
+  background: transparent;
+  color: #1a3fd4;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.request-reason-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.request-note-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+
+.request-note-modal {
+  width: min(560px, 100%);
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.22);
+}
+
+.request-note-modal h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: #1a3fd4;
+}
+
+.request-note-label {
+  margin: 10px 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.request-note-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #0f172a;
+  white-space: pre-wrap;
+}
+
+.request-note-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.request-note-close {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.request-note-close:hover {
+  background: #f8fafc;
 }
 
 .purchase-btn,

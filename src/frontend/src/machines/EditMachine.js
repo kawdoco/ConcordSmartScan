@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
-import "./EditMachine.css";
+import "./MachineShared.css";
 
 const machineTypes = [
   "Single Needle",
@@ -15,7 +15,7 @@ const machineTypes = [
 
 function IconMachine() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="8" width="18" height="10" rx="2" />
       <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
       <path d="M8 13h2" />
@@ -26,7 +26,7 @@ function IconMachine() {
 
 function IconMapPin() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" />
       <circle cx="12" cy="10" r="3" />
     </svg>
@@ -35,7 +35,7 @@ function IconMapPin() {
 
 function IconEdit() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
     </svg>
@@ -44,22 +44,53 @@ function IconEdit() {
 
 function EditMachine() {
   const navigate = useNavigate();
+  const { id } = useParams();
+
   const [machine, setMachine] = useState({
-    machineId: "MC-9042",
-    type: "Single Needle",
-    brand: "JUKI",
-    model: "DDL-8700",
-    serialNumber: "SN-23910",
-    location: "ST010",
-    addedDate: "2024-10-24",
+    machineId: "",
+    type: "",
+    brand: "",
+    model: "",
+    serialNumber: "",
+    location: "",
+    date: "",
   });
+
   const [errors, setErrors] = useState({});
   const [notification, setNotification] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const showNotification = (message, type) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
+
+  // 🔹 FETCH MACHINE BY ID
+  useEffect(() => {
+    const fetchMachine = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(`http://localhost:8080/api/machines/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) throw new Error(`Failed to load machine (${response.status})`);
+
+        const data = await response.json();
+        setMachine(data);
+
+      } catch (err) {
+        showNotification(err.message, "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMachine();
+  }, [id]);
 
   const validate = () => {
     const nextErrors = {};
@@ -77,25 +108,59 @@ function EditMachine() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setMachine((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleSubmit = (event) => {
+  // 🔹 UPDATE MACHINE
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!validate()) return;
 
-    showNotification("Machine updated successfully!", "success");
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(`http://localhost:8080/api/machines/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(machine),
+      });
+
+      if (!response.ok) throw new Error(`Update failed (${response.status})`);
+
+      showNotification("Machine updated successfully!", "success");
+
+      setTimeout(() => {
+        navigate("/machines");
+      }, 1000);
+
+    } catch (err) {
+      showNotification(err.message, "error");
+    }
   };
 
   const handleCancel = () => {
-    setErrors({});
     navigate("/machines");
   };
+
+  // 🔹 LOADING STATE
+  if (loading) {
+    return (
+      <section className="edit-machine-page">
+        <PagePath items={[{ label: "Machines", to: "/machines" }, { label: "Edit Machine" }]} />
+        <div className="edit-machine-card">Loading machine...</div>
+      </section>
+    );
+  }
 
   return (
     <section className="edit-machine-page">
       <PagePath items={[{ label: "Machines", to: "/machines" }, { label: "Edit Machine" }]} />
+
       {notification && (
-        <div className={`edit-machine-notice ${notification.type === "success" ? "success" : "info"}`}>
+        <div className={`edit-machine-notice ${notification.type}`}>
           {notification.message}
         </div>
       )}
@@ -112,7 +177,13 @@ function EditMachine() {
           <div className="edit-machine-grid-two">
             <div className="edit-machine-field">
               <label htmlFor="machineId">Machine ID</label>
-              <input id="machineId" value={machine.machineId} disabled className="disabled" />
+              <input
+                id="machineId"
+                name="machineId"
+                value={machine.machineId}
+                disabled
+                className="disabled"
+              />
             </div>
 
             <div className="edit-machine-field">
@@ -191,14 +262,22 @@ function EditMachine() {
             </div>
 
             <div className="edit-machine-field">
-              <label htmlFor="addedDate">Added Date</label>
-              <input id="addedDate" value={machine.addedDate} disabled className="disabled" />
+              <label htmlFor="date">Added Date</label>
+              <input
+                id="date"
+                name="date"
+                value={machine.date}
+                disabled
+                className="disabled"
+              />
             </div>
           </div>
         </div>
 
         <div className="edit-machine-actions">
-          <button type="button" className="btn-secondary" onClick={handleCancel}>Cancel</button>
+          <button type="button" className="btn-secondary" onClick={handleCancel}>
+            Cancel
+          </button>
           <button type="submit" className="btn-primary">
             <IconEdit />
             Update Machine

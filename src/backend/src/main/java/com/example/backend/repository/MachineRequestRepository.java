@@ -15,6 +15,8 @@ public interface MachineRequestRepository extends JpaRepository<MachineRequest, 
 
     List<MachineRequest> findByStatusOrderByCreatedAtDesc(RequestStatus status);
 
+    List<MachineRequest> findByStatusAndApprovedByManagerIdIsNull(RequestStatus status);
+
     long countByRequestType(RequestType requestType);
 
     boolean existsByRequestCode(String requestCode);
