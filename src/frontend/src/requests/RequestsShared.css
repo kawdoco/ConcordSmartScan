@@ -56,6 +56,17 @@
   color: #6b7280;
 }
 
+.request-inline-error {
+  margin: 10px 12px 0;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .request-new-btn {
   border: none;
   border-radius: 8px;

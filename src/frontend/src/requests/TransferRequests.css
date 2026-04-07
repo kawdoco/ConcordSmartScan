@@ -29,6 +29,7 @@
   min-width: 70px;
   padding: 4px 10px;
   border-radius: 999px;
+  border: 2px solid #cbd5e1;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -36,21 +37,21 @@
 }
 
 .transfer-badge.approved {
-  color: #065f46;
+  color: #1a3fd4;
   background: transparent;
-  border: 2px solid #a7f3d0;
+  border-color: #bfdbfe;
 }
 
 .transfer-badge.pending {
   color: #92400e;
   background: transparent;
-  border: 2px solid #fde68a;
+  border-color: #fde68a;
 }
 
 .transfer-badge.declined {
   color: var(--tr-red);
   background: transparent;
-  border: 2px solid #fecaca;
+  border-color: #fecaca;
 }
 
 .transfer-btn.approve {

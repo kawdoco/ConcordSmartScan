@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import TableEmptyState from "../components/TableEmptyState";
 import { useAuth } from "../authentication/AuthContext";
 import apiClient from "../services/api";
@@ -22,6 +23,8 @@ function TransferRequests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [updatingRequestIds, setUpdatingRequestIds] = useState([]);
+  const [pendingAction, setPendingAction] = useState(null);
 
   const truncateText = (text, maxLength = 20) => {
     const value = String(text || "").trim();
@@ -72,16 +75,40 @@ function TransferRequests() {
   }, []);
 
   const updateRequestStatus = async (requestId, status) => {
+    const nextStatus = String(status || "").toLowerCase();
+
+    setError("");
+    setUpdatingRequestIds((previous) => (previous.includes(requestId) ? previous : [...previous, requestId]));
+
     try {
-      await apiClient.patch(`/requests/${requestId}/status`, { status });
-      fetchTransferRequests();
-    } catch {
-      setError("Failed to update request status.");
+      await apiClient.patch(`/requests/${requestId}/status`, { status: nextStatus });
+      await fetchTransferRequests();
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || "Failed to update request status.");
+    } finally {
+      setUpdatingRequestIds((previous) => previous.filter((id) => id !== requestId));
     }
   };
 
   return (
     <section className="transfer-requests-page">
+      <ConfirmActionModal
+        isOpen={Boolean(pendingAction)}
+        title={pendingAction?.status === "approved" ? "Approve Request" : "Decline Request"}
+        message={pendingAction?.status === "approved"
+          ? `Are you sure you want to approve ${pendingAction?.requestCode || "this request"}?`
+          : `Are you sure you want to decline ${pendingAction?.requestCode || "this request"}?`}
+        confirmLabel={pendingAction?.status === "approved" ? "Approve" : "Decline"}
+        variant={pendingAction?.status === "approved" ? "approve" : "decline"}
+        isSubmitting={pendingAction ? updatingRequestIds.includes(pendingAction.requestId) : false}
+        onCancel={() => setPendingAction(null)}
+        onConfirm={async () => {
+          if (!pendingAction) return;
+          await updateRequestStatus(pendingAction.requestId, pendingAction.status);
+          setPendingAction(null);
+        }}
+      />
+
       {selectedRequest && (
         <div className="request-note-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="request-note-title">
           <div className="request-note-modal">
@@ -111,6 +138,8 @@ function TransferRequests() {
           </div>
         </div>
 
+        {error && <div className="request-inline-error">{error}</div>}
+
         <div className="transfer-requests-table-wrap">
           {loading ? (
             <TableEmptyState message="Loading transfer requests..." minHeight={260} />
@@ -132,6 +161,7 @@ function TransferRequests() {
               <tbody>
                 {transferRequests.map((row) => {
                   const status = STATUS_LABELS[row.status] ? row.status : "pending";
+                  const isUpdatingStatus = updatingRequestIds.includes(row.id);
 
                   return (
                     <tr key={row.id}>
@@ -166,14 +196,24 @@ function TransferRequests() {
                             <button
                               type="button"
                               className="transfer-btn approve"
-                              onClick={() => updateRequestStatus(row.id, "approved")}
+                              onClick={() => setPendingAction({
+                                requestId: row.id,
+                                requestCode: formatTransferRequestCode(row.requestCode),
+                                status: "approved"
+                              })}
+                              disabled={isUpdatingStatus}
                             >
                               Approve
                             </button>
                             <button
                               type="button"
                               className="transfer-btn decline"
-                              onClick={() => updateRequestStatus(row.id, "declined")}
+                              onClick={() => setPendingAction({
+                                requestId: row.id,
+                                requestCode: formatTransferRequestCode(row.requestCode),
+                                status: "declined"
+                              })}
+                              disabled={isUpdatingStatus}
                             >
                               Decline
                             </button>
