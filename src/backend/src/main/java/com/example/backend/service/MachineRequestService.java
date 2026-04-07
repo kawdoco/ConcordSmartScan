@@ -42,19 +42,14 @@ public class MachineRequestService {
         request.setStatus(RequestStatus.PENDING);
 
         if (requestType == RequestType.TRANSFER) {
-            String machineId = normalizeOptional(dto.getMachineId());
-            if (machineId != null) {
-                Machine machine = findMachineByFlexibleMachineId(machineId)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Machine not found for ID: " + machineId));
+            String fromStoreId = normalizeOptional(dto.getFromStoreId());
+            String machineId = normalizeRequired(dto.getMachineId(), "Machine ID is required for transfer requests");
+            Machine machine = findMachineByFlexibleMachineId(machineId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Machine not found for ID: " + machineId));
 
-                request.setMachineId(machine.getMachineCode());
-                request.setMachineType(normalizeOptional(machine.getBrand()));
-                request.setFromStoreId(normalizeOptional(machine.getLocation()));
-            } else {
-                request.setMachineId(null);
-                request.setMachineType(null);
-                request.setFromStoreId(null);
-            }
+                request.setMachineId(formatMachineDisplayId(machine));
+            request.setMachineType(normalizeOptional(machine.getBrand()));
+            request.setFromStoreId(fromStoreId != null ? fromStoreId : normalizeOptional(machine.getLocation()));
         } else {
             request.setMachineId(normalizeOptional(dto.getMachineId()));
             request.setMachineType(normalizeRequired(dto.getMachineType(), "Machine type is required for purchase requests"));
@@ -157,6 +152,13 @@ public class MachineRequestService {
         return prefix + "-" + String.format(Locale.ROOT, "%04d", number);
     }
 
+    private String formatMachineDisplayId(Machine machine) {
+        if (machine == null || machine.getId() == null) {
+            return normalizeOptional(machine != null ? machine.getMachineCode() : null);
+        }
+        return "MAC-" + String.format(Locale.ROOT, "%03d", machine.getId());
+    }
+
     private String normalizeRequired(String value, String message) {
         if (value == null || value.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
@@ -201,6 +203,15 @@ public class MachineRequestService {
 
         if (!normalized.matches("\\d+")) {
             return Optional.empty();
+        }
+
+        try {
+            Optional<Machine> idMatch = machineRepository.findById(Long.parseLong(normalized));
+            if (idMatch.isPresent()) {
+                return idMatch;
+            }
+        } catch (NumberFormatException ignored) {
+            // Keep flowing to padded machineId lookup.
         }
 
         String padded = String.format(Locale.ROOT, "%03d", Integer.parseInt(normalized));
