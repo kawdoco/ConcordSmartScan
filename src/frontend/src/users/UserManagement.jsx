@@ -288,6 +288,7 @@ export default function UserManagement() {
           name: u.name,
           role: formatRoleDisplay(u.role),   // Use formatter: "ADMIN" -> "Admin", etc.
           location: u.location || "",
+          garmentId: u.garmentId || null,
           email: u.email,
           date: new Date().toISOString().slice(0, 10),
         }));
@@ -347,6 +348,7 @@ export default function UserManagement() {
           name: u.name,
           role: formatRoleDisplay(u.role),
           location: u.location || "",
+          garmentId: u.garmentId || null,
           email: u.email,
           date: today(),
         };
@@ -460,7 +462,7 @@ export default function UserManagement() {
                           {u.role}
                         </span>
                       </td>
-                      <td>{u.location}</td>
+                      <td>{u.garmentId ? `Garment #${u.garmentId}` : (u.location || '—')}</td>
                       <td>{u.date}</td>
                       <td>
                         <div className="actions">
