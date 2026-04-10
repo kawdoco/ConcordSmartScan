@@ -2,8 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import GenericLookupInput from "../components/GenericLookupInput";
 import "./MachineShared.css";
 import axios from "axios";
+
+const formatGarmentDisplayId = (garmentId) => {
+  const parsed = Number(garmentId);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    return "";
+  }
+  return `GAR-${String(parsed).padStart(3, "0")}`;
+};
 
 function IconMachine() {
   return (
@@ -257,18 +266,28 @@ function AddMachine() {
 
           <div className="add-machine-grid-two">
             <div className="add-machine-field">
-              <label htmlFor="location">Location (Garment ID)</label>
-              <input
+              <GenericLookupInput
                 id="location"
                 name="location"
                 value={machine.location}
+                label="Location (Garment ID)"
                 onChange={handleChange}
+                error={errors.location}
                 placeholder="e.g., GAR-001"
-                className={errors.location ? "error" : ""}
+                className="add-machine-field"
+                endpoint="/locations/garments"
+                searchFields={[
+                  (garment) => formatGarmentDisplayId(garment.locationId),
+                  "locationId",
+                  "name"
+                ]}
+                getOptionKey={(garment) => garment.locationId}
+                getOptionValue={(garment) => formatGarmentDisplayId(garment.locationId)}
+                getPrimaryText={(garment) => formatGarmentDisplayId(garment.locationId)}
+                getSecondaryText={(garment) => garment.name || "-"}
+                emptyMessage="No garments found"
+                loadingMessage="Loading garments..."
               />
-              {errors.location && (
-                <span className="add-machine-error">{errors.location}</span>
-              )}
             </div>
 
             <div className="add-machine-field">
