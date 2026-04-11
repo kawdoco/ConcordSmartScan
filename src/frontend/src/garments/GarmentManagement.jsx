@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import TableEmptyState from "../components/TableEmptyState";
 import { getAllGarments, deleteLocation } from "../services/locationService";
 import "./GarmentManagement.css";
@@ -218,22 +219,16 @@ function GarmentManagement() {
         </div>
       </div>
 
-      {canManageGarments && deleteConfirm && (
-        <div className="garment-delete-modal">
-          <div className="garment-delete-modal-content">
-            <h3>Delete Garment</h3>
-            <p>Are you sure you want to delete <strong>{deleteConfirm.name}</strong>?</p>
-            <div className="garment-delete-modal-actions">
-              <button type="button" className="btn-secondary" onClick={() => setDeleteConfirm(null)}>
-                Cancel
-              </button>
-              <button type="button" className="btn-danger" onClick={confirmDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmActionModal
+        isOpen={canManageGarments && Boolean(deleteConfirm)}
+        title="Delete Garment"
+        message={`Are you sure you want to delete ${deleteConfirm ? deleteConfirm.name : "this garment"}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="decline"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm(null)}
+      />
 
       <AppFooter />
     </section>

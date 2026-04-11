@@ -5,6 +5,7 @@ import com.example.backend.repository.MachineRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,12 +21,16 @@ public class MachineService {
     }
 
     public List<Machine> getAllMachines() {
-        return repository.findAll();
+        return repository.findAll().stream()
+            .map(this::normalizeMachineIdForRead)
+            .toList();
     }
 
     public Machine getMachineById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Machine not found with id: " + id));
+        Machine machine = repository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Machine not found with id: " + id));
+
+        return normalizeMachineIdForRead(machine);
     }
 
     public Machine createMachine(Machine machine) {
@@ -42,6 +47,7 @@ public class MachineService {
         machine.setSerialNumber(updatedMachine.getSerialNumber());
         machine.setLocation(updatedMachine.getLocation());
         machine.setDate(updatedMachine.getDate());
+        machine.setMachineId(resolveCanonicalMachineId(machine.getMachineId(), machine.getId()));
 
         return repository.save(machine);
     }
@@ -86,6 +92,29 @@ public class MachineService {
     }
 
     private String formatMachineId(int value) {
-        return String.format("%03d", value);
+        return String.format(Locale.ROOT, "MAC-%03d", value);
+    }
+
+    private Machine normalizeMachineIdForRead(Machine machine) {
+        String canonical = resolveCanonicalMachineId(machine.getMachineId(), machine.getId());
+        if (canonical != null && !canonical.equals(machine.getMachineId())) {
+            machine.setMachineId(canonical);
+            return repository.save(machine);
+        }
+        return machine;
+    }
+
+    private String resolveCanonicalMachineId(String rawMachineId, Long fallbackId) {
+        int extracted = extractTrailingNumber(rawMachineId);
+
+        if (extracted <= 0 && fallbackId != null && fallbackId > 0) {
+            extracted = fallbackId.intValue();
+        }
+
+        if (extracted <= 0) {
+            return null;
+        }
+
+        return formatMachineId(extracted);
     }
 }

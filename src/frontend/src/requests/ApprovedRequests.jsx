@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import StatsCards from "../components/StatsCards";
 import apiClient from "../services/api";
+import { formatUserId } from "../users/userId";
 import "./ApprovedRequests.css";
 
 const ROWS_PER_PAGE = 4;
@@ -73,13 +74,6 @@ const toTitleCase = (value) => {
   return String(value)
     .toLowerCase()
     .replace(/(^\w|\s\w)/g, (char) => char.toUpperCase());
-};
-
-const formatUserId = (value) => {
-  if (value === null || value === undefined || value === "" || value === "-") return "-";
-  const numericId = Number.parseInt(value, 10);
-  if (Number.isNaN(numericId) || numericId <= 0) return "-";
-  return `UID-${String(numericId).padStart(3, "0")}`;
 };
 
 export default function ApprovedRequests() {

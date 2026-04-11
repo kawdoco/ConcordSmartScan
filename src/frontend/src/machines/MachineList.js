@@ -3,9 +3,11 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import QRModal from "./QRModal";
 import ScanModal from "./ScanModal";
 import apiClient from "../services/api";
+import { getMachineDisplayId } from "./machineId";
 import "./MachineShared.css";
 import "./MachineList.css";
 
@@ -92,14 +94,14 @@ function MachineList() {
   };
 
   const tabFiltered = machines.filter((m) => {
-    if (activeTab === "stores") return m.location?.toUpperCase().startsWith("ST");
-    if (activeTab === "garments") return m.location?.toUpperCase().startsWith("GR");
+    if (activeTab === "stores")   return m.location?.toUpperCase().startsWith("STO");
+    if (activeTab === "garments") return m.location?.toUpperCase().startsWith("GAR");
     return true;
   });
 
   const filtered = tabFiltered.filter((m) => {
     const q = search.toLowerCase();
-    const displayMachineId = `MAC-${String(m.id ?? "").padStart(3, "0")}`.toLowerCase();
+    const displayMachineId = getMachineDisplayId(m).toLowerCase();
     return (
       m.machineId?.toLowerCase().includes(q) ||
       displayMachineId.includes(q) ||
@@ -115,16 +117,19 @@ function MachineList() {
 
   const handleDeleteConfirm = async () => {
     if (!deleteConfirm) return;
-    const deletedId = deleteConfirm;
+    const deletedMachine = deleteConfirm;
     try {
-      await apiClient.delete(`/machines/${deletedId}`);
+      await apiClient.delete(`/machines/${deletedMachine.id}`);
       await fetchMachines();
-      showNotification(`Machine ${deletedId} was deleted successfully.`, "success");
+    showNotification(
+      `Machine ${getMachineDisplayId(deletedMachine)} was deleted successfully.`,
+      "success"
+    );
     } catch {
       alert("Error deleting machine");
     } finally {
       setDeleteConfirm(null);
-    }
+    } 
   };
 
   const getLocationLabel = () => {
@@ -137,18 +142,16 @@ function MachineList() {
     <section className="machine-list-page">
       <StatsCards machines={machines} />
 
-      {canManageMachines && deleteConfirm && (
-        <div className="machine-list-modal-overlay">
-          <div className="machine-list-modal">
-            <h3 className="machine-list-modal-title">Delete machine?</h3>
-            <p className="machine-list-modal-body">Are you sure you want to delete <strong>{deleteConfirm}</strong>? This action cannot be undone.</p>
-            <div className="machine-list-modal-actions">
-              <button className="machine-list-btn-ghost" onClick={() => setDeleteConfirm(null)}>Cancel</button>
-              <button className="machine-list-btn-danger" onClick={handleDeleteConfirm}>Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmActionModal
+        isOpen={canManageMachines && Boolean(deleteConfirm)}
+        title="Delete machine?"
+        message={`Are you sure you want to delete ${deleteConfirm ? getMachineDisplayId(deleteConfirm) : "this machine"}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="decline"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteConfirm(null)}
+      />
 
       {qrMachine && <QRModal machine={qrMachine} onClose={() => setQrMachine(null)} />}
 
@@ -223,7 +226,7 @@ function MachineList() {
               <tbody>
                 {paginated.length > 0 ? (
                   paginated.map((machine) => {
-                    const displayMachineId = `MAC-${String(machine.id ?? "").padStart(3, "0")}`;
+                    const displayMachineId = getMachineDisplayId(machine);
 
                     return (
                       <tr key={machine.id}>
@@ -270,7 +273,7 @@ function MachineList() {
                               <button
                                 className="machine-list-icon-btn delete"
                                 title="Delete"
-                                onClick={() => setDeleteConfirm(machine.id)}
+                                onClick={() => setDeleteConfirm(machine)}
                               >
                                 <IconTrash />
                               </button>

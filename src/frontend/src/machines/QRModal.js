@@ -1,5 +1,6 @@
 // machines/QRModal.js
 import { useState, useEffect } from "react";
+import { getMachineDisplayId } from "./machineId";
 import "./QRModal.css";
 
 /**
@@ -15,8 +16,9 @@ function getQRUrl(data, size = 220) {
 }
 
 function buildQRData(machine) {
+  const machineDisplayId = getMachineDisplayId(machine);
   return JSON.stringify({
-    machineId:    machine.machineId,
+    machineId:    machineDisplayId,
     type:         machine.type,
     brand:        machine.brand,
     model:        machine.model,
@@ -63,6 +65,7 @@ export default function QRModal({ machine, onClose }) {
   const [downloading, setDownloading] = useState(false);
   const [toast, setToast] = useState(null);
 
+  const machineDisplayId = getMachineDisplayId(machine);
   const qrData = buildQRData(machine);
   const qrUrl  = getQRUrl(qrData, 220);
 
@@ -88,12 +91,12 @@ export default function QRModal({ machine, onClose }) {
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
       a.href     = url;
-      a.download = `QR-${machine.machineId}.png`;
+      a.download = `QR-${machineDisplayId}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      showToast(`QR code for ${machine.machineId} downloaded.`);
+      showToast(`QR code for ${machineDisplayId} downloaded.`);
     } catch {
       // Fallback: draw on canvas, then download
       try {
@@ -112,12 +115,12 @@ export default function QRModal({ machine, onClose }) {
           const url = URL.createObjectURL(blob);
           const a   = document.createElement("a");
           a.href     = url;
-          a.download = `QR-${machine.machineId}.png`;
+          a.download = `QR-${machineDisplayId}.png`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
           setTimeout(() => URL.revokeObjectURL(url), 1000);
-          showToast(`QR code for ${machine.machineId} downloaded.`);
+          showToast(`QR code for ${machineDisplayId} downloaded.`);
         }, "image/png");
       } catch {
         // Last resort — open in new tab
@@ -132,7 +135,7 @@ export default function QRModal({ machine, onClose }) {
   const handlePrint = () => {
     const win = window.open("", "_blank");
     win.document.write(`
-      <html><head><title>QR — ${machine.machineId}</title>
+      <html><head><title>QR — ${machineDisplayId}</title>
       <style>
         body { margin:0; display:flex; flex-direction:column;
                align-items:center; justify-content:center; min-height:100vh;
@@ -143,7 +146,7 @@ export default function QRModal({ machine, onClose }) {
       </style></head>
       <body>
         <img src="${qrUrl}" />
-        <h2>${machine.machineId}</h2>
+        <h2>${machineDisplayId}</h2>
         <p>${machine.brand} ${machine.model} · ${machine.type}</p>
         <p>${machine.location}</p>
         <script>window.onload=()=>window.print();</script>
@@ -160,7 +163,7 @@ export default function QRModal({ machine, onClose }) {
         <div className="qrm-header">
           <div>
             <h2 className="qrm-title">QR Code</h2>
-            <p className="qrm-subtitle">Machine ID: <strong>{machine.machineId}</strong></p>
+            <p className="qrm-subtitle">Machine ID: <strong>{machineDisplayId}</strong></p>
           </div>
           <button className="qrm-close" onClick={onClose} aria-label="Close"><IconX /></button>
         </div>
@@ -182,7 +185,7 @@ export default function QRModal({ machine, onClose }) {
             )}
             <img
               src={qrUrl}
-              alt={`QR code for ${machine.machineId}`}
+              alt={`QR code for ${machineDisplayId}`}
               className="qrm-img"
               style={{ display: imgLoaded ? "block" : "none" }}
               onLoad={() => setImgLoaded(true)}
@@ -192,7 +195,7 @@ export default function QRModal({ machine, onClose }) {
 
           {/* Machine info under QR */}
           <div className="qrm-meta">
-            <span className="qrm-meta-id">{machine.machineId}</span>
+            <span className="qrm-meta-id">{machineDisplayId}</span>
             <span className="qrm-meta-line">{machine.brand} {machine.model}</span>
             <span className="qrm-meta-line">{machine.type} · {machine.location}</span>
           </div>
