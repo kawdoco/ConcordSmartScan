@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import apiClient from "../services/api";
@@ -268,7 +268,6 @@ export default function UserManagement() {
 
   // Modals
   const [addOpen, setAddOpen] = useState(false);
-  const [viewUser, setViewUser] = useState(null);
   const [deleteUser, setDeleteUser] = useState(null);
 
   // Form state
@@ -468,7 +467,7 @@ export default function UserManagement() {
                       <td>{u.date}</td>
                       <td>
                         <div className="actions">
-                          <button className="ic-btn" title="View" onClick={() => setViewUser(u)}><Icons.Eye /></button>
+                          <button className="ic-btn" title="View" onClick={() => navigate(`/users/view/${u.id}`)}><Icons.Eye /></button>
                           <button className="ic-btn" title="Edit" onClick={() => navigate(`/users/edit/${u.id}`)}><Icons.Edit /></button>
                           <button className="ic-btn del" title="Delete" onClick={() => setDeleteUser(u)}><Icons.Trash /></button>
                         </div>
@@ -511,43 +510,6 @@ export default function UserManagement() {
             <button className="btn-cancel" onClick={() => setAddOpen(false)}>Cancel</button>
             <button className="btn-save" onClick={handleAdd}>Add User</button>
           </div>
-        </div>
-      </div>
-
-      {/* ── View Modal ── */}
-      <div className={`overlay${viewUser ? " open" : ""}`} onClick={e => e.target === e.currentTarget && setViewUser(null)}>
-        <div className="modal">
-          <div className="modal-hd">
-            <h2>User Details</h2>
-            <button className="mc-btn" onClick={() => setViewUser(null)}><Icons.X /></button>
-          </div>
-          {viewUser && (
-            <>
-              <div className="view-grid">
-                {[
-                  ["User ID", viewUser.id],
-                  ["Full Name", viewUser.name],
-                  ["Role", viewUser.role],
-                  ["Email", viewUser.email],
-                  ["Assigned Location", viewUser.location],
-                  ["Added Date", viewUser.date],
-                ].map(([lbl, val]) => (
-                  <div className="vf" key={lbl}>
-                    <div className="vf-lbl">{lbl}</div>
-                    <div className="vf-val">
-                      {lbl === "Role"
-                        ? <span className={`badge ${getBadgeClass(val)}`}>{val}</span>
-                        : val}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="modal-actions">
-                <button className="btn-cancel" onClick={() => setViewUser(null)}>Close</button>
-                <button className="btn-save" onClick={() => { setViewUser(null); navigate(`/users/edit/${viewUser.id}`); }}>Edit User</button>
-              </div>
-            </>
-          )}
         </div>
       </div>
 

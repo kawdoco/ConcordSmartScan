@@ -1,0 +1,194 @@
+/* ViewUser.css */
+
+.view-user-page {
+  display: flex;
+  flex-direction: column;
+  min-height: auto;
+  padding: 6px 8px;
+}
+
+.view-user-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  flex: 1;
+}
+
+.view-user-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.view-user-header-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.view-user-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #ede9fe;
+  border-radius: 8px;
+  color: #7c3aed;
+}
+
+.view-user-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.view-user-card-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.view-user-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.view-user-edit-btn:hover {
+  background: #1d4ed8;
+}
+
+.view-user-edit-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.view-user-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.view-user-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px 30px;
+}
+
+.view-user-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.view-user-detail-label {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.view-user-detail-value {
+  color: #1e293b;
+  font-size: 1.1rem;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.view-user-role-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.view-user-role-admin {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.view-user-role-chief {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.view-user-role-tech {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.view-user-role-default {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.view-user-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.view-user-back-btn {
+  padding: 10px 20px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #1e293b;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-user-back-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.view-user-status {
+  padding: 20px;
+  text-align: center;
+}
+
+.view-user-status-error {
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .view-user-card {
+    padding: 20px;
+  }
+
+  .view-user-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .view-user-edit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .view-user-details-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
