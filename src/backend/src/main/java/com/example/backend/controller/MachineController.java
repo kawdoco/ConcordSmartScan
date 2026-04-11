@@ -72,6 +72,16 @@ public class MachineController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Machine> getMachineById(@PathVariable Long id) {
+        try {
+            Machine machine = service.getMachineById(id);
+            return ResponseEntity.ok(machine);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
     @GetMapping("/code/{machineCode}")
     public ResponseEntity<Machine> getMachineByCode(@PathVariable String machineCode) {
         return machineRepository.findByMachineId(machineCode)
