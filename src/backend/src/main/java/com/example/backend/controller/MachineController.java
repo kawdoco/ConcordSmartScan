@@ -74,7 +74,7 @@ public class MachineController {
 
     @GetMapping("/code/{machineCode}")
     public ResponseEntity<Machine> getMachineByCode(@PathVariable String machineCode) {
-        return machineRepository.findByMachineCode(machineCode)
+        return machineRepository.findByMachineId(machineCode)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
