@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
+import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import TableEmptyState from "../components/TableEmptyState";
 import { getAllGarments, deleteLocation } from "../services/locationService";
@@ -34,6 +35,8 @@ const PAGE_SIZE = 4;
 
 function GarmentManagement() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
   const { user } = useAuth();
   const role = String(user?.role || "").toUpperCase();
   const canManageGarments = role === "ADMIN";
@@ -45,12 +48,12 @@ function GarmentManagement() {
 
   useEffect(() => {
     loadGarments();
-  }, []);
+  }, [searchQ]);
 
   const loadGarments = () => {
     setLoading(true);
     setError(null);
-    getAllGarments()
+    getAllGarments(searchQ)
       .then(res => {
         // API returns list directly
         const garmentsArray = Array.isArray(res) ? res : res.data || [];
