@@ -2,7 +2,18 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import GenericLookupInput from "../components/GenericLookupInput";
 import "./MachineShared.css";
+
+const buildLocationDisplayId = (location) => {
+  const parsed = Number(location?.locationId);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    return "";
+  }
+
+  const prefix = location?.type === "STORE" ? "STO" : "GAR";
+  return `${prefix}-${String(parsed).padStart(3, "0")}`;
+};
 
 const machineTypes = [
   "Single Needle",
@@ -250,15 +261,30 @@ function EditMachine() {
 
           <div className="edit-machine-grid-two">
             <div className="edit-machine-field">
-              <label htmlFor="location">Location</label>
-              <input
+              <GenericLookupInput
                 id="location"
                 name="location"
+                label="Location"
                 value={machine.location}
                 onChange={handleChange}
-                className={errors.location ? "error" : ""}
+                error={errors.location}
+                  placeholder="e.g., GAR-001 or STO-002"
+                className="edit-machine-field"
+                  endpoint="/locations"
+                searchFields={[
+                    (location) => buildLocationDisplayId(location),
+                    "locationId",
+                    "name",
+                    "type"
+                ]}
+                  sortComparator={(a, b) => Number(a.locationId) - Number(b.locationId)}
+                  getOptionKey={(location) => `${location.type}-${location.locationId}`}
+                  getOptionValue={(location) => buildLocationDisplayId(location)}
+                  getPrimaryText={(location) => buildLocationDisplayId(location)}
+                  getSecondaryText={(location) => `${location.name || "-"} | ${location.type || "-"}`}
+                  emptyMessage="No locations found"
+                  loadingMessage="Loading locations..."
               />
-              {errors.location && <span className="edit-machine-error">{errors.location}</span>}
             </div>
 
             <div className="edit-machine-field">

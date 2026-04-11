@@ -32,6 +32,7 @@ export default function GenericLookupInput({
   modifierClassName = "",
   endpoint,
   searchFields = [],
+  sortComparator,
   getOptionKey,
   getOptionValue,
   getPrimaryText,
@@ -79,7 +80,11 @@ export default function GenericLookupInput({
 
   const searchText = String(value || "").trim().toLowerCase();
   const suggestions = useMemo(() => {
-    return options
+    const sortedOptions = typeof sortComparator === "function"
+      ? [...options].sort(sortComparator)
+      : options;
+
+    return sortedOptions
       .filter((option) => {
         if (!searchText) {
           return true;
@@ -95,7 +100,7 @@ export default function GenericLookupInput({
         return indexedValues.some((entry) => String(entry || "").toLowerCase().includes(searchText));
       })
       .slice(0, maxResults);
-  }, [options, searchFields, searchText, maxResults]);
+  }, [options, searchFields, searchText, maxResults, sortComparator]);
 
   const emitChange = (nextValue) => {
     if (!onChange) {

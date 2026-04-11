@@ -19,6 +19,7 @@ function PurchaseRequest() {
   const role = String(user?.role || "").toUpperCase();
   const canManageStatus = role === "CHIEF_MANAGER";
   const showHistoryView = role === "TECHNICIAN";
+  const [chiefManagerGarmentId, setChiefManagerGarmentId] = useState(null);
   const [purchaseRequests, setPurchaseRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -34,12 +35,29 @@ function PurchaseRequest() {
     return `${value.slice(0, maxLength)}...`;
   };
 
+  const extractNumericGarmentId = (value) => {
+    const matched = String(value || "").match(/(\d+)/);
+    if (!matched) {
+      return null;
+    }
+
+    const parsed = Number(matched[1]);
+    return Number.isInteger(parsed) ? parsed : null;
+  };
+
   const fetchPurchaseRequests = async () => {
     try {
       setError("");
-      const response = await apiClient.get("/requests", {
-        params: { type: "purchase" }
-      });
+      const [response, currentUserResponse] = await Promise.all([
+        apiClient.get("/requests", {
+          params: { type: "purchase" }
+        }),
+        canManageStatus && user?.id ? apiClient.get(`/users/${user.id}`) : Promise.resolve(null)
+      ]);
+
+      const currentGarmentId = currentUserResponse?.data?.garmentId ?? null;
+      setChiefManagerGarmentId(currentGarmentId);
+
       const normalizedRows = Array.isArray(response.data)
         ? response.data.map((row) => ({
             ...row,
@@ -47,7 +65,14 @@ function PurchaseRequest() {
             priority: String(row.priority || "medium").toLowerCase()
           }))
         : [];
-      setPurchaseRequests(normalizedRows);
+
+      const visibleRows = canManageStatus
+        ? (currentGarmentId != null
+          ? normalizedRows.filter((row) => extractNumericGarmentId(row.toGarmentId) === Number(currentGarmentId))
+          : [])
+        : normalizedRows;
+
+      setPurchaseRequests(visibleRows);
     } catch (requestError) {
       setError(requestError.response?.data?.message || "Failed to load purchase requests.");
     } finally {
@@ -129,7 +154,15 @@ function PurchaseRequest() {
           {loading ? (
             <TableEmptyState message="Loading purchase requests..." minHeight={260} />
           ) : purchaseRequests.length === 0 ? (
-            <TableEmptyState message={error || "No purchase requests found."} minHeight={260} />
+            <TableEmptyState
+              message={
+                error
+                  || (canManageStatus && chiefManagerGarmentId != null
+                    ? "No purchase requests found for your garment."
+                    : "No purchase requests found.")
+              }
+              minHeight={260}
+            />
           ) : (
             <table>
               <thead>
