@@ -53,24 +53,31 @@
 
 .user-management-tabs {
   display: flex;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1.5px solid #e5e7eb;
   margin-bottom: 16px;
 }
 
 .user-management-tab {
   border: none;
-  border-bottom: 2px solid transparent;
+  border-bottom: 2.5px solid transparent;
   background: transparent;
-  padding: 10px 16px;
-  font-size: 13px;
-  font-weight: 600;
+  padding: 10px 20px;
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
   color: #6b7280;
   cursor: pointer;
+  margin-bottom: -1.5px;
+  transition: all 0.15s;
 }
 
 .user-management-tab.active {
   color: #1a3fd4;
   border-bottom-color: #1a3fd4;
+}
+
+.user-management-tab:hover {
+  color: #0f1623;
 }
 
 .user-management-card {
@@ -152,7 +159,8 @@
 }
 
 .user-management-card td {
-  font-size: 13px;
+  font-size: 13.5px;
+  color: #475569;
   padding: 14px 20px;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -166,9 +174,9 @@
 }
 
 .user-management-uid {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
-  color: #6b7280;
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
+  color: #475569;
 }
 
 .user-management-name {

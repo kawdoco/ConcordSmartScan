@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import ConfirmActionModal from "../components/ConfirmActionModal";
 import apiClient from "../services/api";
+import { formatUserId } from "./userId";
 import "./AddUser.css";
 import "./UserManagement.css";
 
@@ -243,7 +244,7 @@ export default function UserManagement() {
               ) : (
                 paged.map((user) => (
                   <tr key={user.id}>
-                    <td><span className="user-management-uid">{user.id}</span></td>
+                    <td><span className="user-management-uid">{formatUserId(user.id)}</span></td>
                     <td><span className="user-management-name">{user.name}</span></td>
                     <td>
                       <span className={`user-management-badge ${roleClass(user.role)}`}>{user.role}</span>
@@ -321,7 +322,7 @@ export default function UserManagement() {
             <>
               <div className="user-management-view-grid">
                 {[
-                  ["User ID", viewUser.id],
+                  ["User ID", formatUserId(viewUser.id)],
                   ["Full Name", viewUser.name],
                   ["Role", viewUser.role],
                   ["Email", viewUser.email],
@@ -348,7 +349,7 @@ export default function UserManagement() {
       <ConfirmActionModal
         isOpen={Boolean(deleteUser)}
         title="Delete user?"
-        message={deleteUser ? `Are you sure you want to delete ${deleteUser.name} (${deleteUser.id})? This action cannot be undone.` : ""}
+        message={deleteUser ? `Are you sure you want to delete ${deleteUser.name} (${formatUserId(deleteUser.id)})? This action cannot be undone.` : ""}
         confirmLabel="Delete"
         cancelLabel="Cancel"
         variant="decline"

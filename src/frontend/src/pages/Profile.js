@@ -1,5 +1,6 @@
 import React from "react";
 import { useAuth } from "../authentication/AuthContext";
+import { formatUserId } from "../users/userId";
 
 function Profile() {
   const { user } = useAuth();
@@ -18,7 +19,7 @@ function Profile() {
         </div>
         <div style={styles.row}>
           <span style={styles.label}>User ID</span>
-          <span style={styles.value}>{user?.id ?? "-"}</span>
+          <span style={styles.value}>{formatUserId(user?.id)}</span>
         </div>
       </div>
     </div>

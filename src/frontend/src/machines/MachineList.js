@@ -85,8 +85,8 @@ function MachineList() {
   };
 
   const tabFiltered = machines.filter((m) => {
-    if (activeTab === "stores")   return m.location?.toUpperCase().startsWith("ST");
-    if (activeTab === "garments") return m.location?.toUpperCase().startsWith("GR");
+    if (activeTab === "stores")   return m.location?.toUpperCase().startsWith("STO");
+    if (activeTab === "garments") return m.location?.toUpperCase().startsWith("GAR");
     return true;
   });
 

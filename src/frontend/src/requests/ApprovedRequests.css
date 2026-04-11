@@ -151,7 +151,7 @@
   padding: 15px 20px;
   border-bottom: 1px solid var(--border);
   font-size: 13.5px;
-  color: #0f1623;
+  color: #475569;
 }
 
 .approved-requests-page tbody tr:last-child td {
@@ -159,9 +159,9 @@
 }
 
 .approved-requests-page .req-id {
-  font-family: inherit;
+  font-family: 'Sora', sans-serif;
   font-size: 13.5px;
-  color: inherit;
+  color: #475569;
 }
 
 .approved-requests-page .mc-id,
