@@ -1,3 +1,4 @@
+.add-machine-page,
 .edit-machine-page {
   font-family: "Sora", sans-serif;
   color: #0f1623;
@@ -7,12 +8,17 @@
   flex-direction: column;
 }
 
+.add-machine-page *,
+.add-machine-page *::before,
+.add-machine-page *::after,
 .edit-machine-page *,
 .edit-machine-page *::before,
 .edit-machine-page *::after {
   box-sizing: border-box;
 }
 
+.machine-shared-notice,
+.add-machine-notice,
 .edit-machine-notice {
   margin-bottom: 14px;
   border-radius: 10px;
@@ -22,14 +28,25 @@
   font-weight: 600;
 }
 
+.machine-shared-notice.success,
+.add-machine-notice.success,
 .edit-machine-notice.success {
   background: #065f46;
 }
 
+.machine-shared-notice.info,
+.add-machine-notice.info,
 .edit-machine-notice.info {
   background: #1230a8;
 }
 
+.machine-shared-notice.error,
+.add-machine-notice.error,
+.edit-machine-notice.error {
+  background: #b91c1c;
+}
+
+.add-machine-card,
 .edit-machine-card {
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -38,6 +55,7 @@
   width: 100%;
 }
 
+.add-machine-card-header,
 .edit-machine-card-header {
   border-bottom: 1px solid #e5e7eb;
   padding: 18px 22px;
@@ -46,28 +64,33 @@
   gap: 10px;
 }
 
+.add-machine-card-icon,
+.edit-machine-card-icon {
+  color: #1a3fd4;
+  display: inline-flex;
+  align-items: center;
+}
+
+.add-machine-card-header h2,
 .edit-machine-card-header h2 {
   margin: 0;
   font-size: 15px;
   font-weight: 700;
 }
 
+.add-machine-card-header p,
 .edit-machine-card-header p {
   margin: 2px 0 0;
   color: #6b7280;
   font-size: 12px;
 }
 
-.edit-machine-card-icon {
-  display: inline-flex;
-  align-items: center;
-  color: #1a3fd4;
-}
-
+.add-machine-card-body,
 .edit-machine-card-body {
   padding: 22px;
 }
 
+.add-machine-grid-two,
 .edit-machine-grid-two {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -76,10 +99,12 @@
   margin-bottom: 2px;
 }
 
+.add-machine-field,
 .edit-machine-field {
   margin-bottom: 16px;
 }
 
+.add-machine-field label,
 .edit-machine-field label {
   display: block;
   margin-bottom: 6px;
@@ -87,6 +112,8 @@
   font-weight: 600;
 }
 
+.add-machine-field input,
+.add-machine-field select,
 .edit-machine-field input,
 .edit-machine-field select {
   width: 100%;
@@ -101,20 +128,55 @@
   outline: none;
 }
 
+.add-machine-field textarea {
+  width: 100%;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: #0f1623;
+  background: #fff;
+  outline: none;
+}
+
+.add-machine-field input::placeholder,
+.add-machine-field textarea::placeholder {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.add-machine-field input:focus,
+.add-machine-field select:focus,
 .edit-machine-field input:focus,
 .edit-machine-field select:focus {
   border-color: #1a3fd4;
+}
+
+.add-machine-field textarea:focus {
+  border-color: #1a3fd4;
+}
+
+.add-machine-field textarea {
+  resize: vertical;
+}
+
+.add-machine-field input.error,
+.add-machine-field select.error,
+.edit-machine-field input.error,
+.edit-machine-field select.error {
+  border-color: #ef4444;
+}
+
+.add-machine-field textarea.error {
+  border-color: #ef4444;
 }
 
 .edit-machine-field input.disabled {
   background: #f4f6fb;
   color: #6b7280;
   cursor: not-allowed;
-}
-
-.edit-machine-field input.error,
-.edit-machine-field select.error {
-  border-color: #ef4444;
 }
 
 .edit-machine-hint {
@@ -124,6 +186,7 @@
   font-size: 11px;
 }
 
+.add-machine-error,
 .edit-machine-error {
   margin-top: 3px;
   display: block;
@@ -131,6 +194,7 @@
   font-size: 11px;
 }
 
+.add-machine-location-heading,
 .edit-machine-location-heading {
   border-top: 1px solid #e5e7eb;
   padding-top: 18px;
@@ -141,6 +205,7 @@
   color: #1a3fd4;
 }
 
+.add-machine-location-heading h3,
 .edit-machine-location-heading h3 {
   margin: 0;
   color: #0f1623;
@@ -148,12 +213,14 @@
   font-weight: 700;
 }
 
+.add-machine-location-heading p,
 .edit-machine-location-heading p {
   margin: 2px 0 0;
   color: #6b7280;
   font-size: 12px;
 }
 
+.add-machine-actions,
 .edit-machine-actions {
   border-top: 1px solid #e5e7eb;
   padding: 12px 22px;
@@ -162,6 +229,8 @@
   gap: 10px;
 }
 
+.add-machine-actions .btn-secondary,
+.add-machine-actions .btn-primary,
 .edit-machine-actions .btn-secondary,
 .edit-machine-actions .btn-primary {
   border-radius: 8px;
@@ -171,6 +240,7 @@
   cursor: pointer;
 }
 
+.add-machine-actions .btn-secondary,
 .edit-machine-actions .btn-secondary {
   border: 1.5px solid #e5e7eb;
   background: #fff;
@@ -178,6 +248,13 @@
   padding: 10px 18px;
 }
 
+.add-machine-actions .btn-secondary:hover,
+.edit-machine-actions .btn-secondary:hover {
+  background: #f4f6fb;
+  color: #0f1623;
+}
+
+.add-machine-actions .btn-primary,
 .edit-machine-actions .btn-primary {
   border: none;
   background: #1a3fd4;
@@ -188,11 +265,19 @@
   gap: 8px;
 }
 
+.add-machine-actions .btn-primary:hover,
+.edit-machine-actions .btn-primary:hover {
+  background: #1230a8;
+}
+
 @media (max-width: 768px) {
+  .add-machine-grid-two,
   .edit-machine-grid-two {
     grid-template-columns: 1fr;
   }
 
+  .add-machine-card,
+  .add-machine-card-body,
   .edit-machine-card,
   .edit-machine-card-body {
     width: 100%;

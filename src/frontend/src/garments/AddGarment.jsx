@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import MapSelector from "../components/MapSelector";
 import { createGarment } from "../services/locationService";
 import "./AddGarment.css";
 
@@ -60,11 +61,13 @@ export default function AddGarment() {
     if (!form.phoneNumber.trim()) nextErrors.phoneNumber = "Phone number is required.";
     if (!form.address.trim()) nextErrors.address = "Address is required.";
 
-    if (form.latitude !== "" && (isNaN(form.latitude) || Number(form.latitude) < -90 || Number(form.latitude) > 90)) {
+    if (!form.latitude.trim()) nextErrors.latitude = "Latitude is required.";
+    else if (isNaN(form.latitude) || Number(form.latitude) < -90 || Number(form.latitude) > 90) {
       nextErrors.latitude = "Latitude must be between -90 and 90.";
     }
 
-    if (form.longitude !== "" && (isNaN(form.longitude) || Number(form.longitude) < -180 || Number(form.longitude) > 180)) {
+    if (!form.longitude.trim()) nextErrors.longitude = "Longitude is required.";
+    else if (isNaN(form.longitude) || Number(form.longitude) < -180 || Number(form.longitude) > 180) {
       nextErrors.longitude = "Longitude must be between -180 and 180.";
     }
 
@@ -76,6 +79,15 @@ export default function AddGarment() {
     const { name, value } = event.target;
     setForm((previous) => ({ ...previous, [name]: value }));
     setErrors((previous) => ({ ...previous, [name]: "" }));
+  };
+
+  const handleLocationSelect = (latitude, longitude) => {
+    setForm((previous) => ({
+      ...previous,
+      latitude: latitude.toFixed(6),
+      longitude: longitude.toFixed(6)
+    }));
+    setErrors((previous) => ({ ...previous, latitude: "", longitude: "" }));
   };
 
   const handleSubmit = async () => {
@@ -176,7 +188,7 @@ export default function AddGarment() {
             <span><IconMapPin /></span>
             <div>
               <h3>Location Coordinates</h3>
-              <p>Optional - GPS coordinates for map pinning.</p>
+              <p>Required - GPS coordinates for map pinning.</p>
             </div>
           </div>
 
@@ -206,6 +218,16 @@ export default function AddGarment() {
               />
               {errors.longitude && <span className="add-garment-error">{errors.longitude}</span>}
             </div>
+          </div>
+
+          <div className="add-garment-field">
+            <label>Location Map</label>
+            <p className="add-garment-help-text">Click on the map to select the garment location. The coordinates will be automatically filled above.</p>
+            <MapSelector
+              latitude={form.latitude ? parseFloat(form.latitude) : null}
+              longitude={form.longitude ? parseFloat(form.longitude) : null}
+              onLocationSelect={handleLocationSelect}
+            />
           </div>
         </div>
 

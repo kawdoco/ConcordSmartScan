@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import GarmentSelector from "./GarmentSelector";
 import apiClient from "../services/api";
 import "./AddUser.css";
 
@@ -245,7 +246,13 @@ export default function EditUserPage() {
             <div className="add-user-grid-two">
               <div className="add-user-field">
                 <label htmlFor="garmentId">Garment ID</label>
-                <input type="text" id="garmentId" name="garmentId" value={formData.garmentId} onChange={handleInputChange} />
+                <GarmentSelector
+                  value={formData.garmentId}
+                  onChange={(garmentId) => {
+                    setFormData({ ...formData, garmentId });
+                    setSubmitError("");
+                  }}
+                />
               </div>
               <div className="add-user-field">
                 <label htmlFor="companyEmail">Company Email</label>

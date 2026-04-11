@@ -1,5 +1,10 @@
 import "./StatsCards.css";
 
+const countByLocationPrefix = (machines, prefix) =>
+  machines.filter((machine) =>
+    machine.location?.toUpperCase().startsWith(prefix)
+  ).length;
+
 function IconMachines() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -57,7 +62,12 @@ function IconTransferRequests() {
   );
 }
 
-function StatsCards({ mode = "machines", counts }) {
+function StatsCards({ mode = "machines", counts, machines = [] }) {
+  const totalMachines = machines.length;
+  const storeMachines = countByLocationPrefix(machines, "ST");
+  const garmentMachines = countByLocationPrefix(machines, "GR");
+  const otherMachines = Math.max(0, totalMachines - storeMachines - garmentMachines);
+
   const cards = mode === "requests"
     ? [
         { label: "Total Requests", value: counts?.total ?? 0, icon: <IconTotalRequests />, tone: "requests-total" },
@@ -65,9 +75,10 @@ function StatsCards({ mode = "machines", counts }) {
         { label: "Transfer Requests", value: counts?.transfer ?? 0, icon: <IconTransferRequests />, tone: "requests-transfer" }
       ]
     : [
-        { label: "Total Machines", value: "4,821", icon: <IconMachines />, tone: "machines" },
-        { label: "At Stores", value: "2,140", icon: <IconStore />, tone: "stores" },
-        { label: "At Garments", value: "2,681", icon: <IconGarment />, tone: "garments" }
+        { label: "Total Machines", value: totalMachines, icon: <IconMachines />, tone: "machines" },
+        { label: "At Stores", value: storeMachines, icon: <IconStore />, tone: "stores" },
+        { label: "At Garments", value: garmentMachines, icon: <IconGarment />, tone: "garments" },
+        { label: "Other", value: otherMachines, icon: <IconMachines />, tone: "machines" }
       ];
 
   return (

@@ -151,7 +151,7 @@
   padding: 15px 20px;
   border-bottom: 1px solid var(--border);
   font-size: 13.5px;
-  color: #475569;
+  color: #0f1623;
 }
 
 .approved-requests-page tbody tr:last-child td {
@@ -159,16 +159,16 @@
 }
 
 .approved-requests-page .req-id {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
-  color: #6b7280;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: inherit;
 }
 
 .approved-requests-page .mc-id,
 .approved-requests-page .store-id {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
-  color: #6b7280;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: inherit;
 }
 
 .approved-requests-page .approval-date {

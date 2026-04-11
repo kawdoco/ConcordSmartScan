@@ -1,6 +1,7 @@
 package com.example.backend.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class UserResponse {
 
@@ -16,6 +17,8 @@ public class UserResponse {
     private String companyEmail;
     private Long garmentId;
     private String garmentName;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDateTime createdAt;
 
     public UserResponse() {}
 
@@ -62,4 +65,7 @@ public class UserResponse {
 
     public String getGarmentName() { return garmentName; }
     public void setGarmentName(String garmentName) { this.garmentName = garmentName; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

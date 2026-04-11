@@ -1,67 +1,72 @@
 package com.example.backend.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
+@Table(name = "machine")
 public class Machine {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
-    private String machineCode;
-
-    private String name;
+    private String machineId;
+    private String type;
+    private String brand;
+    private String model;
+    private String serialNumber;
     private String location;
+    private LocalDate date;
 
-    @Column(name = "added_date")
-    private LocalDate addedDate;
-
-    public Machine() {}
-
-    public Machine(String name, String location) {
-        this.name = name;
-        this.location = location;
-        this.machineCode = UUID.randomUUID().toString();
+    public Machine() {
     }
-
-    @PrePersist
-    public void generateCode() {
-        if (machineCode == null) {
-            machineCode = UUID.randomUUID().toString();
-        }
-        if (addedDate == null) {
-            addedDate = LocalDate.now();
-        }
-    }
-
-    // Getters & Setters
     public Long getId() {
         return id;
+    }
+
+    public String getMachineId() {
+        return machineId;
+    }
+
+    public void setMachineId(String machineId) {
+        this.machineId = machineId;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public void setMachineCode(String machineCode) {
-        this.machineCode = machineCode;
+    public String getType() {
+        return type;
     }
 
-    public String getMachineCode() {
-        return this.machineCode;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public String getName() {
-        return name;
+    public String getBrand() {
+        return brand;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
     }
 
     public String getLocation() {
@@ -73,10 +78,26 @@ public class Machine {
     }
 
     public LocalDate getAddedDate() {
-        return addedDate;
+        return date;
     }
 
     public void setAddedDate(LocalDate addedDate) {
-        this.addedDate = addedDate;
+        this.date = addedDate;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public void setMachineCode(String machineId) {
+        this.machineId = machineId;
+    }
+
+    public String getMachineCode() {
+        return this.machineId;
     }
 }

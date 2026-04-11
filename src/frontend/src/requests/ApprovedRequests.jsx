@@ -75,6 +75,13 @@ const toTitleCase = (value) => {
     .replace(/(^\w|\s\w)/g, (char) => char.toUpperCase());
 };
 
+const formatUserId = (value) => {
+  if (value === null || value === undefined || value === "" || value === "-") return "-";
+  const numericId = Number.parseInt(value, 10);
+  if (Number.isNaN(numericId) || numericId <= 0) return "-";
+  return `UID-${String(numericId).padStart(3, "0")}`;
+};
+
 export default function ApprovedRequests() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -106,6 +113,7 @@ export default function ApprovedRequests() {
               machineId: row.machineId || "-",
               storeId: row.fromStoreId || "-",
               garment: row.toGarmentId || "-",
+              approvedByManagerId: formatUserId(row.approvedByManagerId),
               approvalDate: formatDate(row.createdAt),
               approvalMeta: `Priority: ${toTitleCase(row.priority)}`
             }))
@@ -117,6 +125,7 @@ export default function ApprovedRequests() {
               requestCode: row.requestCode,
               machineType: row.machineType || "-",
               garment: row.toGarmentId || "-",
+              approvedByManagerId: formatUserId(row.approvedByManagerId),
               approvalDate: formatDate(row.createdAt),
               approvalMeta: `Priority: ${toTitleCase(row.priority)}`
             }))
@@ -211,9 +220,9 @@ export default function ApprovedRequests() {
   };
 
   const handleExportTransfer = () => {
-    const headers = ["REQUEST ID,MACHINE ID,REQUESTED GARMENT,APPROVED DATE,PRIORITY"];
+    const headers = ["REQUEST ID,MACHINE ID,REQUESTED GARMENT,APPROVED BY MANAGER ID,APPROVED DATE,PRIORITY"];
     const rows = filtered.map((row) =>
-      `${row.requestCode},${row.machineId},"${row.garment}",${row.approvalDate},"${row.approvalMeta}"`
+      `${row.requestCode},${row.machineId},"${row.garment}",${row.approvedByManagerId},${row.approvalDate},"${row.approvalMeta}"`
     );
     const csv = [...headers, ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -227,9 +236,9 @@ export default function ApprovedRequests() {
   };
 
   const handleExportPurchase = () => {
-    const headers = ["REQUEST ID,MACHINE TYPE,GARMENT REQUESTED,APPROVED DATE,PRIORITY"];
+    const headers = ["REQUEST ID,MACHINE TYPE,GARMENT REQUESTED,APPROVED BY MANAGER ID,APPROVED DATE,PRIORITY"];
     const rows = filteredPurchase.map((row) =>
-      `${row.requestCode},"${row.machineType}","${row.garment}",${row.approvalDate},"${row.approvalMeta}"`
+      `${row.requestCode},"${row.machineType}","${row.garment}",${row.approvedByManagerId},${row.approvalDate},"${row.approvalMeta}"`
     );
     const csv = [...headers, ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -287,6 +296,7 @@ export default function ApprovedRequests() {
                   <th>Request ID</th>
                   <th>Machine ID</th>
                   <th>Requested Garment</th>
+                  <th>Approved By (Manager ID)</th>
                   <th>
                     Approval
                     <span className="th-sub">Date | Priority</span>
@@ -317,6 +327,7 @@ export default function ApprovedRequests() {
                     <td><span className="req-id">{row.requestCode}</span></td>
                     <td><span className="mc-id">{row.machineId}</span></td>
                     <td>{row.garment}</td>
+                    <td><span className="mc-id">{row.approvedByManagerId}</span></td>
                     <td>
                       <div className="approval-date">{row.approvalDate}</div>
                       <div className="approval-cm">{row.approvalMeta}</div>
@@ -383,6 +394,7 @@ export default function ApprovedRequests() {
                   <th>Request ID</th>
                   <th>Machine Type</th>
                   <th>Garment Requested</th>
+                  <th>Approved By (Manager ID)</th>
                   <th>
                     Approval
                     <span className="th-sub">Date | Priority</span>
@@ -393,7 +405,7 @@ export default function ApprovedRequests() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={5}>
+                    <td colSpan={6}>
                       <div className="empty">
                         <p className="empty-title">Loading approved requests...</p>
                       </div>
@@ -401,7 +413,7 @@ export default function ApprovedRequests() {
                   </tr>
                 ) : pagedPurchase.length === 0 ? (
                   <tr>
-                    <td colSpan={5}>
+                    <td colSpan={6}>
                       <div className="empty">
                         <ShoppingIcon />
                         <p className="empty-title">No purchase requests found</p>
@@ -414,6 +426,7 @@ export default function ApprovedRequests() {
                     <td><span className="req-id prq-id">{row.requestCode}</span></td>
                     <td>{row.machineType}</td>
                     <td>{row.garment}</td>
+                    <td><span className="mc-id">{row.approvedByManagerId}</span></td>
                     <td>
                       <div className="approval-date">{row.approvalDate}</div>
                       <div className="approval-cm">{row.approvalMeta}</div>
