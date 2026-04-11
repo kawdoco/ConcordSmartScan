@@ -72,7 +72,13 @@ public class UserService {
 
     /** Retrieve all users. */
     public List<UserResponse> getAllUsers() {
+        return getAllUsers(null);
+    }
+
+    /** Retrieve users filtered by a search string. */
+    public List<UserResponse> getAllUsers(String search) {
         return userRepository.findAll().stream()
+                .filter(user -> matchesSearch(user, search))
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -232,5 +238,26 @@ public class UserService {
 
     private boolean isBcryptHash(String value) {
         return value.startsWith("$2a$") || value.startsWith("$2b$") || value.startsWith("$2y$");
+    }
+
+    private boolean matchesSearch(User user, String search) {
+        String query = normalizeSearch(search);
+        if (query.isEmpty()) {
+            return true;
+        }
+
+        return containsIgnoreCase(String.valueOf(user.getId()), query)
+                || containsIgnoreCase(user.getName(), query)
+                || containsIgnoreCase(user.getEmail(), query)
+                || containsIgnoreCase(user.getRole() == null ? null : user.getRole().name(), query)
+                || containsIgnoreCase(user.getLocation(), query);
+    }
+
+    private String normalizeSearch(String search) {
+        return search == null ? "" : search.trim().toLowerCase();
+    }
+
+    private boolean containsIgnoreCase(String value, String query) {
+        return value != null && value.toLowerCase().contains(query);
     }
 }

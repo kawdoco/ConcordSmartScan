@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
+import { getAllMachines } from "../services/machineService";
 import "./MachineList.css";
 
 function IconSearch() {
@@ -70,14 +72,29 @@ function IconChevRight() {
 
 function MachineList() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
   const [activeTab, setActiveTab] = useState("all");
-  
-  const machines = [
-    { id: "MAC-9021", type: "Single Needle Lockstitch", location: "ST-101", storeName: "Colombo 03", garmentName: "", date: "2024-03-15" },
-    { id: "MAC-8842", type: "Overlock Machine", location: "GR-202", storeName: "", garmentName: "Denim Jacket", date: "2024-04-02" },
-    { id: "MAC-4512", type: "Button Hole Machine", location: "ST-105", storeName: "Peradeniya", garmentName: "", date: "2024-04-18" },
-    { id: "MAC-7729", type: "Flatlock Machine", location: "GR-205", storeName: "", garmentName: "Cotton Crew", date: "2024-05-10" }
-  ];
+  const [machines, setMachines] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    setError("");
+    getAllMachines(searchQ)
+      .then((response) => {
+        const rows = Array.isArray(response.data) ? response.data : [];
+        setMachines(rows.map((machine) => ({
+          id: machine.machineCode || String(machine.id),
+          type: machine.name || "-",
+          location: machine.location || "-",
+          date: machine.addedDate || "-",
+        })));
+      })
+      .catch(() => setError("Failed to load machines."))
+      .finally(() => setLoading(false));
+  }, [searchQ]);
 
   const getLocationLabel = () => {
     if (activeTab === "stores") return "Store Name";
@@ -86,8 +103,6 @@ function MachineList() {
   };
 
   const getLocationValue = (machine) => {
-    if (activeTab === "stores") return machine.storeName;
-    if (activeTab === "garments") return machine.garmentName;
     return machine.location;
   };
 
@@ -160,66 +175,72 @@ function MachineList() {
         </div>
 
         <div className="machine-list-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Machine ID</th>
-                <th>Type</th>
-                <th>{getLocationLabel()}</th>
-                <th>Added Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredMachines.length > 0 ? (
-                filteredMachines.map((machine) => (
-                  <tr key={machine.id}>
-                    <td>
-                      <Link to={`/machine/${machine.id}`} className="machine-list-machine-link">
-                        {machine.id}
-                      </Link>
-                    </td>
-                    <td>{machine.type}</td>
-                    <td>
-                      <span className="machine-list-location-pill">{getLocationValue(machine)}</span>
-                    </td>
-                    <td>{machine.date}</td>
-                    <td>
-                      <div className="machine-list-actions">
-                        <Link
-                          to={`/machine/${machine.id}`}
-                          className="machine-list-icon-btn"
-                          title="View Machine"
-                        >
-                          <IconEye />
+          {loading ? (
+            <div className="machine-list-empty">Loading machines...</div>
+          ) : error ? (
+            <div className="machine-list-empty">{error}</div>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Machine ID</th>
+                  <th>Type</th>
+                  <th>{getLocationLabel()}</th>
+                  <th>Added Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredMachines.length > 0 ? (
+                  filteredMachines.map((machine) => (
+                    <tr key={machine.id}>
+                      <td>
+                        <Link to={`/machine/${machine.id}`} className="machine-list-machine-link">
+                          {machine.id}
                         </Link>
-                        <button
-                          className="machine-list-icon-btn"
-                          onClick={() => handleEditMachine(machine.id)}
-                          title="Edit Machine"
-                        >
-                          <IconEdit />
-                        </button>
-                        <button
-                          className="machine-list-icon-btn delete"
-                          onClick={() => handleDeleteMachine(machine.id)}
-                          title="Delete Machine"
-                        >
-                          <IconTrash />
-                        </button>
-                      </div>
+                      </td>
+                      <td>{machine.type}</td>
+                      <td>
+                        <span className="machine-list-location-pill">{getLocationValue(machine)}</span>
+                      </td>
+                      <td>{machine.date}</td>
+                      <td>
+                        <div className="machine-list-actions">
+                          <Link
+                            to={`/machine/${machine.id}`}
+                            className="machine-list-icon-btn"
+                            title="View Machine"
+                          >
+                            <IconEye />
+                          </Link>
+                          <button
+                            className="machine-list-icon-btn"
+                            onClick={() => handleEditMachine(machine.id)}
+                            title="Edit Machine"
+                          >
+                            <IconEdit />
+                          </button>
+                          <button
+                            className="machine-list-icon-btn delete"
+                            onClick={() => handleDeleteMachine(machine.id)}
+                            title="Delete Machine"
+                          >
+                            <IconTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="machine-list-empty">
+                      No machines found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="machine-list-empty">
-                    No machines found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         <div className="machine-list-tfoot">

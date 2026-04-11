@@ -1,6 +1,6 @@
 // components/Topbar.js
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import SearchBar from "./SearchBar";
 
@@ -9,7 +9,7 @@ function Topbar() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
-  const [searchQ, setSearchQ] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
   const menuRef = useRef(null);
 
   const titleByPath = {
@@ -37,6 +37,44 @@ function Topbar() {
     : location.pathname.startsWith("/edit/")
       ? "Edit Machine"
       : (titleByPath[location.pathname] || "Concord Dashboard");
+
+  const searchConfig = (() => {
+    if (location.pathname === "/users") {
+      return { placeholder: "Search users by ID, name, or role" };
+    }
+    if (location.pathname === "/machines") {
+      return { placeholder: "Search machines by ID, type, location, or date" };
+    }
+    if (location.pathname === "/stores") {
+      return { placeholder: "Search stores by ID, name, or address" };
+    }
+    if (location.pathname === "/garments") {
+      return { placeholder: "Search garments by ID, name, or address" };
+    }
+    if (location.pathname === "/requests/transfer") {
+      return { placeholder: "Search transfer requests" };
+    }
+    if (location.pathname === "/requests/purchase") {
+      return { placeholder: "Search purchase requests" };
+    }
+    if (location.pathname === "/requests/approved") {
+      return { placeholder: "Search approved requests" };
+    }
+    return null;
+  })();
+
+  const searchQ = searchParams.get("q") || "";
+
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    const nextParams = new URLSearchParams(searchParams);
+    if (value.trim()) {
+      nextParams.set("q", value);
+    } else {
+      nextParams.delete("q");
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
 
   useEffect(() => {
     const onClickOutside = (event) => {
@@ -72,13 +110,15 @@ function Topbar() {
         <h1 style={styles.title}>{title}</h1>
       </div>
       <div style={styles.centerWrap}>
-        <SearchBar
-          size="sm"
-          value={searchQ}
-          onChange={(e) => setSearchQ(e.target.value)}
-          placeholder={`Search in ${title.toLowerCase()}...`}
-          className="topbar-search"
-        />
+        {searchConfig && (
+          <SearchBar
+            size="sm"
+            value={searchQ}
+            onChange={handleSearchChange}
+            placeholder={searchConfig.placeholder}
+            className="topbar-search"
+          />
+        )}
       </div>
       <div style={styles.menuWrap} ref={menuRef}>
         <button style={styles.userBtn} onClick={() => setOpen(v => !v)}>

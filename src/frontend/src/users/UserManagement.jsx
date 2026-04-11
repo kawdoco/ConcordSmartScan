@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import apiClient from "../services/api";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -237,6 +238,8 @@ const ROWS_PER_PAGE = 8;
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function UserManagement() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
 
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -259,8 +262,10 @@ export default function UserManagement() {
     setTimeout(() => setToast(t => ({ ...t, visible: false })), 3000);
   }, []);
 
-  const loadUsers = useCallback(() => {
-    return apiClient.get("/users")
+  const loadUsers = useCallback((search = "") => {
+    return apiClient.get("/users", {
+      params: search ? { search } : undefined,
+    })
       .then(res => {
         const mapped = res.data.map(u => ({
           id: String(u.id),
@@ -277,8 +282,8 @@ export default function UserManagement() {
 
   // ── Load users from backend on mount ──
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+    loadUsers(searchQ);
+  }, [loadUsers, searchQ]);
 
   // ── Derived data ──
   const filtered = users.filter(u => {
@@ -294,7 +299,7 @@ export default function UserManagement() {
   const managers = users.filter(u => u.role === "Chief Manager").length;
   const techs = users.filter(u => u.role === "Technician").length;
 
-  useEffect(() => { setPage(1); }, [activeTab]);
+  useEffect(() => { setPage(1); }, [activeTab, searchQ]);
 
   // ── Form helpers ──
   const resetForm = () => { setForm({ name: "", role: "Technician", location: "", email: "", password: "" }); setFormErr({}); };

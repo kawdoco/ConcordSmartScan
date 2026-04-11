@@ -1,6 +1,8 @@
 package com.example.backend.model;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -16,6 +18,9 @@ public class Machine {
     private String name;
     private String location;
 
+    @Column(name = "added_date")
+    private LocalDate addedDate;
+
     public Machine() {}
 
     public Machine(String name, String location) {
@@ -28,6 +33,9 @@ public class Machine {
     public void generateCode() {
         if (machineCode == null) {
             machineCode = UUID.randomUUID().toString();
+        }
+        if (addedDate == null) {
+            addedDate = LocalDate.now();
         }
     }
 
@@ -62,5 +70,13 @@ public class Machine {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public LocalDate getAddedDate() {
+        return addedDate;
+    }
+
+    public void setAddedDate(LocalDate addedDate) {
+        this.addedDate = addedDate;
     }
 }

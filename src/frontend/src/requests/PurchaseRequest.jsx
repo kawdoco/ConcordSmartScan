@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import TableEmptyState from "../components/TableEmptyState";
 import apiClient from "../services/api";
@@ -7,6 +8,8 @@ import "./PurchaseRequest.css";
 
 function PurchaseRequest() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
   const [purchaseRequests, setPurchaseRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -35,6 +38,17 @@ function PurchaseRequest() {
   useEffect(() => {
     fetchPurchaseRequests();
   }, []);
+
+  const filteredRequests = purchaseRequests.filter((row) => {
+    const query = searchQ.trim().toLowerCase();
+    if (!query) {
+      return true;
+    }
+
+    return [row.requestCode, row.machineType, row.toGarmentId, row.priority, row.status]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(query));
+  });
 
   const updateRequestStatus = async (requestId, status) => {
     try {
@@ -65,7 +79,7 @@ function PurchaseRequest() {
         <div className="purchase-request-table-wrap">
           {loading ? (
             <TableEmptyState message="Loading purchase requests..." minHeight={260} />
-          ) : purchaseRequests.length === 0 ? (
+          ) : filteredRequests.length === 0 ? (
             <TableEmptyState message={error || "No purchase requests found."} minHeight={260} />
           ) : (
             <table>
@@ -79,7 +93,7 @@ function PurchaseRequest() {
                 </tr>
               </thead>
               <tbody>
-                {purchaseRequests.map((row) => (
+                {filteredRequests.map((row) => (
                   <tr key={row.id}>
                     <td>{row.requestCode}</td>
                     <td>{row.machineType}</td>
@@ -117,7 +131,7 @@ function PurchaseRequest() {
         </div>
 
         <div className="purchase-request-footer">
-          <span>{`Showing ${purchaseRequests.length} purchase request${purchaseRequests.length === 1 ? "" : "s"}`}</span>
+          <span>{`Showing ${filteredRequests.length} purchase request${filteredRequests.length === 1 ? "" : "s"}`}</span>
           <div className="purchase-pagination">
             <button type="button" className="purchase-page-btn" disabled>
               <span aria-hidden="true">&lsaquo;</span>

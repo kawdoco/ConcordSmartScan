@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import AppFooter from '../components/AppFooter';
 import TableEmptyState from '../components/TableEmptyState';
 import { getAllStores, deleteLocation } from '../services/locationService';
@@ -37,6 +38,8 @@ function DeleteIcon() {
 
 const StoreManagement = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get('q') || '';
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,12 +47,12 @@ const StoreManagement = () => {
 
   useEffect(() => {
     loadStores();
-  }, []);
+  }, [searchQ]);
 
   const loadStores = () => {
     setLoading(true);
     setError(null);
-    getAllStores()
+    getAllStores(searchQ)
       .then(res => {
         // getAllStores() returns the filtered array directly, not a response object
         const storesArray = Array.isArray(res) ? res : res.data || [];

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import TableEmptyState from "../components/TableEmptyState";
 import apiClient from "../services/api";
@@ -7,6 +8,8 @@ import "./TransferRequests.css";
 
 function TransferRequests() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
   const [transferRequests, setTransferRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -35,6 +38,17 @@ function TransferRequests() {
   useEffect(() => {
     fetchTransferRequests();
   }, []);
+
+  const filteredRequests = transferRequests.filter((row) => {
+    const query = searchQ.trim().toLowerCase();
+    if (!query) {
+      return true;
+    }
+
+    return [row.requestCode, row.machineId, row.fromStoreId, row.toGarmentId, row.reason, row.status]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(query));
+  });
 
   const updateRequestStatus = async (requestId, status) => {
     try {
@@ -65,7 +79,7 @@ function TransferRequests() {
         <div className="transfer-requests-table-wrap">
           {loading ? (
             <TableEmptyState message="Loading transfer requests..." minHeight={260} />
-          ) : transferRequests.length === 0 ? (
+          ) : filteredRequests.length === 0 ? (
             <TableEmptyState message={error || "No transfer requests found."} minHeight={260} />
           ) : (
             <table>
@@ -80,7 +94,7 @@ function TransferRequests() {
                 </tr>
               </thead>
               <tbody>
-                {transferRequests.map((row) => (
+                {filteredRequests.map((row) => (
                   <tr key={row.id}>
                     <td>{row.requestCode}</td>
                     <td>{row.machineId}</td>
@@ -117,7 +131,7 @@ function TransferRequests() {
         </div>
 
         <div className="transfer-requests-footer">
-          <span>{`Showing ${transferRequests.length} transfer request${transferRequests.length === 1 ? "" : "s"}`}</span>
+          <span>{`Showing ${filteredRequests.length} transfer request${filteredRequests.length === 1 ? "" : "s"}`}</span>
           <div className="transfer-pagination">
             <button type="button" className="transfer-page-btn" disabled>
               <span aria-hidden="true">&lsaquo;</span>
