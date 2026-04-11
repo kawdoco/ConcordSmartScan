@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import GenericLookupInput from "../components/GenericLookupInput";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import apiClient from "../services/api";
 import "./AddUser.css";
 
@@ -49,6 +50,7 @@ export default function EditUserPage() {
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [chiefManagerGarmentIds, setChiefManagerGarmentIds] = useState([]);
 
   useEffect(() => {
@@ -111,8 +113,8 @@ export default function EditUserPage() {
     setSubmitError("");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    setIsConfirmOpen(false);
 
     if (!id) {
       setSubmitError("Missing user id.");
@@ -173,6 +175,11 @@ export default function EditUserPage() {
     }
   };
 
+  const handleOpenConfirm = (event) => {
+    event.preventDefault();
+    setIsConfirmOpen(true);
+  };
+
   const extractBackendError = (error, fallbackMessage) => {
     const data = error?.response?.data;
     if (!data) {
@@ -218,7 +225,7 @@ export default function EditUserPage() {
     <section className="add-user-page">
       <PagePath items={[{ label: "Users", to: "/users" }, { label: "Edit User" }]} />
 
-      <form onSubmit={handleSubmit} className="add-user-card">
+      <form onSubmit={handleOpenConfirm} className="add-user-card">
         <div className="add-user-card-header">
           <span className="add-user-card-icon" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -377,6 +384,18 @@ export default function EditUserPage() {
           </button>
         </div>
       </form>
+
+      <ConfirmActionModal
+        isOpen={isConfirmOpen}
+        title="Confirm Update"
+        message="Are you sure you want to update this user?"
+        confirmLabel="Yes, Update"
+        cancelLabel="Cancel"
+        variant="approve"
+        isSubmitting={isSubmitting}
+        onConfirm={handleSubmit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
 
       <AppFooter />
     </section>

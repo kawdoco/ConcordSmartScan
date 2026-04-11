@@ -414,6 +414,7 @@ import { useNavigate } from 'react-router-dom';
 import AppFooter from '../components/AppFooter';
 import PagePath from '../components/PagePath';
 import GenericLookupInput from '../components/GenericLookupInput';
+import ConfirmActionModal from '../components/ConfirmActionModal';
 import apiClient from '../services/api';
 import './AddUser.css';
 
@@ -463,6 +464,7 @@ const AddUser = () => {
   const [formErrors, setFormErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [chiefManagerGarmentIds, setChiefManagerGarmentIds] = useState([]);
 
   useEffect(() => {
@@ -550,8 +552,8 @@ const AddUser = () => {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    setIsConfirmOpen(false);
     if (!validateSecurityFields()) return;
     if (!validateAge()) return;  // Age validation added here
 
@@ -591,6 +593,11 @@ const AddUser = () => {
     }
   };
 
+  const handleOpenConfirm = (event) => {
+    event.preventDefault();
+    setIsConfirmOpen(true);
+  };
+
   const handleCancel = () => {
     navigate('/users');
   };
@@ -604,7 +611,7 @@ const AddUser = () => {
     <section className="add-user-page">
       <PagePath items={[{ label: 'Users', to: '/users' }, { label: 'Add User' }]} />
 
-      <form onSubmit={handleSubmit} className="add-user-card">
+      <form onSubmit={handleOpenConfirm} className="add-user-card">
         <div className="add-user-card-header">
           <span className="add-user-card-icon" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -884,6 +891,18 @@ const AddUser = () => {
               </button>
             </div>
       </form>
+
+      <ConfirmActionModal
+        isOpen={isConfirmOpen}
+        title="Confirm New User"
+        message="Are you sure you want to add this user?"
+        confirmLabel="Yes, Add User"
+        cancelLabel="Cancel"
+        variant="approve"
+        isSubmitting={isSubmitting}
+        onConfirm={handleSubmit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
 
       <AppFooter />
     </section>

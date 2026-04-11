@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../authentication/AuthContext';
 import AppFooter from '../components/AppFooter';
+import ConfirmActionModal from '../components/ConfirmActionModal';
 import TableEmptyState from '../components/TableEmptyState';
 import { getAllStores, deleteLocation } from '../services/locationService';
 import './StoreManagement.css';
@@ -189,22 +190,16 @@ const StoreManagement = () => {
         </div>
       </div>
 
-      {canManageStores && deleteConfirm && (
-        <div className="store-delete-modal">
-          <div className="store-delete-modal-content">
-            <h3>Delete Store</h3>
-            <p>Are you sure you want to delete <strong>{deleteConfirm.name}</strong>?</p>
-            <div className="store-delete-modal-actions">
-              <button type="button" className="btn-secondary" onClick={() => setDeleteConfirm(null)}>
-                Cancel
-              </button>
-              <button type="button" className="btn-danger" onClick={confirmDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmActionModal
+        isOpen={canManageStores && Boolean(deleteConfirm)}
+        title="Delete Store"
+        message={`Are you sure you want to delete ${deleteConfirm ? deleteConfirm.name : "this store"}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="decline"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm(null)}
+      />
 
       <AppFooter />
     </section>
