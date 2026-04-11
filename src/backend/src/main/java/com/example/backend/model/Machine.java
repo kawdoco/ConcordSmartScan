@@ -21,7 +21,6 @@ public class Machine {
 
     public Machine() {
     }
-
     public Long getId() {
         return id;
     }
@@ -78,6 +77,14 @@ public class Machine {
         this.location = location;
     }
 
+    public LocalDate getAddedDate() {
+        return date;
+    }
+
+    public void setAddedDate(LocalDate addedDate) {
+        this.date = addedDate;
+    }
+
     public LocalDate getDate() {
         return date;
     }
@@ -86,7 +93,6 @@ public class Machine {
         this.date = date;
     }
 
-    // Getters & Setters
     public void setMachineCode(String machineId) {
         this.machineId = machineId;
     }

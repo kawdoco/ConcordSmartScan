@@ -43,8 +43,8 @@ public class LocationController {
      */
     @GetMapping("/garments")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<LocationResponse>> getAllGarments() {
-        return ResponseEntity.ok(locationService.getAllGarments());
+    public ResponseEntity<List<LocationResponse>> getAllGarments(@RequestParam(required = false) String search) {
+        return ResponseEntity.ok(locationService.getAllGarments(search));
     }
 
     // NOTE: Store management is handled by a separate implementation.
@@ -56,8 +56,8 @@ public class LocationController {
       */
     @GetMapping("/stores")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<LocationResponse>> getAllStores() {
-        return ResponseEntity.ok(locationService.getAllStores());
+    public ResponseEntity<List<LocationResponse>> getAllStores(@RequestParam(required = false) String search) {
+        return ResponseEntity.ok(locationService.getAllStores(search));
      }
 
     /**
@@ -66,8 +66,8 @@ public class LocationController {
      */
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<LocationResponse>> getAllLocations() {
-        return ResponseEntity.ok(locationService.getAllLocations());
+    public ResponseEntity<List<LocationResponse>> getAllLocations(@RequestParam(required = false) String search) {
+        return ResponseEntity.ok(locationService.getAllLocations(search));
     }
 
     /**

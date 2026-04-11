@@ -1,7 +1,8 @@
-﻿import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import ConfirmActionModal from "../components/ConfirmActionModal";
+import { useSearchParams } from "react-router-dom";
 import apiClient from "../services/api";
 import { formatUserId } from "./userId";
 import "./AddUser.css";
@@ -44,6 +45,8 @@ const ROWS_PER_PAGE = 8;
 
 export default function UserManagement() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
 
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -60,9 +63,11 @@ export default function UserManagement() {
     setTimeout(() => setToast((previous) => ({ ...previous, visible: false })), 3000);
   }, []);
 
-  const loadUsers = useCallback(() => {
+  const loadUsers = useCallback((search = "") => {
     return apiClient
-      .get("/users")
+      .get("/users", {
+        params: search ? { search } : undefined,
+      })
       .then((res) => {
         const mapped = (Array.isArray(res.data) ? res.data : []).map((user) => ({
           id: String(user.id),
@@ -70,7 +75,9 @@ export default function UserManagement() {
           role: formatRoleDisplay(user.role),
           location: user.location || "",
           email: user.email,
-          date: user.createdAt ? user.createdAt.slice(0, 10) : today()
+          date: user.createdAt
+            ? user.createdAt.slice(0, 10)
+            : today(),
         }));
         setUsers(mapped);
       })
@@ -78,8 +85,8 @@ export default function UserManagement() {
   }, [showToast]);
 
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+    loadUsers(searchQ);
+  }, [loadUsers, searchQ]);
 
   useEffect(() => {
     setPage(1);
@@ -94,6 +101,9 @@ export default function UserManagement() {
   const managers = users.filter((user) => user.role === "Chief Manager").length;
   const techs = users.filter((user) => user.role === "Technician").length;
 
+  useEffect(() => { setPage(1); }, [activeTab, searchQ]);
+
+  // ── Form helpers ──
   const resetForm = () => {
     setForm({ name: "", role: "Technician", location: "", email: "", password: "" });
     setFormErr({});

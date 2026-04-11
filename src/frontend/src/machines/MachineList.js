@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
@@ -43,6 +43,8 @@ const PAGE_SIZE = 10;
 
 function MachineList() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
   const { user } = useAuth();
   const role = String(user?.role || "").toUpperCase();
   const canManageMachines = role === "ADMIN";
@@ -51,26 +53,33 @@ function MachineList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchQ);
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [notification, setNotification]   = useState(null);
-  const [qrMachine, setQrMachine]         = useState(null);
-  const [scanOpen, setScanOpen]           = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [qrMachine, setQrMachine] = useState(null);
+  const [scanOpen, setScanOpen] = useState(false);
 
   const showNotification = (message, type) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3500);
   };
 
-  useEffect(() => { fetchMachines(); }, []);
+  useEffect(() => {
+    fetchMachines();
+  }, []);
+
+  useEffect(() => {
+    setSearch(searchQ);
+    setCurrentPage(1);
+  }, [searchQ]);
 
   const fetchMachines = async () => {
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
       const response = await apiClient.get("/machines");
-
-      setMachines(response.data);
+      setMachines(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       if (err.response?.status === 403) {
         setError("Access denied. Your role does not have permission to view machines.");
@@ -104,7 +113,7 @@ function MachineList() {
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated  = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const handleDeleteConfirm = async () => {
     if (!deleteConfirm) return;
@@ -112,13 +121,19 @@ function MachineList() {
     try {
       await apiClient.delete(`/machines/${deletedMachine.id}`);
       await fetchMachines();
-      showNotification(`Machine ${getMachineDisplayId(deletedMachine)} was deleted successfully.`, "success");
-    } catch { alert("Error deleting machine"); }
-    finally { setDeleteConfirm(null); }
+    showNotification(
+      `Machine ${getMachineDisplayId(deletedMachine)} was deleted successfully.`,
+      "success"
+    );
+    } catch {
+      alert("Error deleting machine");
+    } finally {
+      setDeleteConfirm(null);
+    } 
   };
 
   const getLocationLabel = () => {
-    if (activeTab === "stores")   return "Store Name";
+    if (activeTab === "stores") return "Store Name";
     if (activeTab === "garments") return "Garment Name";
     return "Location";
   };
@@ -154,8 +169,8 @@ function MachineList() {
       )}
 
       <div className="machine-list-tabs">
-        {[["all","All Machines"],["stores","At Stores"],["garments","At Garments"]].map(([tab, lbl]) => (
-          <button key={tab} type="button" className={`machine-list-tab${activeTab===tab?" active":""}`}
+        {[ ["all", "All Machines"], ["stores", "At Stores"], ["garments", "At Garments"] ].map(([tab, lbl]) => (
+          <button key={tab} type="button" className={`machine-list-tab${activeTab === tab ? " active" : ""}`}
             onClick={() => { setActiveTab(tab); setCurrentPage(1); }}>{lbl}</button>
         ))}
       </div>
@@ -229,7 +244,7 @@ function MachineList() {
                         <td>
                           <span className="machine-list-location-pill">{machine.location}</span>
                         </td>
-                        <td>{machine.date}</td>
+                        <td>{machine.date || machine.addedDate || "-"}</td>
                         <td>
                           <div className="machine-list-actions">
                             <Link to={`/machine/${machine.id}`} className="machine-list-icon-btn" title="View">
@@ -283,19 +298,19 @@ function MachineList() {
         <div className="machine-list-tfoot">
           <span>
             {filtered.length === 0 ? "No machines"
-              : `Showing ${Math.min((currentPage-1)*PAGE_SIZE+1,filtered.length)}–${Math.min(currentPage*PAGE_SIZE,filtered.length)} of ${filtered.length} machines`}
+              : `Showing ${Math.min((currentPage - 1) * PAGE_SIZE + 1, filtered.length)}-${Math.min(currentPage * PAGE_SIZE, filtered.length)} of ${filtered.length} machines`}
           </span>
           <div className="machine-list-pagination">
-            <button className="machine-list-pg-btn" onClick={() => setCurrentPage(p=>p-1)} disabled={currentPage===1}><IconChevLeft /></button>
-            {Array.from({length:totalPages},(_,i)=>i+1).map(page=>(
-              <button key={page} className={`machine-list-pg-btn${page===currentPage?" active":""}`} onClick={()=>setCurrentPage(page)}>{page}</button>
+            <button className="machine-list-pg-btn" onClick={() => setCurrentPage((p) => p - 1)} disabled={currentPage === 1}><IconChevLeft /></button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button key={page} className={`machine-list-pg-btn${page === currentPage ? " active" : ""}`} onClick={() => setCurrentPage(page)}>{page}</button>
             ))}
-            <button className="machine-list-pg-btn" onClick={() => setCurrentPage(p=>p+1)} disabled={currentPage===totalPages}><IconChevRight /></button>
+            <button className="machine-list-pg-btn" onClick={() => setCurrentPage((p) => p + 1)} disabled={currentPage === totalPages}><IconChevRight /></button>
           </div>
         </div>
       </div>
 
-      <div style={{flex:1}} />
+      <div style={{ flex: 1 }} />
       <AppFooter />
     </section>
   );

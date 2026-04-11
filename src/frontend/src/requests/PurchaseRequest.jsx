@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import ConfirmActionModal from "../components/ConfirmActionModal";
 import TableEmptyState from "../components/TableEmptyState";
@@ -15,6 +16,8 @@ const STATUS_LABELS = {
 
 function PurchaseRequest() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
   const { user } = useAuth();
   const role = String(user?.role || "").toUpperCase();
   const canManageStatus = role === "CHIEF_MANAGER";
@@ -83,6 +86,17 @@ function PurchaseRequest() {
   useEffect(() => {
     fetchPurchaseRequests();
   }, []);
+
+  const filteredRequests = purchaseRequests.filter((row) => {
+    const query = searchQ.trim().toLowerCase();
+    if (!query) {
+      return true;
+    }
+
+    return [row.requestCode, row.machineType, row.toGarmentId, row.priority, row.status]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(query));
+  });
 
   const updateRequestStatus = async (requestId, status) => {
     const nextStatus = String(status || "").toLowerCase();
@@ -153,16 +167,16 @@ function PurchaseRequest() {
         <div className="purchase-request-table-wrap">
           {loading ? (
             <TableEmptyState message="Loading purchase requests..." minHeight={260} />
-          ) : purchaseRequests.length === 0 ? (
-            <TableEmptyState
-              message={
-                error
-                  || (canManageStatus && chiefManagerGarmentId != null
-                    ? "No purchase requests found for your garment."
-                    : "No purchase requests found.")
-              }
-              minHeight={260}
-            />
+        ) : filteredRequests.length === 0 ? (
+          <TableEmptyState
+            message={
+              error
+                || (canManageStatus && chiefManagerGarmentId != null
+                  ? "No purchase requests found for your garment."
+                  : "No purchase requests found.")
+            }
+            minHeight={260}
+          />
           ) : (
             <table>
               <thead>
@@ -177,7 +191,7 @@ function PurchaseRequest() {
                 </tr>
               </thead>
               <tbody>
-                {purchaseRequests.map((row) => {
+                {filteredRequests.map((row) => {
                   const status = STATUS_LABELS[row.status] ? row.status : "pending";
                   const isUpdatingStatus = updatingRequestIds.includes(row.id);
 
@@ -247,7 +261,7 @@ function PurchaseRequest() {
         </div>
 
         <div className="purchase-request-footer">
-          <span>{`Showing ${purchaseRequests.length} purchase request${purchaseRequests.length === 1 ? "" : "s"}`}</span>
+          <span>{`Showing ${filteredRequests.length} purchase request${filteredRequests.length === 1 ? "" : "s"}`}</span>
           <div className="purchase-pagination">
             <button type="button" className="purchase-page-btn" disabled>
               <span aria-hidden="true">&lsaquo;</span>
