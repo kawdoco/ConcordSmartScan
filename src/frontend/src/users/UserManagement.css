@@ -1,0 +1,441 @@
+.user-management-page {
+  font-family: "Sora", sans-serif;
+  color: #0f1623;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-management-content {
+  padding: 8px;
+}
+
+.user-management-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.user-management-stat-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-management-stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #eef1fd;
+  color: #1a3fd4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-management-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.user-management-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.user-management-tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 16px;
+}
+
+.user-management-tab {
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.user-management-tab.active {
+  color: #1a3fd4;
+  border-bottom-color: #1a3fd4;
+}
+
+.user-management-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.user-management-card-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 18px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-management-card-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.user-management-card-subtitle {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.user-management-btn-primary {
+  border: none;
+  background: #1a3fd4;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.user-management-btn-primary:hover {
+  background: #1230a8;
+}
+
+.user-management-btn-secondary {
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.user-management-btn-secondary:hover {
+  background: #f4f6fb;
+  color: #0f1623;
+}
+
+.user-management-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-management-card th {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  text-align: left;
+  padding: 11px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f4f6fb;
+}
+
+.user-management-card td {
+  font-size: 13px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.user-management-card tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.user-management-card tbody tr:hover {
+  background: #f8f9ff;
+}
+
+.user-management-uid {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.user-management-name {
+  font-weight: 600;
+}
+
+.user-management-badge {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.user-management-badge.admin {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.user-management-badge.chief {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.user-management-badge.tech {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.user-management-badge.default {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.user-management-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-management-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1.5px solid transparent;
+  background: #fff;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.user-management-icon-btn:hover {
+  border-color: #b8c8f8;
+  background: #eef1fd;
+  color: #1a3fd4;
+}
+
+.user-management-icon-btn.delete:hover {
+  border-color: #fca5a5;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.user-management-empty {
+  text-align: center;
+  color: #6b7280;
+  padding: 56px 20px;
+}
+
+.user-management-empty svg {
+  width: 46px;
+  height: 46px;
+  opacity: 0.3;
+}
+
+.user-management-empty-title {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.user-management-empty-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.user-management-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.user-management-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.user-management-pg-btn {
+  min-width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.user-management-pg-btn.active {
+  background: #1a3fd4;
+  border-color: #1a3fd4;
+  color: #fff;
+}
+
+.user-management-pg-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.user-management-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 22, 35, 0.45);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px);
+  padding: 16px;
+}
+
+.user-management-overlay.open {
+  display: flex;
+}
+
+.user-management-modal {
+  width: min(560px, 95vw);
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.24);
+  padding: 18px;
+}
+
+.user-management-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.user-management-modal-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a3fd4;
+}
+
+.user-management-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.user-management-form {
+  margin-top: 4px;
+}
+
+.user-management-form-grid {
+  margin-bottom: 0;
+}
+
+.user-management-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.user-management-view-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 18px;
+}
+
+.user-management-view-field {
+  margin-bottom: 10px;
+}
+
+.user-management-view-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+}
+
+.user-management-view-value {
+  margin-top: 2px;
+  font-size: 14px;
+  color: #0f1623;
+}
+
+.user-management-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 600;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(80px);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.user-management-toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.user-management-toast-success {
+  background: #065f46;
+}
+
+.user-management-toast-error {
+  background: #991b1b;
+}
+
+.user-management-toast-info {
+  background: #1230a8;
+}
+
+@media (max-width: 900px) {
+  .user-management-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .user-management-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .user-management-view-grid {
+    grid-template-columns: 1fr;
+  }
+}
