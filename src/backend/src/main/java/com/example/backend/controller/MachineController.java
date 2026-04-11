@@ -43,10 +43,14 @@
 package com.example.backend.controller;
 
 import com.example.backend.model.Machine;
+import com.example.backend.repository.MachineRepository;
 import com.example.backend.service.MachineService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/machines")
@@ -54,19 +58,35 @@ import java.util.List;
 public class MachineController {
 
     private final MachineService service;
+    private final MachineRepository machineRepository;
 
-    public MachineController(MachineService service) {
+    public MachineController(MachineService service, MachineRepository machineRepository) {
         this.service = service;
+        this.machineRepository = machineRepository;
     }
 
     @GetMapping
-    public List<Machine> getAllMachines() {
-        return service.getAllMachines();
+    public List<Machine> getAllMachines(@RequestParam(required = false) String search) {
+        return service.getAllMachines().stream()
+                .filter(machine -> matchesSearch(machine, search))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public Machine getMachineById(@PathVariable Long id) {
-        return service.getMachineById(id);
+    public ResponseEntity<Machine> getMachineById(@PathVariable Long id) {
+        try {
+            Machine machine = service.getMachineById(id);
+            return ResponseEntity.ok(machine);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/code/{machineCode}")
+    public ResponseEntity<Machine> getMachineByCode(@PathVariable String machineCode) {
+        return machineRepository.findByMachineId(machineCode)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PostMapping
@@ -83,5 +103,26 @@ public class MachineController {
     public String deleteMachine(@PathVariable Long id) {
         service.deleteMachine(id);
         return "Machine deleted successfully!";
+    }
+
+    private boolean matchesSearch(Machine machine, String search) {
+        String query = normalizeSearch(search);
+        if (query.isEmpty()) {
+            return true;
+        }
+
+        return containsIgnoreCase(String.valueOf(machine.getId()), query)
+                || containsIgnoreCase(machine.getMachineCode(), query)
+                || containsIgnoreCase(machine.getType(), query)
+                || containsIgnoreCase(machine.getLocation(), query)
+                || containsIgnoreCase(machine.getAddedDate() == null ? null : machine.getAddedDate().toString(), query);
+    }
+
+    private String normalizeSearch(String search) {
+        return search == null ? "" : search.trim().toLowerCase();
+    }
+
+    private boolean containsIgnoreCase(String value, String query) {
+        return value != null && value.toLowerCase().contains(query);
     }
 }

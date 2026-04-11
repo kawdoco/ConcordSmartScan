@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import ConfirmActionModal from "../components/ConfirmActionModal";
 import TableEmptyState from "../components/TableEmptyState";
@@ -15,10 +16,13 @@ const STATUS_LABELS = {
 
 function PurchaseRequest() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
   const { user } = useAuth();
   const role = String(user?.role || "").toUpperCase();
   const canManageStatus = role === "CHIEF_MANAGER";
   const showHistoryView = role === "TECHNICIAN";
+  const [chiefManagerGarmentId, setChiefManagerGarmentId] = useState(null);
   const [purchaseRequests, setPurchaseRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -34,12 +38,29 @@ function PurchaseRequest() {
     return `${value.slice(0, maxLength)}...`;
   };
 
+  const extractNumericGarmentId = (value) => {
+    const matched = String(value || "").match(/(\d+)/);
+    if (!matched) {
+      return null;
+    }
+
+    const parsed = Number(matched[1]);
+    return Number.isInteger(parsed) ? parsed : null;
+  };
+
   const fetchPurchaseRequests = async () => {
     try {
       setError("");
-      const response = await apiClient.get("/requests", {
-        params: { type: "purchase" }
-      });
+      const [response, currentUserResponse] = await Promise.all([
+        apiClient.get("/requests", {
+          params: { type: "purchase" }
+        }),
+        canManageStatus && user?.id ? apiClient.get(`/users/${user.id}`) : Promise.resolve(null)
+      ]);
+
+      const currentGarmentId = currentUserResponse?.data?.garmentId ?? null;
+      setChiefManagerGarmentId(currentGarmentId);
+
       const normalizedRows = Array.isArray(response.data)
         ? response.data.map((row) => ({
             ...row,
@@ -47,7 +68,14 @@ function PurchaseRequest() {
             priority: String(row.priority || "medium").toLowerCase()
           }))
         : [];
-      setPurchaseRequests(normalizedRows);
+
+      const visibleRows = canManageStatus
+        ? (currentGarmentId != null
+          ? normalizedRows.filter((row) => extractNumericGarmentId(row.toGarmentId) === Number(currentGarmentId))
+          : [])
+        : normalizedRows;
+
+      setPurchaseRequests(visibleRows);
     } catch (requestError) {
       setError(requestError.response?.data?.message || "Failed to load purchase requests.");
     } finally {
@@ -58,6 +86,17 @@ function PurchaseRequest() {
   useEffect(() => {
     fetchPurchaseRequests();
   }, []);
+
+  const filteredRequests = purchaseRequests.filter((row) => {
+    const query = searchQ.trim().toLowerCase();
+    if (!query) {
+      return true;
+    }
+
+    return [row.requestCode, row.machineType, row.toGarmentId, row.priority, row.status]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(query));
+  });
 
   const updateRequestStatus = async (requestId, status) => {
     const nextStatus = String(status || "").toLowerCase();
@@ -128,8 +167,16 @@ function PurchaseRequest() {
         <div className="purchase-request-table-wrap">
           {loading ? (
             <TableEmptyState message="Loading purchase requests..." minHeight={260} />
-          ) : purchaseRequests.length === 0 ? (
-            <TableEmptyState message={error || "No purchase requests found."} minHeight={260} />
+        ) : filteredRequests.length === 0 ? (
+          <TableEmptyState
+            message={
+              error
+                || (canManageStatus && chiefManagerGarmentId != null
+                  ? "No purchase requests found for your garment."
+                  : "No purchase requests found.")
+            }
+            minHeight={260}
+          />
           ) : (
             <table>
               <thead>
@@ -144,7 +191,7 @@ function PurchaseRequest() {
                 </tr>
               </thead>
               <tbody>
-                {purchaseRequests.map((row) => {
+                {filteredRequests.map((row) => {
                   const status = STATUS_LABELS[row.status] ? row.status : "pending";
                   const isUpdatingStatus = updatingRequestIds.includes(row.id);
 
@@ -214,7 +261,7 @@ function PurchaseRequest() {
         </div>
 
         <div className="purchase-request-footer">
-          <span>{`Showing ${purchaseRequests.length} purchase request${purchaseRequests.length === 1 ? "" : "s"}`}</span>
+          <span>{`Showing ${filteredRequests.length} purchase request${filteredRequests.length === 1 ? "" : "s"}`}</span>
           <div className="purchase-pagination">
             <button type="button" className="purchase-page-btn" disabled>
               <span aria-hidden="true">&lsaquo;</span>

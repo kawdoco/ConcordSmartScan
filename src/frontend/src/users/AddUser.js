@@ -1,6 +1,6 @@
 /*
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppFooter from '../components/AppFooter';
 import PagePath from '../components/PagePath';
@@ -30,6 +30,36 @@ const AddUser = () => {
   const [formErrors, setFormErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [chiefManagerGarmentIds, setChiefManagerGarmentIds] = useState([]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadChiefManagerAssignments = async () => {
+      try {
+        const response = await apiClient.get('/users');
+        const users = Array.isArray(response.data) ? response.data : [];
+        const assigned = users
+          .filter((user) => (user.role || user.userType) === 'CHIEF_MANAGER' && user.garmentId != null)
+          .map((user) => Number(user.garmentId))
+          .filter((garmentId) => Number.isInteger(garmentId));
+
+        if (isActive) {
+          setChiefManagerGarmentIds(Array.from(new Set(assigned)));
+        }
+      } catch {
+        if (isActive) {
+          setChiefManagerGarmentIds([]);
+        }
+      }
+    };
+
+    loadChiefManagerAssignments();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -379,12 +409,37 @@ export default AddUser;
 */
 
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppFooter from '../components/AppFooter';
 import PagePath from '../components/PagePath';
+import GenericLookupInput from '../components/GenericLookupInput';
+import ConfirmActionModal from '../components/ConfirmActionModal';
 import apiClient from '../services/api';
 import './AddUser.css';
+
+const formatGarmentDisplayId = (garmentId) => {
+  const parsed = Number(garmentId);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    return '';
+  }
+  return `GAR-${String(parsed).padStart(3, '0')}`;
+};
+
+const parseGarmentId = (value) => {
+  const normalized = String(value || '').trim();
+  if (!normalized) {
+    return null;
+  }
+
+  const match = normalized.match(/(\d+)/);
+  if (!match) {
+    return null;
+  }
+
+  const parsed = Number(match[1]);
+  return Number.isInteger(parsed) ? parsed : null;
+};
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -409,6 +464,37 @@ const AddUser = () => {
   const [formErrors, setFormErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [chiefManagerGarmentIds, setChiefManagerGarmentIds] = useState([]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadChiefManagerAssignments = async () => {
+      try {
+        const response = await apiClient.get('/users');
+        const users = Array.isArray(response.data) ? response.data : [];
+        const assigned = users
+          .filter((user) => (user.role || user.userType) === 'CHIEF_MANAGER' && user.garmentId != null)
+          .map((user) => Number(user.garmentId))
+          .filter((garmentId) => Number.isInteger(garmentId));
+
+        if (isActive) {
+          setChiefManagerGarmentIds(Array.from(new Set(assigned)));
+        }
+      } catch {
+        if (isActive) {
+          setChiefManagerGarmentIds([]);
+        }
+      }
+    };
+
+    loadChiefManagerAssignments();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   // Helper: calculate max date (18 years ago)
   const getMaxDate = () => {
@@ -466,13 +552,19 @@ const AddUser = () => {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    setIsConfirmOpen(false);
     if (!validateSecurityFields()) return;
     if (!validateAge()) return;  // Age validation added here
 
-    if (formData.garmentId && Number.isNaN(Number(formData.garmentId))) {
+    const parsedGarmentId = parseGarmentId(formData.garmentId);
+    if (formData.garmentId && parsedGarmentId === null) {
       setSubmitError('Garment ID must be a valid number.');
+      return;
+    }
+
+    if (formData.userType === 'CHIEF_MANAGER' && parsedGarmentId !== null && chiefManagerGarmentIds.includes(parsedGarmentId)) {
+      setSubmitError('Selected garment is already assigned to a Chief Manager.');
       return;
     }
 
@@ -485,7 +577,7 @@ const AddUser = () => {
       address: formData.address.trim(),
       companyEmail: formData.companyEmail.trim(),
       password: formData.password,
-      garmentId: formData.garmentId ? Number(formData.garmentId) : null,
+      garmentId: parsedGarmentId,
     };
 
     try {
@@ -501,6 +593,11 @@ const AddUser = () => {
     }
   };
 
+  const handleOpenConfirm = (event) => {
+    event.preventDefault();
+    setIsConfirmOpen(true);
+  };
+
   const handleCancel = () => {
     navigate('/users');
   };
@@ -514,7 +611,7 @@ const AddUser = () => {
     <section className="add-user-page">
       <PagePath items={[{ label: 'Users', to: '/users' }, { label: 'Add User' }]} />
 
-      <form onSubmit={handleSubmit} className="add-user-card">
+      <form onSubmit={handleOpenConfirm} className="add-user-card">
         <div className="add-user-card-header">
           <span className="add-user-card-icon" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -640,14 +737,33 @@ const AddUser = () => {
 
               <div className="add-user-grid-two">
                 <div className="add-user-field">
-                  <label htmlFor="garmentId">Garment ID</label>
-                  <input
-                    type="text"
+                  <GenericLookupInput
                     id="garmentId"
                     name="garmentId"
+                    label="Garment ID"
                     value={formData.garmentId}
                     onChange={handleInputChange}
+                    error={formErrors.garmentId}
                     placeholder="Select or search Garment ID"
+                    className="add-user-field"
+                    endpoint="/locations/garments"
+                    optionFilter={(garment) => {
+                      if (formData.userType !== 'CHIEF_MANAGER') {
+                        return true;
+                      }
+                      return !chiefManagerGarmentIds.includes(Number(garment.locationId));
+                    }}
+                    searchFields={[
+                      (garment) => formatGarmentDisplayId(garment.locationId),
+                      'locationId',
+                      'name'
+                    ]}
+                    getOptionKey={(garment) => garment.locationId}
+                    getOptionValue={(garment) => formatGarmentDisplayId(garment.locationId)}
+                    getPrimaryText={(garment) => formatGarmentDisplayId(garment.locationId)}
+                    getSecondaryText={(garment) => garment.name || '-'}
+                    emptyMessage={formData.userType === 'CHIEF_MANAGER' ? 'No unassigned garments found' : 'No garments found'}
+                    loadingMessage="Loading garments..."
                   />
                 </div>
 
@@ -775,6 +891,18 @@ const AddUser = () => {
               </button>
             </div>
       </form>
+
+      <ConfirmActionModal
+        isOpen={isConfirmOpen}
+        title="Confirm New User"
+        message="Are you sure you want to add this user?"
+        confirmLabel="Yes, Add User"
+        cancelLabel="Cancel"
+        variant="approve"
+        isSubmitting={isSubmitting}
+        onConfirm={handleSubmit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
 
       <AppFooter />
     </section>

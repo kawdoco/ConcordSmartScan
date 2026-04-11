@@ -4,6 +4,8 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import QRModal from "./QRModal";
+import apiClient from "../services/api";
+import { getMachineDisplayId } from "./machineId";
 import "./ViewMachine.css";
 
 function IconMachine() {
@@ -40,19 +42,17 @@ function ViewMachine() {
   const fetchMachine = async () => {
     try {
       setLoading(true); setError(null);
-      const token = localStorage.getItem("token");
-      if (!token) { navigate("/login"); return; }
-      const response = await fetch(`http://localhost:8080/api/machines/${id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      });
-      if (response.status === 401) { localStorage.removeItem("token"); navigate("/login"); return; }
-      if (response.status === 403) throw new Error("Access denied (403)");
-      if (response.status === 404) throw new Error("Machine not found");
-      if (!response.ok) throw new Error(`Error: ${response.status}`);
-      const data = await response.json();
-      setMachine(data);
-    } catch (err) { setError(err.message); }
+      const response = await apiClient.get(`/machines/${id}`);
+      setMachine(response.data);
+    } catch (err) {
+      if (err.response?.status === 403) {
+        setError("Access denied (403)");
+      } else if (err.response?.status === 404) {
+        setError("Machine not found");
+      } else {
+        setError(err.message || "Failed to load machine details");
+      }
+    }
     finally { setLoading(false); }
   };
 
@@ -83,7 +83,7 @@ function ViewMachine() {
   }
   if (!machine) return null;
 
-const displayMachineId = `MAC-${String(machine.id ?? "").padStart(3, "0")}`;
+const displayMachineId = getMachineDisplayId(machine);
 
   return (
     <section className="view-machine-page">

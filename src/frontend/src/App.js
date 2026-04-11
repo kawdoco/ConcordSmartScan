@@ -12,6 +12,7 @@ import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
 import AddUser from "./users/AddUser";
 import EditUserPage from "./users/EditUser";
+import ViewUser from "./users/ViewUser";
 import AppLayout from "./components/AppLayout";
 import StoreManagement from "./stores/StoreManagement";
 import AddStore from "./stores/AddStore";
@@ -105,6 +106,14 @@ function App() {
             element={
               <RequireRole allowedRoles={["ADMIN"]}>
                 <EditUserPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="users/view/:id"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <ViewUser />
               </RequireRole>
             }
           />

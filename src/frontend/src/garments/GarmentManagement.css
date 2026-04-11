@@ -109,6 +109,7 @@
 
 .garment-table td {
   padding: 15px 20px;
+  font-family: 'Sora', sans-serif;
   font-size: 13.5px;
   color: #475569;
   border-bottom: 1px solid #e5e7eb;
@@ -119,20 +120,22 @@
 }
 
 .garment-id {
-  color: #6b7280;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  color: #475569;
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
 }
 
 .garment-branch {
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
   color: #1f2937;
   font-weight: 600;
 }
 
 .garment-lat-long {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: #6b7280;
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
+  color: #475569;
 }
 
 .garment-action-icons {

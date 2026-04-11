@@ -174,10 +174,23 @@ public class MachineRequestService {
     }
 
     private String formatMachineDisplayId(Machine machine) {
-        if (machine == null || machine.getId() == null) {
-            return normalizeOptional(machine != null ? machine.getMachineCode() : null);
+        if (machine == null) {
+            return null;
         }
-        return "MAC-" + String.format(Locale.ROOT, "%03d", machine.getId());
+
+        String directMachineId = normalizeOptional(machine.getMachineId());
+        if (directMachineId != null) {
+            Long numeric = extractNumericSuffix(directMachineId);
+            if (numeric != null && numeric > 0) {
+                return "MAC-" + String.format(Locale.ROOT, "%03d", numeric);
+            }
+        }
+
+        if (machine.getId() != null && machine.getId() > 0) {
+            return "MAC-" + String.format(Locale.ROOT, "%03d", machine.getId());
+        }
+
+        return directMachineId;
     }
 
     private String normalizeRequired(String value, String message) {
@@ -328,7 +341,14 @@ public class MachineRequestService {
             // Keep flowing to padded machineId lookup.
         }
 
-        String padded = String.format(Locale.ROOT, "%03d", Integer.parseInt(normalized));
+        int numericValue = Integer.parseInt(normalized);
+        String padded = String.format(Locale.ROOT, "%03d", numericValue);
+
+        Optional<Machine> prefixedMatch = machineRepository.findByMachineId("MAC-" + padded);
+        if (prefixedMatch.isPresent()) {
+            return prefixedMatch;
+        }
+
         return machineRepository.findByMachineId(padded);
     }
 }

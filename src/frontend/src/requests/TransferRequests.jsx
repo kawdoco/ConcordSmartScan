@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import ConfirmActionModal from "../components/ConfirmActionModal";
 import TableEmptyState from "../components/TableEmptyState";
@@ -14,11 +14,13 @@ const STATUS_LABELS = {
 };
 
 function TransferRequests() {
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
   const { user } = useAuth();
   const role = String(user?.role || "").toUpperCase();
   const canManageStatus = role === "CHIEF_MANAGER";
   const showHistoryView = role === "TECHNICIAN";
+  const [chiefManagerGarmentId, setChiefManagerGarmentId] = useState(null);
   const [transferRequests, setTransferRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,12 +50,29 @@ function TransferRequests() {
     return raw;
   };
 
+  const extractNumericGarmentId = (value) => {
+    const matched = String(value || "").match(/(\d+)/);
+    if (!matched) {
+      return null;
+    }
+
+    const parsed = Number(matched[1]);
+    return Number.isInteger(parsed) ? parsed : null;
+  };
+
   const fetchTransferRequests = async () => {
     try {
       setError("");
-      const response = await apiClient.get("/requests", {
-        params: { type: "transfer" }
-      });
+      const [response, currentUserResponse] = await Promise.all([
+        apiClient.get("/requests", {
+          params: { type: "transfer" }
+        }),
+        canManageStatus && user?.id ? apiClient.get(`/users/${user.id}`) : Promise.resolve(null)
+      ]);
+
+      const currentGarmentId = currentUserResponse?.data?.garmentId ?? null;
+      setChiefManagerGarmentId(currentGarmentId);
+
       const normalizedRows = Array.isArray(response.data)
         ? response.data.map((row) => ({
             ...row,
@@ -62,7 +81,14 @@ function TransferRequests() {
             status: String(row.status || "pending").toLowerCase()
           }))
         : [];
-      setTransferRequests(normalizedRows);
+
+      const visibleRows = canManageStatus
+        ? (currentGarmentId != null
+          ? normalizedRows.filter((row) => extractNumericGarmentId(row.toGarmentId) === Number(currentGarmentId))
+          : [])
+        : normalizedRows;
+
+      setTransferRequests(visibleRows);
     } catch (requestError) {
       setError(requestError.response?.data?.message || "Failed to load transfer requests.");
     } finally {
@@ -73,6 +99,17 @@ function TransferRequests() {
   useEffect(() => {
     fetchTransferRequests();
   }, []);
+
+  const filteredRequests = transferRequests.filter((row) => {
+    const query = searchQ.trim().toLowerCase();
+    if (!query) {
+      return true;
+    }
+
+    return [row.requestCode, row.machineId, row.fromStoreId, row.toGarmentId, row.reason, row.status]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(query));
+  });
 
   const updateRequestStatus = async (requestId, status) => {
     const nextStatus = String(status || "").toLowerCase();
@@ -143,8 +180,18 @@ function TransferRequests() {
         <div className="transfer-requests-table-wrap">
           {loading ? (
             <TableEmptyState message="Loading transfer requests..." minHeight={260} />
-          ) : transferRequests.length === 0 ? (
-            <TableEmptyState message={error || "No transfer requests found."} minHeight={260} />
+
+          ) : filteredRequests.length === 0 ? (
+            <TableEmptyState
+              message={
+                error
+                  || (canManageStatus && chiefManagerGarmentId != null
+                    ? "No transfer requests found for your garment."
+                    : "No transfer requests found.")
+              }
+              minHeight={260}
+            />
+
           ) : (
             <table>
               <thead>
@@ -159,7 +206,7 @@ function TransferRequests() {
                 </tr>
               </thead>
               <tbody>
-                {transferRequests.map((row) => {
+                {filteredRequests.map((row) => {
                   const status = STATUS_LABELS[row.status] ? row.status : "pending";
                   const isUpdatingStatus = updatingRequestIds.includes(row.id);
 
@@ -229,7 +276,7 @@ function TransferRequests() {
         </div>
 
         <div className="transfer-requests-footer">
-          <span>{`Showing ${transferRequests.length} transfer request${transferRequests.length === 1 ? "" : "s"}`}</span>
+          <span>{`Showing ${filteredRequests.length} transfer request${filteredRequests.length === 1 ? "" : "s"}`}</span>
           {canManageStatus && (
             <div className="transfer-pagination">
               <button type="button" className="transfer-page-btn" disabled>

@@ -3,7 +3,10 @@ import apiClient from './api';
 /**
  * Get all locations (stores + garments)
  */
-export const getAllLocations = () => apiClient.get('/locations');
+export const getAllLocations = (search) => {
+  const params = search ? { search } : undefined;
+  return apiClient.get('/locations', { params });
+};
 
 /**
  * Get a single location by ID
@@ -34,7 +37,10 @@ export const deleteLocation = (id) => apiClient.delete(`/locations/${id}`);
 /**
  * Get all garment locations
  */
-export const getAllGarments = () => apiClient.get('/locations/garments');
+export const getAllGarments = (search) => {
+  const params = search ? { search } : undefined;
+  return apiClient.get('/locations/garments', { params });
+};
 
 /**
  * Get a single garment by ID
@@ -67,10 +73,10 @@ export const updateGarment = (id, data) => {
 /**
  * Get all store locations (filtered from all locations)
  */
-export const getAllStores = () =>
-  getAllLocations().then(res =>
-    res.data.filter(loc => loc.type === 'STORE')
-  );
+export const getAllStores = (search) => {
+  const params = search ? { search } : undefined;
+  return apiClient.get('/locations/stores', { params });
+};
 
 /**
  * Create a new store location
