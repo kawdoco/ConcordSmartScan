@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import QRModal from "./QRModal";
 import ScanModal from "./ScanModal";
 import apiClient from "../services/api";
@@ -125,19 +126,16 @@ function MachineList() {
     <section className="machine-list-page">
       <StatsCards machines={machines} />
 
-      {/* Delete confirmation modal */}
-      {canManageMachines && deleteConfirm && (
-        <div className="machine-list-modal-overlay">
-          <div className="machine-list-modal">
-            <h3 className="machine-list-modal-title">Delete machine?</h3>
-            <p className="machine-list-modal-body">Are you sure you want to delete <strong>{deleteConfirm}</strong>? This action cannot be undone.</p>
-            <div className="machine-list-modal-actions">
-              <button className="machine-list-btn-ghost" onClick={() => setDeleteConfirm(null)}>Cancel</button>
-              <button className="machine-list-btn-danger" onClick={handleDeleteConfirm}>Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmActionModal
+        isOpen={canManageMachines && Boolean(deleteConfirm)}
+        title="Delete machine?"
+        message={`Are you sure you want to delete ${deleteConfirm ? `MAC-${String(deleteConfirm).padStart(3, "0")}` : "this machine"}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="decline"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteConfirm(null)}
+      />
 
       {qrMachine && <QRModal machine={qrMachine} onClose={() => setQrMachine(null)} />}
 
