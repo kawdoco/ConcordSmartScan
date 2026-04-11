@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./ScanModal.css";
 import axios from "axios";
+import { formatMachineId, getMachineDisplayId } from "./machineId";
 
 const API_URL = "http://localhost:8080/api/machines";
 
@@ -226,9 +227,10 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
       const all = res.data;
 
       // Match: same type, at a Store (location starts with ST), exclude same machine
+      const scannedMachineId = formatMachineId(parsed.machineId);
       const matching = all.filter(
         (m) =>
-          m.machineId !== parsed.machineId &&
+          getMachineDisplayId(m) !== scannedMachineId &&
           m.type?.toLowerCase() === parsed.type?.toLowerCase() &&
           m.location?.toUpperCase().startsWith("ST")
       );
@@ -295,16 +297,17 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
         `http://localhost:8080/api/requests`,
         {
           requestedMachineId: machine.id,
-          machineId:          scanResult?.data?.machineId,
+          machineId:          formatMachineId(scanResult?.data?.machineId) || scanResult?.data?.machineId,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch {
       // If endpoint not yet implemented, still mark as requested in UI
     }
-    setRequested((prev) => new Set([...prev, machine.machineId]));
-    if (onRequest) onRequest(machine.machineId);
-    if (showToast) showToast(`Request sent to Chief Manager for ${machine.machineId}.`, "success");
+    const machineDisplayId = getMachineDisplayId(machine);
+    setRequested((prev) => new Set([...prev, machineDisplayId]));
+    if (onRequest) onRequest(machineDisplayId);
+    if (showToast) showToast(`Request sent to Chief Manager for ${machineDisplayId}.`, "success");
   };
 
   /* ── Send purchase request ── */
@@ -313,7 +316,7 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
       const token = localStorage.getItem("token");
       await axios.post(
         `http://localhost:8080/api/requests/purchase`,
-        { machineId: scanResult?.data?.machineId },
+        { machineId: formatMachineId(scanResult?.data?.machineId) || scanResult?.data?.machineId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch { /* endpoint may not be ready */ }
@@ -468,7 +471,7 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
             {/* Result badge */}
             {scanResult.ok ? (
               <div className="scm-result-badge scm-result-badge--ok">
-                ✓ Scanned: <strong>{scanResult.data.machineId}</strong>
+                ✓ Scanned: <strong>{formatMachineId(scanResult.data.machineId) || scanResult.data.machineId}</strong>
                 &nbsp;·&nbsp;{scanResult.data.type}
                 &nbsp;·&nbsp;{scanResult.data.brand} {scanResult.data.model}
               </div>
@@ -508,7 +511,7 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
                 {!loadingMatches && matches.map((m) => (
                   <div key={m.id} className="scm-match-card">
                     <div className="scm-match-left">
-                      <span className="scm-match-id">{m.machineId}</span>
+                      <span className="scm-match-id">{getMachineDisplayId(m)}</span>
                       <span className="scm-match-model">{m.brand} {m.model}</span>
                       <div className="scm-match-meta">
                         <span>{m.type}</span>
@@ -521,11 +524,11 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
                       </div>
                     </div>
                     <button
-                      className={`scm-btn-request${requested.has(m.machineId) ? " sent" : ""}`}
-                      onClick={() => !requested.has(m.machineId) && handleRequest(m)}
-                      disabled={requested.has(m.machineId)}
+                      className={`scm-btn-request${requested.has(getMachineDisplayId(m)) ? " sent" : ""}`}
+                      onClick={() => !requested.has(getMachineDisplayId(m)) && handleRequest(m)}
+                      disabled={requested.has(getMachineDisplayId(m))}
                     >
-                      {requested.has(m.machineId) ? "✓ Requested" : <><IconSend /> Request</>}
+                      {requested.has(getMachineDisplayId(m)) ? "✓ Requested" : <><IconSend /> Request</>}
                     </button>
                   </div>
                 ))}

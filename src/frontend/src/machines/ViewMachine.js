@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import QRModal from "./QRModal";
+import { getMachineDisplayId } from "./machineId";
 import "./ViewMachine.css";
 
 function IconMachine() {
@@ -83,7 +84,7 @@ function ViewMachine() {
   }
   if (!machine) return null;
 
-const displayMachineId = `MAC-${String(machine.id ?? "").padStart(3, "0")}`;
+const displayMachineId = getMachineDisplayId(machine);
 
   return (
     <section className="view-machine-page">

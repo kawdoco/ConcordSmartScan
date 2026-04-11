@@ -7,12 +7,14 @@ import ConfirmActionModal from "../components/ConfirmActionModal";
 import "./MachineShared.css";
 import axios from "axios";
 
-const formatGarmentDisplayId = (garmentId) => {
-  const parsed = Number(garmentId);
+const buildLocationDisplayId = (location) => {
+  const parsed = Number(location?.locationId);
   if (!Number.isInteger(parsed) || parsed < 0) {
     return "";
   }
-  return `GAR-${String(parsed).padStart(3, "0")}`;
+
+  const prefix = location?.type === "STORE" ? "STO" : "GAR";
+  return `${prefix}-${String(parsed).padStart(3, "0")}`;
 };
 
 function IconMachine() {
@@ -278,23 +280,25 @@ function AddMachine() {
                 id="location"
                 name="location"
                 value={machine.location}
-                label="Location (Garment ID)"
+                label="Location"
                 onChange={handleChange}
                 error={errors.location}
-                placeholder="e.g., GAR-001"
+                placeholder="e.g., GAR-001 or STO-002"
                 className="add-machine-field"
-                endpoint="/locations/garments"
+                endpoint="/locations"
                 searchFields={[
-                  (garment) => formatGarmentDisplayId(garment.locationId),
+                  (location) => buildLocationDisplayId(location),
                   "locationId",
-                  "name"
+                  "name",
+                  "type"
                 ]}
-                getOptionKey={(garment) => garment.locationId}
-                getOptionValue={(garment) => formatGarmentDisplayId(garment.locationId)}
-                getPrimaryText={(garment) => formatGarmentDisplayId(garment.locationId)}
-                getSecondaryText={(garment) => garment.name || "-"}
-                emptyMessage="No garments found"
-                loadingMessage="Loading garments..."
+                sortComparator={(a, b) => Number(a.locationId) - Number(b.locationId)}
+                getOptionKey={(location) => `${location.type}-${location.locationId}`}
+                getOptionValue={(location) => buildLocationDisplayId(location)}
+                getPrimaryText={(location) => buildLocationDisplayId(location)}
+                getSecondaryText={(location) => `${location.name || "-"} | ${location.type || "-"}`}
+                emptyMessage="No locations found"
+                loadingMessage="Loading locations..."
               />
             </div>
 

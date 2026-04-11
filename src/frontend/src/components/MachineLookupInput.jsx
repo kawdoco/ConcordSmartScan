@@ -1,17 +1,9 @@
 import GenericLookupInput from "./GenericLookupInput";
+import { getMachineDisplayId } from "../machines/machineId";
 
 function buildMachineDisplayId(machine) {
-  const numericId = machine?.id;
-  if (numericId !== null && numericId !== undefined) {
-    return `MAC-${String(numericId).padStart(3, "0")}`;
-  }
-
-  const rawMachineId = String(machine?.machineId || "").trim();
-  if (!rawMachineId) {
-    return "-";
-  }
-
-  return rawMachineId.toUpperCase().startsWith("MAC-") ? rawMachineId : `MAC-${rawMachineId}`;
+  const displayId = getMachineDisplayId(machine);
+  return displayId || "-";
 }
 
 export default function MachineLookupInput({

@@ -4,6 +4,7 @@ import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import GenericLookupInput from "../components/GenericLookupInput";
 import ConfirmActionModal from "../components/ConfirmActionModal";
+import { getMachineDisplayId } from "./machineId";
 import "./MachineShared.css";
 
 const buildLocationDisplayId = (location) => {
@@ -203,7 +204,7 @@ function EditMachine() {
               <input
                 id="machineId"
                 name="machineId"
-                value={machine.machineId}
+                value={getMachineDisplayId(machine)}
                 disabled
                 className="disabled"
               />
