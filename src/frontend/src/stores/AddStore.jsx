@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import MapSelector from "../components/MapSelector";
+import { useToast } from "../components/Toast";
 import { createStore } from "../services/locationService";
 import "./AddStore.css";
 
@@ -43,15 +44,10 @@ const EMPTY_FORM = {
 
 export default function AddStore() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
-  const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
 
   const validate = () => {
     const nextErrors = {};
@@ -105,7 +101,7 @@ export default function AddStore() {
       };
 
       await createStore(payload);
-      showNotification("Store added successfully!", "success");
+      showToast("Store added successfully!", "success");
       
       // Redirect after a short delay to show the success message
       setTimeout(() => {
@@ -113,7 +109,7 @@ export default function AddStore() {
       }, 1500);
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || "Failed to add store. Please try again.";
-      showNotification(errorMsg, "error");
+      showToast(errorMsg, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -128,11 +124,6 @@ export default function AddStore() {
   return (
     <section className="add-store-page">
       <PagePath items={[{ label: "Stores", to: "/stores" }, { label: "Add Store" }]} />
-      {notification && (
-        <div className={`add-store-notice ${notification.type === "success" ? "success" : "info"}`}>
-          {notification.message}
-        </div>
-      )}
 
       <div className="add-store-card">
         <div className="add-store-card-header">
