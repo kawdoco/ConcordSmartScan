@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
+import { useToast } from "../components/Toast";
 import QRModal from "./QRModal";
 import ScanModal from "./ScanModal";
 import apiClient from "../services/api";
@@ -41,6 +42,7 @@ const PAGE_SIZE = 10;
 
 function MachineList() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const { user } = useAuth();
   const role = String(user?.role || "").toUpperCase();
   const canManageMachines = role === "ADMIN";
@@ -52,14 +54,8 @@ function MachineList() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [notification, setNotification]   = useState(null);
   const [qrMachine, setQrMachine]         = useState(null);
   const [scanOpen, setScanOpen]           = useState(false);
-
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3500);
-  };
 
   useEffect(() => { fetchMachines(); }, []);
 
@@ -110,8 +106,10 @@ function MachineList() {
     try {
       await apiClient.delete(`/machines/${deletedId}`);
       await fetchMachines();
-      showNotification(`Machine ${deletedId} was deleted successfully.`, "success");
-    } catch { alert("Error deleting machine"); }
+      showToast(`Machine ${deletedId} was deleted successfully.`, "success");
+    } catch {
+      showToast("Error deleting machine", "error");
+    }
     finally { setDeleteConfirm(null); }
   };
 
@@ -144,14 +142,8 @@ function MachineList() {
       {scanOpen && (
         <ScanModal
           onClose={() => setScanOpen(false)}
-          showToast={(msg, type) => showNotification(msg, type || "success")}
+          showToast={(msg, type) => showToast(msg, type || "success")}
         />
-      )}
-
-      {notification && (
-        <div className={`machine-shared-notice ${notification.type}`}>
-          {notification.message}
-        </div>
       )}
 
       <div className="machine-list-tabs">

@@ -1,5 +1,6 @@
 // machines/QRModal.js
 import { useState, useEffect } from "react";
+import { useToast } from "../components/Toast";
 import "./QRModal.css";
 
 /**
@@ -58,10 +59,10 @@ function IconPrint() {
 }
 
 export default function QRModal({ machine, onClose }) {
+  const { showToast } = useToast();
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [toast, setToast] = useState(null);
 
   const qrData = buildQRData(machine);
   const qrUrl  = getQRUrl(qrData, 220);
@@ -72,11 +73,6 @@ export default function QRModal({ machine, onClose }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   // Download via blob so the browser actually saves it instead of navigating
   const handleDownload = async () => {
@@ -224,11 +220,6 @@ export default function QRModal({ machine, onClose }) {
           <button className="qrm-btn-text" onClick={onClose}>Close</button>
         </div>
       </div>
-
-      {/* Toast */}
-      {toast && (
-        <div className={`qrm-toast qrm-toast--${toast.type}`}>{toast.msg}</div>
-      )}
     </div>
   );
 }
