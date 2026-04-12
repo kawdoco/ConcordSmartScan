@@ -5,6 +5,7 @@ import AppFooter from "../components/AppFooter";
 import GenericLookupInput from "../components/GenericLookupInput";
 import MachineLookupInput from "../components/MachineLookupInput";
 import PagePath from "../components/PagePath";
+import { useToast } from "../components/Toast";
 import apiClient from "../services/api";
 import "./NewRequest.css";
 
@@ -53,6 +54,7 @@ const MACHINE_TYPE_OPTIONS = [
 export default function NewRequest() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [searchParams] = useSearchParams();
   const [form, setForm] = useState(() => {
     const urlType = searchParams.get("type");
@@ -60,7 +62,6 @@ export default function NewRequest() {
     return { ...EMPTY_FORM, requestType };
   });
   const [errors, setErrors] = useState({});
-  const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isTransfer = form.requestType === "transfer";
@@ -80,11 +81,6 @@ export default function NewRequest() {
     const requestType = urlType === "purchase" ? "purchase" : "transfer";
     setForm((previous) => ({ ...previous, requestType }));
   }, [searchParams]);
-
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
 
   const validate = () => {
     const nextErrors = {};
@@ -136,13 +132,13 @@ export default function NewRequest() {
       });
 
       const successLabel = isTransfer ? "Transfer request created successfully!" : "Purchase request created successfully!";
-      showNotification(successLabel, "success");
+      showToast(successLabel, "success");
 
       setTimeout(() => {
         navigate(isTransfer ? "/requests/transfer" : "/requests/purchase");
       }, 900);
     } catch (requestError) {
-      showNotification(requestError.response?.data?.message || "Failed to create request.", "error");
+      showToast(requestError.response?.data?.message || "Failed to create request.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -157,12 +153,6 @@ export default function NewRequest() {
   return (
     <section className="new-request-page">
       <PagePath items={[{ label: "Requests", to: requestsRootPath }, { label: "New Request" }]} />
-
-      {notification && (
-        <div className={`new-request-notice ${notification.type}`}>
-          {notification.message}
-        </div>
-      )}
 
       <div className="new-request-card">
         <div className="new-request-card-header">
