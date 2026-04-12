@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../components/Toast";
 import apiClient from "../services/api";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -258,6 +259,7 @@ const ROWS_PER_PAGE = 8;
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function UserManagement() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -271,14 +273,6 @@ export default function UserManagement() {
   // Form state
   const [form, setForm] = useState({ name: "", role: "Technician", location: "", email: "", password: "" });
   const [formErr, setFormErr] = useState({});
-
-  // Toast
-  const [toast, setToast] = useState({ msg: "", type: "", visible: false });
-
-  const showToast = useCallback((msg, type = "success") => {
-    setToast({ msg, type, visible: true });
-    setTimeout(() => setToast(t => ({ ...t, visible: false })), 3000);
-  }, []);
 
   const loadUsers = useCallback(() => {
     return apiClient.get("/users")
@@ -569,8 +563,6 @@ export default function UserManagement() {
         </div>
       </div>
 
-      {/* ── Toast ── */}
-      <div className={`toast toast-${toast.type}${toast.visible ? " visible" : ""}`}>{toast.msg}</div>
     </>
   );
 }
