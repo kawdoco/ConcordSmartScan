@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import MapSelector from "../components/MapSelector";
+import { useToast } from "../components/Toast";
 import { createGarment } from "../services/locationService";
 import "./AddGarment.css";
 
@@ -44,15 +45,10 @@ const EMPTY_FORM = {
 
 export default function AddGarment() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
-  const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 2500);
-  };
 
   const validate = () => {
     const nextErrors = {};
@@ -105,14 +101,14 @@ export default function AddGarment() {
       };
 
       await createGarment(payload);
-      showNotification("Garment added successfully!", "success");
+      showToast("Garment added successfully!", "success");
 
       setTimeout(() => {
         navigate("/garments");
       }, 1500);
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || "Failed to add garment. Please try again.";
-      showNotification(errorMsg, "error");
+      showToast(errorMsg, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -127,12 +123,6 @@ export default function AddGarment() {
   return (
     <section className="add-garment-page">
       <PagePath items={[{ label: "Garments", to: "/garments" }, { label: "Add Garment" }]} />
-
-      {notification && (
-        <div className={`add-garment-notice ${notification.type}`}>
-          {notification.message}
-        </div>
-      )}
 
       <div className="add-garment-card">
         <div className="add-garment-card-header">

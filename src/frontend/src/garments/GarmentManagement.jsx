@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import TableEmptyState from "../components/TableEmptyState";
+import { useToast } from "../components/Toast";
 import { getAllGarments, deleteLocation } from "../services/locationService";
 import "./GarmentManagement.css";
 
@@ -34,6 +35,7 @@ const PAGE_SIZE = 4;
 
 function GarmentManagement() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const { user } = useAuth();
   const role = String(user?.role || "").toUpperCase();
   const canManageGarments = role === "ADMIN";
@@ -67,6 +69,7 @@ function GarmentManagement() {
       .catch(err => {
         console.error('Failed to fetch garments:', err);
         setError('Failed to load garments. Please try again.');
+        showToast('Failed to load garments. Please try again.', 'error');
       })
       .finally(() => setLoading(false));
   };
@@ -82,10 +85,12 @@ function GarmentManagement() {
       .then(() => {
         setGarments(prev => prev.filter(g => g.id !== deleteConfirm.id));
         setDeleteConfirm(null);
+        showToast('Garment deleted successfully.', 'success');
       })
       .catch(err => {
         console.error('Failed to delete garment:', err);
         setError('Failed to delete garment. Please try again.');
+        showToast('Failed to delete garment. Please try again.', 'error');
       });
   };
 

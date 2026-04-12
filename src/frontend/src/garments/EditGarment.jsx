@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import MapSelector from "../components/MapSelector";
+import { useToast } from "../components/Toast";
 import { updateGarment } from "../services/locationService";
 import "./EditGarment.css";
 
@@ -85,23 +86,18 @@ function mapGarmentToForm(garment) {
 export default function EditGarment() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const initialForm = useMemo(() => mapGarmentToForm(location.state?.garment), [location.state?.garment]);
 
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
-  const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setForm(initialForm);
     setErrors({});
   }, [initialForm]);
-
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
 
   const validate = () => {
     const nextErrors = {};
@@ -160,14 +156,14 @@ export default function EditGarment() {
       };
 
       await updateGarment(garmentId, payload);
-      showNotification("Garment updated successfully!", "success");
+      showToast("Garment updated successfully!", "success");
 
       setTimeout(() => {
         navigate("/garments");
       }, 1500);
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || "Failed to update garment. Please try again.";
-      showNotification(errorMsg, "error");
+      showToast(errorMsg, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -182,12 +178,6 @@ export default function EditGarment() {
   return (
     <section className="edit-garment-page">
       <PagePath items={[{ label: "Garments", to: "/garments" }, { label: "Edit Garment" }]} />
-
-      {notification && (
-        <div className={`edit-garment-notice ${notification.type === "success" ? "success" : "info"}`}>
-          {notification.message}
-        </div>
-      )}
 
       <div className="edit-garment-card">
         <div className="edit-garment-card-header">
