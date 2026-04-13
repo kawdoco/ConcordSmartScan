@@ -268,12 +268,12 @@ export default function UserManagement() {
                       </div>
                     </td>
                   </tr>
-                ))
+                 ))
               )}
-            </tbody>
-          </table>
+             </tbody>
+            </table>
 
-          <div className="user-management-footer">
+            <div className="user-management-footer">
             <span>
               {filtered.length === 0
                 ? "No users"
