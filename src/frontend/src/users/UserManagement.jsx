@@ -223,7 +223,7 @@ export default function UserManagement() {
               <div className="user-management-card-title">Registered Users</div>
               <div className="user-management-card-subtitle">Manage user permissions and location assignments.</div>
             </div>
-            <button type="button" className="user-management-btn-primary" onClick={() => setAddOpen(true)}>
+            <button type="button" className="user-management-btn-primary" onClick={() => navigate("/users/add")}>
               <Icons.Plus /> Add New User
             </button>
           </div>
