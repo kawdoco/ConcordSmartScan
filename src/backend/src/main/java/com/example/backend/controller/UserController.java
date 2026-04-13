@@ -37,8 +37,8 @@ public class UserController {
      * Retrieve all users.
      */
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<List<UserResponse>> getAllUsers(@RequestParam(required = false) String search) {
+        return ResponseEntity.ok(userService.getAllUsers(search));
     }
 
     /**

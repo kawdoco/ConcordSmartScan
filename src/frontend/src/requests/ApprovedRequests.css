@@ -159,16 +159,16 @@
 }
 
 .approved-requests-page .req-id {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
-  color: #6b7280;
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
+  color: #475569;
 }
 
 .approved-requests-page .mc-id,
 .approved-requests-page .store-id {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
-  color: #6b7280;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: inherit;
 }
 
 .approved-requests-page .approval-date {

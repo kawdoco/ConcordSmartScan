@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '../authentication/AuthContext';
 import AppFooter from '../components/AppFooter';
+import ConfirmActionModal from '../components/ConfirmActionModal';
 import TableEmptyState from '../components/TableEmptyState';
 import { getAllStores, deleteLocation } from '../services/locationService';
 import './StoreManagement.css';
@@ -37,6 +40,11 @@ function DeleteIcon() {
 
 const StoreManagement = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get('q') || '';
+  const { user } = useAuth();
+  const role = String(user?.role || '').toUpperCase();
+  const canManageStores = role === 'ADMIN';
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,12 +52,12 @@ const StoreManagement = () => {
 
   useEffect(() => {
     loadStores();
-  }, []);
+  }, [searchQ]);
 
   const loadStores = () => {
     setLoading(true);
     setError(null);
-    getAllStores()
+    getAllStores(searchQ)
       .then(res => {
         // getAllStores() returns the filtered array directly, not a response object
         const storesArray = Array.isArray(res) ? res : res.data || [];
@@ -98,10 +106,12 @@ const StoreManagement = () => {
             <h2 className="store-card-title">Registered Stores</h2>
             <p className="store-card-description">Manage all store branches and location records.</p>
           </div>
-          <button className="store-add-btn" type="button" onClick={() => navigate('/stores/add')}>
-            <span className="store-add-icon" aria-hidden="true">+</span>
-            Add New Store
-          </button>
+          {canManageStores && (
+            <button className="store-add-btn" type="button" onClick={() => navigate('/stores/add')}>
+              <span className="store-add-icon" aria-hidden="true">+</span>
+              Add New Store
+            </button>
+          )}
         </div>
 
         {error && (
@@ -144,21 +154,25 @@ const StoreManagement = () => {
                         >
                           <EyeIcon />
                         </button>
-                        <button
-                          type="button"
-                          aria-label={`Edit ${store.name}`}
-                          onClick={() => navigate('/stores/edit', { state: { store: store.originalData } })}
-                        >
-                          <EditIcon />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={`Delete ${store.name}`}
-                          className="delete"
-                          onClick={() => handleDelete(store.id, store.name)}
-                        >
-                          <DeleteIcon />
-                        </button>
+                        {canManageStores && (
+                          <button
+                            type="button"
+                            aria-label={`Edit ${store.name}`}
+                            onClick={() => navigate('/stores/edit', { state: { store: store.originalData } })}
+                          >
+                            <EditIcon />
+                          </button>
+                        )}
+                        {canManageStores && (
+                          <button
+                            type="button"
+                            aria-label={`Delete ${store.name}`}
+                            className="delete"
+                            onClick={() => handleDelete(store.id, store.name)}
+                          >
+                            <DeleteIcon />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -176,22 +190,16 @@ const StoreManagement = () => {
         </div>
       </div>
 
-      {deleteConfirm && (
-        <div className="store-delete-modal">
-          <div className="store-delete-modal-content">
-            <h3>Delete Store</h3>
-            <p>Are you sure you want to delete <strong>{deleteConfirm.name}</strong>?</p>
-            <div className="store-delete-modal-actions">
-              <button type="button" className="btn-secondary" onClick={() => setDeleteConfirm(null)}>
-                Cancel
-              </button>
-              <button type="button" className="btn-danger" onClick={confirmDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmActionModal
+        isOpen={canManageStores && Boolean(deleteConfirm)}
+        title="Delete Store"
+        message={`Are you sure you want to delete ${deleteConfirm ? deleteConfirm.name : "this store"}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="decline"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm(null)}
+      />
 
       <AppFooter />
     </section>

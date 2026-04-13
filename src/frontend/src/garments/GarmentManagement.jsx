@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../authentication/AuthContext";
+import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import TableEmptyState from "../components/TableEmptyState";
 import { getAllGarments, deleteLocation } from "../services/locationService";
 import "./GarmentManagement.css";
@@ -33,6 +36,11 @@ const PAGE_SIZE = 4;
 
 function GarmentManagement() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
+  const { user } = useAuth();
+  const role = String(user?.role || "").toUpperCase();
+  const canManageGarments = role === "ADMIN";
   const [garments, setGarments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,12 +49,12 @@ function GarmentManagement() {
 
   useEffect(() => {
     loadGarments();
-  }, []);
+  }, [searchQ]);
 
   const loadGarments = () => {
     setLoading(true);
     setError(null);
-    getAllGarments()
+    getAllGarments(searchQ)
       .then(res => {
         // API returns list directly
         const garmentsArray = Array.isArray(res) ? res : res.data || [];
@@ -96,10 +104,12 @@ function GarmentManagement() {
             <h2 className="garment-card-title">Registered Garments</h2>
             <p className="garment-card-description">Manage all garment manufacturing and storage units.</p>
           </div>
-          <button className="garment-add-btn" type="button" onClick={() => navigate("/garments/add")}>
-            <span className="garment-add-icon" aria-hidden="true">+</span>
-            Add New Garment
-          </button>
+          {canManageGarments && (
+            <button className="garment-add-btn" type="button" onClick={() => navigate("/garments/add")}>
+              <span className="garment-add-icon" aria-hidden="true">+</span>
+              Add New Garment
+            </button>
+          )}
         </div>
 
         {error && (
@@ -143,23 +153,27 @@ function GarmentManagement() {
                         >
                           <EyeIcon />
                         </button>
-                        <button
-                          type="button"
-                          title="Edit"
-                          aria-label={`Edit ${row.branch}`}
-                          onClick={() => navigate("/garments/edit", { state: { garment: row.originalData } })}
-                        >
-                          <EditIcon />
-                        </button>
-                        <button
-                          type="button"
-                          title="Delete"
-                          aria-label={`Delete ${row.branch}`}
-                          className="delete"
-                          onClick={() => handleDelete(row.id, row.branch)}
-                        >
-                          <TrashIcon />
-                        </button>
+                        {canManageGarments && (
+                          <button
+                            type="button"
+                            title="Edit"
+                            aria-label={`Edit ${row.branch}`}
+                            onClick={() => navigate("/garments/edit", { state: { garment: row.originalData } })}
+                          >
+                            <EditIcon />
+                          </button>
+                        )}
+                        {canManageGarments && (
+                          <button
+                            type="button"
+                            title="Delete"
+                            aria-label={`Delete ${row.branch}`}
+                            className="delete"
+                            onClick={() => handleDelete(row.id, row.branch)}
+                          >
+                            <TrashIcon />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -205,22 +219,16 @@ function GarmentManagement() {
         </div>
       </div>
 
-      {deleteConfirm && (
-        <div className="garment-delete-modal">
-          <div className="garment-delete-modal-content">
-            <h3>Delete Garment</h3>
-            <p>Are you sure you want to delete <strong>{deleteConfirm.name}</strong>?</p>
-            <div className="garment-delete-modal-actions">
-              <button type="button" className="btn-secondary" onClick={() => setDeleteConfirm(null)}>
-                Cancel
-              </button>
-              <button type="button" className="btn-danger" onClick={confirmDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmActionModal
+        isOpen={canManageGarments && Boolean(deleteConfirm)}
+        title="Delete Garment"
+        message={`Are you sure you want to delete ${deleteConfirm ? deleteConfirm.name : "this garment"}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="decline"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm(null)}
+      />
 
       <AppFooter />
     </section>

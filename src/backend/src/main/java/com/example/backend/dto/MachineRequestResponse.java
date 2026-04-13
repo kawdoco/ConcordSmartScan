@@ -21,6 +21,7 @@ public class MachineRequestResponse {
     private LocalDate requiredDate;
     private String notes;
     private RequestStatus status;
+    private Long approvedByManagerId;
     private LocalDateTime createdAt;
 
     public MachineRequestResponse() {
@@ -39,6 +40,7 @@ public class MachineRequestResponse {
         this.requiredDate = request.getRequiredDate();
         this.notes = request.getNotes();
         this.status = request.getStatus();
+        this.approvedByManagerId = request.getApprovedByManagerId();
         this.createdAt = request.getCreatedAt();
     }
 
@@ -88,6 +90,10 @@ public class MachineRequestResponse {
 
     public RequestStatus getStatus() {
         return status;
+    }
+
+    public Long getApprovedByManagerId() {
+        return approvedByManagerId;
     }
 
     public LocalDateTime getCreatedAt() {

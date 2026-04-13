@@ -3,8 +3,33 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import GenericLookupInput from "../components/GenericLookupInput";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import apiClient from "../services/api";
 import "./AddUser.css";
+
+const formatGarmentDisplayId = (garmentId) => {
+  const parsed = Number(garmentId);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    return "";
+  }
+  return `GAR-${String(parsed).padStart(3, "0")}`;
+};
+
+const parseGarmentId = (value) => {
+  const normalized = String(value || "").trim();
+  if (!normalized) {
+    return null;
+  }
+
+  const match = normalized.match(/(\d+)/);
+  if (!match) {
+    return null;
+  }
+
+  const parsed = Number(match[1]);
+  return Number.isInteger(parsed) ? parsed : null;
+};
 
 export default function EditUserPage() {
   const navigate = useNavigate();
@@ -15,7 +40,7 @@ export default function EditUserPage() {
     phoneNumber: "+94 77 123 4567",
     email: "john.p@gmail.com",
     address: "123 Main St, Colombo",
-    garmentId: "5",
+    garmentId: "GAR-005",
     companyEmail: "john.p@concord.com",
     userType: "TECHNICIAN",
     currentPassword: "",
@@ -23,8 +48,11 @@ export default function EditUserPage() {
     confirmPassword: "",
   });
   const [submitError, setSubmitError] = useState("");
+  const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [chiefManagerGarmentIds, setChiefManagerGarmentIds] = useState([]);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -36,7 +64,22 @@ export default function EditUserPage() {
 
       try {
         setIsLoading(true);
-        const { data } = await apiClient.get(`/users/${id}`);
+        const [{ data }, usersResponse] = await Promise.all([
+          apiClient.get(`/users/${id}`),
+          apiClient.get('/users')
+        ]);
+
+        const users = Array.isArray(usersResponse.data) ? usersResponse.data : [];
+        const currentUserId = Number(id);
+        const assigned = users
+          .filter((user) => {
+            const role = user.role || user.userType;
+            return role === 'CHIEF_MANAGER' && user.garmentId != null && user.id !== currentUserId;
+          })
+          .map((user) => Number(user.garmentId))
+          .filter((garmentId) => Number.isInteger(garmentId));
+        setChiefManagerGarmentIds(Array.from(new Set(assigned)));
+
         setFormData((prev) => ({
           ...prev,
           fullName: data.name || "",
@@ -44,7 +87,7 @@ export default function EditUserPage() {
           phoneNumber: data.phoneNumber || "",
           email: data.email || "",
           address: data.address || "",
-          garmentId: data.garmentId != null ? String(data.garmentId) : "",
+          garmentId: data.garmentId != null ? formatGarmentDisplayId(data.garmentId) : "",
           companyEmail: data.companyEmail || "",
           userType: data.userType || data.role || "",
           currentPassword: "",
@@ -68,11 +111,45 @@ export default function EditUserPage() {
       ...prev,
       [name]: value,
     }));
+    setFormErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
     setSubmitError("");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const getMaxDate = () => {
+    const today = new Date();
+    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+    return maxDate.toISOString().split("T")[0];
+  };
+
+  const validateAge = () => {
+    const dob = formData.dateOfBirth;
+    if (!dob) {
+      setFormErrors((prev) => ({ ...prev, dateOfBirth: "Date of Birth is required" }));
+      return false;
+    }
+
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age -= 1;
+    }
+
+    if (age < 18) {
+      setFormErrors((prev) => ({ ...prev, dateOfBirth: "User must be at least 18 years old" }));
+      return false;
+    }
+
+    setFormErrors((prev) => ({ ...prev, dateOfBirth: "" }));
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    setIsConfirmOpen(false);
 
     if (!id) {
       setSubmitError("Missing user id.");
@@ -89,8 +166,18 @@ export default function EditUserPage() {
       return;
     }
 
-    if (formData.garmentId && Number.isNaN(Number(formData.garmentId))) {
+    if (!validateAge()) {
+      return;
+    }
+
+    const parsedGarmentId = parseGarmentId(formData.garmentId);
+    if (formData.garmentId && parsedGarmentId === null) {
       setSubmitError("Garment ID must be a valid number.");
+      return;
+    }
+
+    if (formData.userType === 'CHIEF_MANAGER' && parsedGarmentId !== null && chiefManagerGarmentIds.includes(parsedGarmentId)) {
+      setSubmitError('Selected garment is already assigned to a Chief Manager.');
       return;
     }
 
@@ -109,7 +196,7 @@ export default function EditUserPage() {
       address: formData.address.trim(),
       companyEmail: formData.companyEmail.trim(),
       userType: formData.userType,
-      garmentId: formData.garmentId ? Number(formData.garmentId) : null,
+      garmentId: parsedGarmentId,
       currentPassword: isChangingPassword ? formData.currentPassword : null,
       password: isChangingPassword ? formData.password : null,
     };
@@ -125,6 +212,11 @@ export default function EditUserPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleOpenConfirm = (event) => {
+    event.preventDefault();
+    setIsConfirmOpen(true);
   };
 
   const extractBackendError = (error, fallbackMessage) => {
@@ -172,7 +264,7 @@ export default function EditUserPage() {
     <section className="add-user-page">
       <PagePath items={[{ label: "Users", to: "/users" }, { label: "Edit User" }]} />
 
-      <form onSubmit={handleSubmit} className="add-user-card">
+      <form onSubmit={handleOpenConfirm} className="add-user-card">
         <div className="add-user-card-header">
           <span className="add-user-card-icon" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -214,7 +306,17 @@ export default function EditUserPage() {
             <div className="add-user-grid-two">
               <div className="add-user-field">
                 <label htmlFor="dateOfBirth">Date of Birth</label>
-                <input type="date" id="dateOfBirth" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} required />
+                <input
+                  type="date"
+                  id="dateOfBirth"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleInputChange}
+                  onBlur={validateAge}
+                  max={getMaxDate()}
+                  required
+                />
+                {formErrors.dateOfBirth && <span className="field-error-text">{formErrors.dateOfBirth}</span>}
               </div>
               <div className="add-user-field">
                 <label htmlFor="phoneNumber">Phone Number</label>
@@ -244,8 +346,33 @@ export default function EditUserPage() {
 
             <div className="add-user-grid-two">
               <div className="add-user-field">
-                <label htmlFor="garmentId">Garment ID</label>
-                <input type="text" id="garmentId" name="garmentId" value={formData.garmentId} onChange={handleInputChange} />
+                <GenericLookupInput
+                  id="garmentId"
+                  name="garmentId"
+                  label="Garment ID"
+                  value={formData.garmentId}
+                  onChange={handleInputChange}
+                  placeholder="Select or search Garment ID"
+                  className="add-user-field"
+                  endpoint="/locations/garments"
+                  optionFilter={(garment) => {
+                    if (formData.userType !== 'CHIEF_MANAGER') {
+                      return true;
+                    }
+                    return !chiefManagerGarmentIds.includes(Number(garment.locationId));
+                  }}
+                  searchFields={[
+                    (garment) => formatGarmentDisplayId(garment.locationId),
+                    "locationId",
+                    "name"
+                  ]}
+                  getOptionKey={(garment) => garment.locationId}
+                  getOptionValue={(garment) => formatGarmentDisplayId(garment.locationId)}
+                  getPrimaryText={(garment) => formatGarmentDisplayId(garment.locationId)}
+                  getSecondaryText={(garment) => garment.name || "-"}
+                  emptyMessage={formData.userType === 'CHIEF_MANAGER' ? 'No unassigned garments found' : 'No garments found'}
+                  loadingMessage="Loading garments..."
+                />
               </div>
               <div className="add-user-field">
                 <label htmlFor="companyEmail">Company Email</label>
@@ -306,6 +433,18 @@ export default function EditUserPage() {
           </button>
         </div>
       </form>
+
+      <ConfirmActionModal
+        isOpen={isConfirmOpen}
+        title="Confirm Update"
+        message="Are you sure you want to update this user?"
+        confirmLabel="Yes, Update"
+        cancelLabel="Cancel"
+        variant="approve"
+        isSubmitting={isSubmitting}
+        onConfirm={handleSubmit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
 
       <AppFooter />
     </section>

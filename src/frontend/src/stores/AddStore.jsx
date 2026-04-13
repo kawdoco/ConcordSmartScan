@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import MapSelector from "../components/MapSelector";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import { createStore } from "../services/locationService";
 import "./AddStore.css";
 
@@ -46,6 +48,7 @@ export default function AddStore() {
   const [errors, setErrors] = useState({});
   const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const showNotification = (message, type) => {
     setNotification({ message, type });
@@ -60,11 +63,13 @@ export default function AddStore() {
     else if (!/^\d{10}$/.test(form.phoneNumber.trim())) nextErrors.phoneNumber = "Phone number must be exactly 10 digits.";
     if (!form.address.trim()) nextErrors.address = "Address is required.";
 
-    if (form.latitude !== "" && (isNaN(form.latitude) || Number(form.latitude) < -90 || Number(form.latitude) > 90)) {
+    if (!form.latitude.trim()) nextErrors.latitude = "Latitude is required.";
+    else if (isNaN(form.latitude) || Number(form.latitude) < -90 || Number(form.latitude) > 90) {
       nextErrors.latitude = "Latitude must be between -90 and 90.";
     }
 
-    if (form.longitude !== "" && (isNaN(form.longitude) || Number(form.longitude) < -180 || Number(form.longitude) > 180)) {
+    if (!form.longitude.trim()) nextErrors.longitude = "Longitude is required.";
+    else if (isNaN(form.longitude) || Number(form.longitude) < -180 || Number(form.longitude) > 180) {
       nextErrors.longitude = "Longitude must be between -180 and 180.";
     }
 
@@ -78,8 +83,18 @@ export default function AddStore() {
     setErrors((previous) => ({ ...previous, [name]: "" }));
   };
 
+  const handleLocationSelect = (latitude, longitude) => {
+    setForm((previous) => ({
+      ...previous,
+      latitude: latitude.toFixed(6),
+      longitude: longitude.toFixed(6)
+    }));
+    setErrors((previous) => ({ ...previous, latitude: "", longitude: "" }));
+  };
+
   const handleSubmit = async () => {
     if (!validate()) return;
+    setIsConfirmOpen(false);
     
     setIsSubmitting(true);
     
@@ -105,6 +120,11 @@ export default function AddStore() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleOpenConfirm = () => {
+    if (!validate()) return;
+    setIsConfirmOpen(true);
   };
 
   const handleCancel = () => {
@@ -177,7 +197,7 @@ export default function AddStore() {
             <span><IconMapPin /></span>
             <div>
               <h3>Location Coordinates</h3>
-              <p>Optional - GPS coordinates for map pinning.</p>
+              <p>Required - GPS coordinates for map pinning.</p>
             </div>
           </div>
 
@@ -208,16 +228,38 @@ export default function AddStore() {
               {errors.longitude && <span className="add-store-error">{errors.longitude}</span>}
             </div>
           </div>
+
+          <div className="add-store-field">
+            <label>Location Map</label>
+            <p className="add-store-help-text">Click on the map to select the store location. The coordinates will be automatically filled above.</p>
+            <MapSelector
+              latitude={form.latitude ? parseFloat(form.latitude) : null}
+              longitude={form.longitude ? parseFloat(form.longitude) : null}
+              onLocationSelect={handleLocationSelect}
+            />
+          </div>
         </div>
 
         <div className="add-store-actions">
           <button type="button" className="btn-secondary" onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
-          <button type="button" className="btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
+          <button type="button" className="btn-primary" onClick={handleOpenConfirm} disabled={isSubmitting}>
             <IconPlus />
             {isSubmitting ? "Adding..." : "Add Store"}
           </button>
         </div>
       </div>
+
+      <ConfirmActionModal
+        isOpen={isConfirmOpen}
+        title="Confirm New Store"
+        message="Are you sure you want to add this store branch?"
+        confirmLabel="Yes, Add Store"
+        cancelLabel="Cancel"
+        variant="approve"
+        isSubmitting={isSubmitting}
+        onConfirm={handleSubmit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
 
       <AppFooter />
     </section>
