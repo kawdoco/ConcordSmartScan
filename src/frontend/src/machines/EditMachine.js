@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import { useToast } from "../components/Toast";
 import GenericLookupInput from "../components/GenericLookupInput";
 import ConfirmActionModal from "../components/ConfirmActionModal";
 import { getMachineDisplayId } from "./machineId";
@@ -57,6 +58,7 @@ function IconEdit() {
 
 function EditMachine() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const { id } = useParams();
 
   const [machine, setMachine] = useState({
@@ -70,15 +72,9 @@ function EditMachine() {
   });
 
   const [errors, setErrors] = useState({});
-  const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
 
   // 🔹 FETCH MACHINE BY ID
   useEffect(() => {
@@ -98,7 +94,7 @@ function EditMachine() {
         setMachine(data);
 
       } catch (err) {
-        showNotification(err.message, "error");
+        showToast(err.message, "error");
       } finally {
         setLoading(false);
       }
@@ -146,14 +142,14 @@ function EditMachine() {
 
       if (!response.ok) throw new Error(`Update failed (${response.status})`);
 
-      showNotification("Machine updated successfully!", "success");
+      showToast("Machine updated successfully!", "success");
 
       setTimeout(() => {
         navigate("/machines");
       }, 1000);
 
     } catch (err) {
-      showNotification(err.message, "error");
+      showToast(err.message, "error");
     } finally {
       setSubmitting(false);
     }
@@ -182,12 +178,6 @@ function EditMachine() {
   return (
     <section className="edit-machine-page">
       <PagePath items={[{ label: "Machines", to: "/machines" }, { label: "Edit Machine" }]} />
-
-      {notification && (
-        <div className={`edit-machine-notice ${notification.type}`}>
-          {notification.message}
-        </div>
-      )}
 
       <form className="edit-machine-card" onSubmit={handleOpenConfirm}>
         <div className="edit-machine-card-header">

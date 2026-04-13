@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
+import { useToast } from "../components/Toast";
 import ConfirmActionModal from "../components/ConfirmActionModal";
 import QRModal from "./QRModal";
 import ScanModal from "./ScanModal";
@@ -45,6 +46,7 @@ function MachineList() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchQ = searchParams.get("q") || "";
+  const { showToast } = useToast();
   const { user } = useAuth();
   const role = String(user?.role || "").toUpperCase();
   const canManageMachines = role === "ADMIN";
@@ -56,14 +58,8 @@ function MachineList() {
   const [search, setSearch] = useState(searchQ);
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [notification, setNotification] = useState(null);
   const [qrMachine, setQrMachine] = useState(null);
   const [scanOpen, setScanOpen] = useState(false);
-
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3500);
-  };
 
   useEffect(() => {
     fetchMachines();
@@ -121,15 +117,12 @@ function MachineList() {
     try {
       await apiClient.delete(`/machines/${deletedMachine.id}`);
       await fetchMachines();
-    showNotification(
-      `Machine ${getMachineDisplayId(deletedMachine)} was deleted successfully.`,
-      "success"
-    );
+      showToast(`Machine ${getMachineDisplayId(deletedMachine)} was deleted successfully.`, "success");
     } catch {
-      alert("Error deleting machine");
+      showToast("Error deleting machine", "error");
     } finally {
       setDeleteConfirm(null);
-    } 
+    }
   };
 
   const getLocationLabel = () => {
@@ -158,14 +151,8 @@ function MachineList() {
       {scanOpen && (
         <ScanModal
           onClose={() => setScanOpen(false)}
-          showToast={(msg, type) => showNotification(msg, type || "success")}
+          showToast={(msg, type) => showToast(msg, type || "success")}
         />
-      )}
-
-      {notification && (
-        <div className={`machine-shared-notice ${notification.type}`}>
-          {notification.message}
-        </div>
       )}
 
       <div className="machine-list-tabs">

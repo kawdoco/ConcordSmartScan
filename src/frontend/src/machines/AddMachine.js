@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import { useToast } from "../components/Toast";
 import GenericLookupInput from "../components/GenericLookupInput";
 import ConfirmActionModal from "../components/ConfirmActionModal";
 import "./MachineShared.css";
@@ -87,16 +88,11 @@ const EMPTY_MACHINE = {
 
 function AddMachine() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [machine, setMachine] = useState(EMPTY_MACHINE);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [notification, setNotification] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
 
   const validate = () => {
     const nextErrors = {};
@@ -138,7 +134,7 @@ function AddMachine() {
 
       console.log(response.data); // optional
 
-      showNotification("Machine added successfully!", "success");
+      showToast("Machine added successfully!", "success");
 
       setMachine(EMPTY_MACHINE);
       setErrors({});
@@ -149,7 +145,7 @@ function AddMachine() {
 
       const message = err.response?.data?.message || "Error adding machine";
 
-      showNotification(message, "error");
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
@@ -174,12 +170,6 @@ function AddMachine() {
           { label: "Add Machine" },
         ]}
       />
-
-      {notification && (
-        <div className={`add-machine-notice ${notification.type}`}>
-          {notification.message}
-        </div>
-      )}
 
       <form className="add-machine-card" onSubmit={handleOpenConfirm} noValidate>
         <div className="add-machine-card-header">
