@@ -3,7 +3,20 @@ import { useNavigate, useParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import { useToast } from "../components/Toast";
+import GenericLookupInput from "../components/GenericLookupInput";
+import ConfirmActionModal from "../components/ConfirmActionModal";
+import { getMachineDisplayId } from "./machineId";
 import "./MachineShared.css";
+
+const buildLocationDisplayId = (location) => {
+  const parsed = Number(location?.locationId);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    return "";
+  }
+
+  const prefix = location?.type === "STORE" ? "STO" : "GAR";
+  return `${prefix}-${String(parsed).padStart(3, "0")}`;
+};
 
 const machineTypes = [
   "Single Needle",
@@ -60,6 +73,8 @@ function EditMachine() {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   // 🔹 FETCH MACHINE BY ID
   useEffect(() => {
@@ -108,11 +123,12 @@ function EditMachine() {
   };
 
   // 🔹 UPDATE MACHINE
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async () => {
     if (!validate()) return;
+    setIsConfirmOpen(false);
 
     try {
+      setSubmitting(true);
       const token = localStorage.getItem("token");
 
       const response = await fetch(`http://localhost:8080/api/machines/${id}`, {
@@ -134,7 +150,15 @@ function EditMachine() {
 
     } catch (err) {
       showToast(err.message, "error");
+    } finally {
+      setSubmitting(false);
     }
+  };
+
+  const handleOpenConfirm = (event) => {
+    event.preventDefault();
+    if (!validate()) return;
+    setIsConfirmOpen(true);
   };
 
   const handleCancel = () => {
@@ -155,7 +179,7 @@ function EditMachine() {
     <section className="edit-machine-page">
       <PagePath items={[{ label: "Machines", to: "/machines" }, { label: "Edit Machine" }]} />
 
-      <form className="edit-machine-card" onSubmit={handleSubmit}>
+      <form className="edit-machine-card" onSubmit={handleOpenConfirm}>
         <div className="edit-machine-card-header">
           <span className="edit-machine-card-icon"><IconMachine /></span>
           <div>
@@ -170,7 +194,7 @@ function EditMachine() {
               <input
                 id="machineId"
                 name="machineId"
-                value={machine.machineId}
+                value={getMachineDisplayId(machine)}
                 disabled
                 className="disabled"
               />
@@ -240,15 +264,30 @@ function EditMachine() {
 
           <div className="edit-machine-grid-two">
             <div className="edit-machine-field">
-              <label htmlFor="location">Location</label>
-              <input
+              <GenericLookupInput
                 id="location"
                 name="location"
+                label="Location"
                 value={machine.location}
                 onChange={handleChange}
-                className={errors.location ? "error" : ""}
+                error={errors.location}
+                  placeholder="e.g., GAR-001 or STO-002"
+                className="edit-machine-field"
+                  endpoint="/locations"
+                searchFields={[
+                    (location) => buildLocationDisplayId(location),
+                    "locationId",
+                    "name",
+                    "type"
+                ]}
+                  sortComparator={(a, b) => Number(a.locationId) - Number(b.locationId)}
+                  getOptionKey={(location) => `${location.type}-${location.locationId}`}
+                  getOptionValue={(location) => buildLocationDisplayId(location)}
+                  getPrimaryText={(location) => buildLocationDisplayId(location)}
+                  getSecondaryText={(location) => `${location.name || "-"} | ${location.type || "-"}`}
+                  emptyMessage="No locations found"
+                  loadingMessage="Loading locations..."
               />
-              {errors.location && <span className="edit-machine-error">{errors.location}</span>}
             </div>
 
             <div className="edit-machine-field">
@@ -268,12 +307,24 @@ function EditMachine() {
           <button type="button" className="btn-secondary" onClick={handleCancel}>
             Cancel
           </button>
-          <button type="submit" className="btn-primary">
+          <button type="submit" className="btn-primary" disabled={submitting}>
             <IconEdit />
-            Update Machine
+            {submitting ? "Updating..." : "Update Machine"}
           </button>
         </div>
       </form>
+
+      <ConfirmActionModal
+        isOpen={isConfirmOpen}
+        title="Confirm Update"
+        message="Are you sure you want to update this machine?"
+        confirmLabel="Yes, Update"
+        cancelLabel="Cancel"
+        variant="approve"
+        isSubmitting={submitting}
+        onConfirm={handleSubmit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
 
       <AppFooter />
     </section>

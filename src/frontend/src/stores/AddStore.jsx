@@ -4,6 +4,7 @@ import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import MapSelector from "../components/MapSelector";
 import { useToast } from "../components/Toast";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import { createStore } from "../services/locationService";
 import "./AddStore.css";
 
@@ -48,6 +49,7 @@ export default function AddStore() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const validate = () => {
     const nextErrors = {};
@@ -88,6 +90,7 @@ export default function AddStore() {
 
   const handleSubmit = async () => {
     if (!validate()) return;
+    setIsConfirmOpen(false);
     
     setIsSubmitting(true);
     
@@ -115,6 +118,11 @@ export default function AddStore() {
     }
   };
 
+  const handleOpenConfirm = () => {
+    if (!validate()) return;
+    setIsConfirmOpen(true);
+  };
+
   const handleCancel = () => {
     setForm(EMPTY_FORM);
     setErrors({});
@@ -124,7 +132,6 @@ export default function AddStore() {
   return (
     <section className="add-store-page">
       <PagePath items={[{ label: "Stores", to: "/stores" }, { label: "Add Store" }]} />
-
       <div className="add-store-card">
         <div className="add-store-card-header">
           <span className="add-store-card-icon"><IconStores /></span>
@@ -225,12 +232,24 @@ export default function AddStore() {
 
         <div className="add-store-actions">
           <button type="button" className="btn-secondary" onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
-          <button type="button" className="btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
+          <button type="button" className="btn-primary" onClick={handleOpenConfirm} disabled={isSubmitting}>
             <IconPlus />
             {isSubmitting ? "Adding..." : "Add Store"}
           </button>
         </div>
       </div>
+
+      <ConfirmActionModal
+        isOpen={isConfirmOpen}
+        title="Confirm New Store"
+        message="Are you sure you want to add this store branch?"
+        confirmLabel="Yes, Add Store"
+        cancelLabel="Cancel"
+        variant="approve"
+        isSubmitting={isSubmitting}
+        onConfirm={handleSubmit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
 
       <AppFooter />
     </section>

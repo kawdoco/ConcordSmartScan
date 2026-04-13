@@ -4,6 +4,7 @@ import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import MapSelector from "../components/MapSelector";
 import { useToast } from "../components/Toast";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import { updateStore } from "../services/locationService";
 import "./EditStore.css";
 
@@ -96,6 +97,7 @@ export default function EditStore() {
 	const [form, setForm] = useState(initialForm);
 	const [errors, setErrors] = useState({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 	const storeId = location.state?.store?.locationId;
 
 	useEffect(() => {
@@ -149,6 +151,7 @@ export default function EditStore() {
 			showToast("Error: Store ID not found", "error");
 			return;
 		}
+		setIsConfirmOpen(false);
 
 		setIsSubmitting(true);
 
@@ -174,6 +177,15 @@ export default function EditStore() {
 		} finally {
 			setIsSubmitting(false);
 		}
+	};
+
+	const handleOpenConfirm = () => {
+		if (!validate()) return;
+		if (!storeId) {
+			showToast("Error: Store ID not found", "error");
+			return;
+		}
+		setIsConfirmOpen(true);
 	};
 
 	const handleCancel = () => {
@@ -290,12 +302,24 @@ export default function EditStore() {
 
 				<div className="edit-store-actions">
 				<button type="button" className="btn-secondary" onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
-				<button type="button" className="btn-primary" onClick={handleUpdate} disabled={isSubmitting}>
+				<button type="button" className="btn-primary" onClick={handleOpenConfirm} disabled={isSubmitting}>
 					<IconEdit />
 					{isSubmitting ? "Updating..." : "Update Store"}
 					</button>
 				</div>
 			</div>
+
+			<ConfirmActionModal
+				isOpen={isConfirmOpen}
+				title="Confirm Update"
+				message="Are you sure you want to update this store?"
+				confirmLabel="Yes, Update"
+				cancelLabel="Cancel"
+				variant="approve"
+				isSubmitting={isSubmitting}
+				onConfirm={handleUpdate}
+				onCancel={() => setIsConfirmOpen(false)}
+			/>
 
 			<AppFooter />
 		</section>

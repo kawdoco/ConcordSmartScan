@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
-import AppFooter from "../components/AppFooter";
-import TableEmptyState from "../components/TableEmptyState";
 import { useToast } from "../components/Toast";
+import { useSearchParams } from "react-router-dom";
+import AppFooter from "../components/AppFooter";
+import ConfirmActionModal from "../components/ConfirmActionModal";
+import TableEmptyState from "../components/TableEmptyState";
 import { getAllGarments, deleteLocation } from "../services/locationService";
 import "./GarmentManagement.css";
 
@@ -35,6 +37,8 @@ const PAGE_SIZE = 4;
 
 function GarmentManagement() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
   const { showToast } = useToast();
   const { user } = useAuth();
   const role = String(user?.role || "").toUpperCase();
@@ -47,12 +51,12 @@ function GarmentManagement() {
 
   useEffect(() => {
     loadGarments();
-  }, []);
+  }, [searchQ]);
 
   const loadGarments = () => {
     setLoading(true);
     setError(null);
-    getAllGarments()
+    getAllGarments(searchQ)
       .then(res => {
         // API returns list directly
         const garmentsArray = Array.isArray(res) ? res : res.data || [];
@@ -68,8 +72,9 @@ function GarmentManagement() {
       })
       .catch(err => {
         console.error('Failed to fetch garments:', err);
-        setError('Failed to load garments. Please try again.');
-        showToast('Failed to load garments. Please try again.', 'error');
+        const message = 'Failed to load garments. Please try again.';
+        setError(message);
+        showToast(message, 'error');
       })
       .finally(() => setLoading(false));
   };
@@ -89,8 +94,9 @@ function GarmentManagement() {
       })
       .catch(err => {
         console.error('Failed to delete garment:', err);
-        setError('Failed to delete garment. Please try again.');
-        showToast('Failed to delete garment. Please try again.', 'error');
+        const message = 'Failed to delete garment. Please try again.';
+        setError(message);
+        showToast(message, 'error');
       });
   };
 
@@ -220,22 +226,16 @@ function GarmentManagement() {
         </div>
       </div>
 
-      {canManageGarments && deleteConfirm && (
-        <div className="garment-delete-modal">
-          <div className="garment-delete-modal-content">
-            <h3>Delete Garment</h3>
-            <p>Are you sure you want to delete <strong>{deleteConfirm.name}</strong>?</p>
-            <div className="garment-delete-modal-actions">
-              <button type="button" className="btn-secondary" onClick={() => setDeleteConfirm(null)}>
-                Cancel
-              </button>
-              <button type="button" className="btn-danger" onClick={confirmDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmActionModal
+        isOpen={canManageGarments && Boolean(deleteConfirm)}
+        title="Delete Garment"
+        message={`Are you sure you want to delete ${deleteConfirm ? deleteConfirm.name : "this garment"}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="decline"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm(null)}
+      />
 
       <AppFooter />
     </section>

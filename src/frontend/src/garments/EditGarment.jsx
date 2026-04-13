@@ -4,6 +4,7 @@ import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import MapSelector from "../components/MapSelector";
 import { useToast } from "../components/Toast";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import { updateGarment } from "../services/locationService";
 import "./EditGarment.css";
 
@@ -93,6 +94,7 @@ export default function EditGarment() {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   useEffect(() => {
     setForm(initialForm);
@@ -141,6 +143,7 @@ export default function EditGarment() {
 
   const handleUpdate = async () => {
     if (!validate()) return;
+    setIsConfirmOpen(false);
 
     setIsSubmitting(true);
 
@@ -167,6 +170,11 @@ export default function EditGarment() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleOpenConfirm = () => {
+    if (!validate()) return;
+    setIsConfirmOpen(true);
   };
 
   const handleCancel = () => {
@@ -283,12 +291,24 @@ export default function EditGarment() {
 
         <div className="edit-garment-actions">
           <button type="button" className="btn-secondary" onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
-          <button type="button" className="btn-primary" onClick={handleUpdate} disabled={isSubmitting}>
+          <button type="button" className="btn-primary" onClick={handleOpenConfirm} disabled={isSubmitting}>
             <IconEdit />
             {isSubmitting ? "Updating..." : "Update Garment"}
           </button>
         </div>
       </div>
+
+      <ConfirmActionModal
+        isOpen={isConfirmOpen}
+        title="Confirm Update"
+        message="Are you sure you want to update this garment?"
+        confirmLabel="Yes, Update"
+        cancelLabel="Cancel"
+        variant="approve"
+        isSubmitting={isSubmitting}
+        onConfirm={handleUpdate}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
 
       <AppFooter />
     </section>

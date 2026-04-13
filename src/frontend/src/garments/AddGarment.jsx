@@ -4,6 +4,7 @@ import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import MapSelector from "../components/MapSelector";
 import { useToast } from "../components/Toast";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import { createGarment } from "../services/locationService";
 import "./AddGarment.css";
 
@@ -49,6 +50,7 @@ export default function AddGarment() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const validate = () => {
     const nextErrors = {};
@@ -88,6 +90,7 @@ export default function AddGarment() {
 
   const handleSubmit = async () => {
     if (!validate()) return;
+    setIsConfirmOpen(false);
 
     setIsSubmitting(true);
 
@@ -112,6 +115,11 @@ export default function AddGarment() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleOpenConfirm = () => {
+    if (!validate()) return;
+    setIsConfirmOpen(true);
   };
 
   const handleCancel = () => {
@@ -223,12 +231,24 @@ export default function AddGarment() {
 
         <div className="add-garment-actions">
           <button type="button" className="btn-secondary" onClick={handleCancel}>Cancel</button>
-          <button type="button" className="btn-primary" onClick={handleSubmit}>
+          <button type="button" className="btn-primary" onClick={handleOpenConfirm} disabled={isSubmitting}>
             <IconPlus />
-            Add Garment
+            {isSubmitting ? "Adding..." : "Add Garment"}
           </button>
         </div>
       </div>
+
+      <ConfirmActionModal
+        isOpen={isConfirmOpen}
+        title="Confirm New Branch"
+        message="Are you sure you want to add this garment branch?"
+        confirmLabel="Yes, Add Branch"
+        cancelLabel="Cancel"
+        variant="approve"
+        isSubmitting={isSubmitting}
+        onConfirm={handleSubmit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
 
       <AppFooter />
     </section>

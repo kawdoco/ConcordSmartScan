@@ -3,8 +3,20 @@ import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import { useToast } from "../components/Toast";
+import GenericLookupInput from "../components/GenericLookupInput";
+import ConfirmActionModal from "../components/ConfirmActionModal";
 import "./MachineShared.css";
 import axios from "axios";
+
+const buildLocationDisplayId = (location) => {
+  const parsed = Number(location?.locationId);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    return "";
+  }
+
+  const prefix = location?.type === "STORE" ? "STO" : "GAR";
+  return `${prefix}-${String(parsed).padStart(3, "0")}`;
+};
 
 function IconMachine() {
   return (
@@ -80,6 +92,7 @@ function AddMachine() {
   const [machine, setMachine] = useState(EMPTY_MACHINE);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const validate = () => {
     const nextErrors = {};
@@ -100,9 +113,9 @@ function AddMachine() {
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const submit = async (event) => {
-    event.preventDefault();
+  const submit = async () => {
     if (!validate()) return;
+    setIsConfirmOpen(false);
 
     setSubmitting(true);
 
@@ -137,6 +150,12 @@ function AddMachine() {
       setSubmitting(false);
     }
   };
+
+  const handleOpenConfirm = (event) => {
+    event.preventDefault();
+    if (!validate()) return;
+    setIsConfirmOpen(true);
+  };
   const handleCancel = () => {
     setMachine(EMPTY_MACHINE);
     setErrors({});
@@ -152,7 +171,7 @@ function AddMachine() {
         ]}
       />
 
-      <form className="add-machine-card" onSubmit={submit} noValidate>
+      <form className="add-machine-card" onSubmit={handleOpenConfirm} noValidate>
         <div className="add-machine-card-header">
           <span className="add-machine-card-icon">
             <IconMachine />
@@ -247,18 +266,30 @@ function AddMachine() {
 
           <div className="add-machine-grid-two">
             <div className="add-machine-field">
-              <label htmlFor="location">Location (Garment ID)</label>
-              <input
+              <GenericLookupInput
                 id="location"
                 name="location"
                 value={machine.location}
+                label="Location"
                 onChange={handleChange}
-                placeholder="e.g., GAR-001"
-                className={errors.location ? "error" : ""}
+                error={errors.location}
+                placeholder="e.g., GAR-001 or STO-002"
+                className="add-machine-field"
+                endpoint="/locations"
+                searchFields={[
+                  (location) => buildLocationDisplayId(location),
+                  "locationId",
+                  "name",
+                  "type"
+                ]}
+                sortComparator={(a, b) => Number(a.locationId) - Number(b.locationId)}
+                getOptionKey={(location) => `${location.type}-${location.locationId}`}
+                getOptionValue={(location) => buildLocationDisplayId(location)}
+                getPrimaryText={(location) => buildLocationDisplayId(location)}
+                getSecondaryText={(location) => `${location.name || "-"} | ${location.type || "-"}`}
+                emptyMessage="No locations found"
+                loadingMessage="Loading locations..."
               />
-              {errors.location && (
-                <span className="add-machine-error">{errors.location}</span>
-              )}
             </div>
 
             <div className="add-machine-field">
@@ -292,6 +323,18 @@ function AddMachine() {
           </button>
         </div>
       </form>
+
+      <ConfirmActionModal
+        isOpen={isConfirmOpen}
+        title="Confirm New Machine"
+        message="Are you sure you want to add this machine?"
+        confirmLabel="Yes, Add Machine"
+        cancelLabel="Cancel"
+        variant="approve"
+        isSubmitting={submitting}
+        onConfirm={submit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
 
       <AppFooter />
     </section>

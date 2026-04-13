@@ -12,6 +12,7 @@ import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
 import AddUser from "./users/AddUser";
 import EditUserPage from "./users/EditUser";
+import ViewUser from "./users/ViewUser";
 import AppLayout from "./components/AppLayout";
 import StoreManagement from "./stores/StoreManagement";
 import AddStore from "./stores/AddStore";
@@ -54,162 +55,170 @@ function App() {
               </RequireAuth>
             }
           >
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route
-              path="machines"
-              element={
-                <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER", "TECHNICIAN"]}>
-                  <MachineList />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="add"
-              element={
-                <RequireRole allowedRoles={["ADMIN"]}>
-                  <AddMachine />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="machine/:id"
-              element={
-                <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER", "TECHNICIAN"]}>
-                  <ViewMachine />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="edit/:id"
-              element={
-                <RequireRole allowedRoles={["ADMIN"]}>
-                  <EditMachine />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="users"
-              element={
-                <RequireRole allowedRoles={["ADMIN"]}>
-                  <UserManagement />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="users/add"
-              element={
-                <RequireRole allowedRoles={["ADMIN"]}>
-                  <AddUser />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="users/edit/:id"
-              element={
-                <RequireRole allowedRoles={["ADMIN"]}>
-                  <EditUserPage />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="stores"
-              element={
-                <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER"]}>
-                  <StoreManagement />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="stores/add"
-              element={
-                <RequireRole allowedRoles={["ADMIN"]}>
-                  <AddStore />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="stores/view/:id"
-              element={
-                <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER"]}>
-                  <ViewStore />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="stores/edit"
-              element={
-                <RequireRole allowedRoles={["ADMIN"]}>
-                  <EditStore />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="requests/transfer"
-              element={
-                <RequireRole allowedRoles={["CHIEF_MANAGER", "TECHNICIAN"]}>
-                  <TransferRequests />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="requests/purchase"
-              element={
-                <RequireRole allowedRoles={["CHIEF_MANAGER", "TECHNICIAN"]}>
-                  <PurchaseRequest />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="requests/approved"
-              element={
-                <RequireRole allowedRoles={["ADMIN"]}>
-                  <ApprovedRequests />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="requests/new"
-              element={
-                <RequireRole allowedRoles={["TECHNICIAN"]}>
-                  <NewRequest />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="garments"
-              element={
-                <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER"]}>
-                  <GarmentManagement />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="garments/add"
-              element={
-                <RequireRole allowedRoles={["ADMIN"]}>
-                  <AddGarment />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="garments/view/:id"
-              element={
-                <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER"]}>
-                  <ViewGarment />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="garments/edit"
-              element={
-                <RequireRole allowedRoles={["ADMIN"]}>
-                  <EditGarment />
-                </RequireRole>
-              }
-            />
-            <Route path="profile" element={<Profile />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route
+            path="machines"
+            element={
+              <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER", "TECHNICIAN"]}>
+                <MachineList />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="add"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <AddMachine />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="machine/:id"
+            element={
+              <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER", "TECHNICIAN"]}>
+                <ViewMachine />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="edit/:id"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <EditMachine />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <UserManagement />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="users/add"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <AddUser />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="users/edit/:id"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <EditUserPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="users/view/:id"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <ViewUser />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="stores"
+            element={
+              <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER"]}>
+                <StoreManagement />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="stores/add"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <AddStore />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="stores/view/:id"
+            element={
+              <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER"]}>
+                <ViewStore />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="stores/edit"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <EditStore />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="requests/transfer"
+            element={
+              <RequireRole allowedRoles={["CHIEF_MANAGER", "TECHNICIAN"]}>
+                <TransferRequests />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="requests/purchase"
+            element={
+              <RequireRole allowedRoles={["CHIEF_MANAGER", "TECHNICIAN"]}>
+                <PurchaseRequest />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="requests/approved"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <ApprovedRequests />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="requests/new"
+            element={
+              <RequireRole allowedRoles={["TECHNICIAN"]}>
+                <NewRequest />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="garments"
+            element={
+              <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER"]}>
+                <GarmentManagement />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="garments/add"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <AddGarment />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="garments/view/:id"
+            element={
+              <RequireRole allowedRoles={["ADMIN", "CHIEF_MANAGER"]}>
+                <ViewGarment />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="garments/edit"
+            element={
+              <RequireRole allowedRoles={["ADMIN"]}>
+                <EditGarment />
+              </RequireRole>
+            }
+          />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ToastProvider>

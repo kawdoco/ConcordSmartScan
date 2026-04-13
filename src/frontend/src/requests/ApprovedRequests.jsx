@@ -1,8 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import StatsCards from "../components/StatsCards";
 import apiClient from "../services/api";
+import { formatUserId } from "../users/userId";
 import "./ApprovedRequests.css";
 
 const ROWS_PER_PAGE = 4;
@@ -66,20 +68,14 @@ const toTitleCase = (value) => {
     .replace(/(^\w|\s\w)/g, (char) => char.toUpperCase());
 };
 
-const formatUserId = (value) => {
-  if (value === null || value === undefined || value === "" || value === "-") return "-";
-  const numericId = Number.parseInt(value, 10);
-  if (Number.isNaN(numericId) || numericId <= 0) return "-";
-  return `UID-${String(numericId).padStart(3, "0")}`;
-};
-
 export default function ApprovedRequests() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQ = searchParams.get("q") || "";
   const { showToast } = useToast();
   const [requestTab, setRequestTab] = useState("transfer");
   const [page, setPage] = useState(1);
   const [purchasePage, setPurchasePage] = useState(1);
-  const [searchQ] = useState("");
   const [transferRequests, setTransferRequests] = useState([]);
   const [purchaseRequests, setPurchaseRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -124,8 +120,9 @@ export default function ApprovedRequests() {
         setTransferRequests(normalizedTransfer);
         setPurchaseRequests(normalizedPurchase);
       } catch (requestError) {
-        setError(requestError.response?.data?.message || "Failed to load approved requests.");
-        showToast(requestError.response?.data?.message || "Failed to load approved requests.", "error");
+        const errorMessage = requestError.response?.data?.message || "Failed to load approved requests.";
+        setError(errorMessage);
+        showToast(errorMessage, "error");
       } finally {
         setLoading(false);
       }
@@ -139,11 +136,12 @@ export default function ApprovedRequests() {
   const totalRequestCount = purchaseCount + transferCount;
 
   const filtered = transferRequests.filter((row) => {
-    const q = searchQ.toLowerCase();
+    const q = searchQ.trim().toLowerCase();
     return !q
       || row.requestCode.toLowerCase().includes(q)
       || row.machineId.toLowerCase().includes(q)
-      || row.garment.toLowerCase().includes(q);
+      || row.garment.toLowerCase().includes(q)
+      || row.storeId.toLowerCase().includes(q);
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
@@ -163,7 +161,7 @@ export default function ApprovedRequests() {
   };
 
   const filteredPurchase = purchaseRequests.filter((row) => {
-    const q = searchQ.toLowerCase();
+    const q = searchQ.trim().toLowerCase();
     return !q
       || row.requestCode.toLowerCase().includes(q)
       || row.machineType.toLowerCase().includes(q)
