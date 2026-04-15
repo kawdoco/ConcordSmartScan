@@ -141,8 +141,21 @@ const AddUser = () => {
     return Object.keys(nextErrors).length === 0;
   };
 
+  const validateUserType = () => {
+    if (formData.userType === 'selection') {
+      setFormErrors((prev) => ({
+        ...prev,
+        userType: 'Please select a valid user type.',
+      }));
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async () => {
     setIsConfirmOpen(false);
+    if (!validateUserType()) return;
     if (!validateSecurityFields()) return;
     if (!validateAge()) return;  // Age validation added here
 
@@ -158,7 +171,7 @@ const AddUser = () => {
     }
 
     const payload = {
-      fullName: formData.fullName.trim(),
+      name: formData.fullName.trim(),
       userType: formData.userType,
       dateOfBirth: formData.dateOfBirth,
       phoneNumber: formData.phoneNumber.trim(),
@@ -184,6 +197,9 @@ const AddUser = () => {
 
   const handleOpenConfirm = (event) => {
     event.preventDefault();
+    if (!validateUserType()) {
+      return;
+    }
     setIsConfirmOpen(true);
   };
 
@@ -252,12 +268,14 @@ const AddUser = () => {
                   name="userType"
                   value={formData.userType}
                   onChange={handleInputChange}
+                  className={formErrors.userType ? 'field-error' : ''}
                   required
                 >
                   <option value="selection" disabled>Select a User Type</option>
                   <option value="TECHNICIAN">Technician</option>
                   <option value="CHIEF_MANAGER">Chief Manager</option>
                 </select>
+                {formErrors.userType && <span className="field-error-text">{formErrors.userType}</span>}
               </div>
             </div>
 

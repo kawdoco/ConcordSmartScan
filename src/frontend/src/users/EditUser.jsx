@@ -189,7 +189,7 @@ export default function EditUserPage() {
     }
 
     const payload = {
-      fullName: formData.fullName.trim(),
+      name: formData.fullName.trim(),
       dateOfBirth: formData.dateOfBirth,
       phoneNumber: formData.phoneNumber.trim(),
       email: formData.email.trim(),
