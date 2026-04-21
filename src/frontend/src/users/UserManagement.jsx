@@ -55,7 +55,7 @@ export default function UserManagement() {
   const [page, setPage] = useState(1);
   const [addOpen, setAddOpen] = useState(false);
   const [deleteUser, setDeleteUser] = useState(null);
-  const [form, setForm] = useState({ name: "", role: "Technician", location: "", email: "", password: "" });
+  const [form, setForm] = useState({ fullName: "", role: "Technician", location: "", email: "", password: "" });
   const [formErr, setFormErr] = useState({});
 
   const loadUsers = useCallback((search = "") => {
@@ -66,7 +66,7 @@ export default function UserManagement() {
       .then((res) => {
         const mapped = (Array.isArray(res.data) ? res.data : []).map((user) => ({
           id: String(user.id),
-          name: user.name,
+          fullName: user.name || "",
           role: formatRoleDisplay(user.role),
           location: user.location || "",
           email: user.email,
@@ -100,13 +100,13 @@ export default function UserManagement() {
 
   // ── Form helpers ──
   const resetForm = () => {
-    setForm({ name: "", role: "Technician", location: "", email: "", password: "" });
+    setForm({ fullName: "", role: "Technician", location: "", email: "", password: "" });
     setFormErr({});
   };
 
   const validate = (draft) => {
     const nextErrors = {};
-    if (!draft.name.trim()) nextErrors.name = "Name is required";
+    if (!draft.fullName.trim()) nextErrors.fullName = "Name is required";
     if (!draft.location.trim()) nextErrors.location = "Location is required";
     if (!draft.email.trim()) nextErrors.email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email)) nextErrors.email = "Invalid email";
@@ -121,7 +121,7 @@ export default function UserManagement() {
     }
 
     const payload = {
-      name: form.name.trim(),
+      name: form.fullName.trim(),
       email: form.email.trim(),
       password: form.password || "changeme123",
       role: form.role === "Chief Manager" ? "CHIEF_MANAGER" : form.role.toUpperCase(),
@@ -135,7 +135,7 @@ export default function UserManagement() {
         setUsers((previous) => [
           {
             id: String(user.id),
-            name: user.name,
+            fullName: user.name || "",
             role: formatRoleDisplay(user.role),
             location: user.location || "",
             email: user.email,
@@ -148,7 +148,7 @@ export default function UserManagement() {
         resetForm();
         setActiveTab("all");
         setPage(1);
-        showToast(`${user.name} added successfully`, "success");
+        showToast(`${user.name || "User"} added successfully`, "success");
       })
       .catch((err) => {
         const message = err.response?.data?.message || "Failed to add user";
@@ -163,7 +163,7 @@ export default function UserManagement() {
       .delete(`/users/${deleteUser.id}`)
       .then(() => {
         setUsers((previous) => previous.filter((user) => user.id !== deleteUser.id));
-        showToast(`${deleteUser.name} removed`, "error");
+        showToast(`${deleteUser.fullName || "User"} removed`, "error");
         setDeleteUser(null);
       })
       .catch(() => showToast("Failed to delete user", "error"));
@@ -219,7 +219,7 @@ export default function UserManagement() {
               <div className="user-management-card-title">Registered Users</div>
               <div className="user-management-card-subtitle">Manage user permissions and location assignments.</div>
             </div>
-            <button type="button" className="user-management-btn-primary" onClick={() => setAddOpen(true)}>
+            <button type="button" className="user-management-btn-primary" onClick={() => navigate("/users/add")}>
               <Icons.Plus /> Add New User
             </button>
           </div>
@@ -250,7 +250,7 @@ export default function UserManagement() {
                 paged.map((user) => (
                   <tr key={user.id}>
                     <td><span className="user-management-uid">{formatUserId(user.id)}</span></td>
-                    <td><span className="user-management-name">{user.name}</span></td>
+                    <td><span className="user-management-name">{user.fullName}</span></td>
                     <td>
                       <span className={`user-management-badge ${roleClass(user.role)}`}>{user.role}</span>
                     </td>
@@ -264,12 +264,12 @@ export default function UserManagement() {
                       </div>
                     </td>
                   </tr>
-                ))
+                 ))
               )}
-            </tbody>
-          </table>
+             </tbody>
+            </table>
 
-          <div className="user-management-footer">
+            <div className="user-management-footer">
             <span>
               {filtered.length === 0
                 ? "No users"
@@ -320,7 +320,7 @@ export default function UserManagement() {
       <ConfirmActionModal
         isOpen={Boolean(deleteUser)}
         title="Delete user?"
-        message={deleteUser ? `Are you sure you want to delete ${deleteUser.name} (${formatUserId(deleteUser.id)})? This action cannot be undone.` : ""}
+        message={deleteUser ? `Are you sure you want to delete ${deleteUser.fullName || "this user"} (${formatUserId(deleteUser.id)})? This action cannot be undone.` : ""}
         confirmLabel="Delete"
         cancelLabel="Cancel"
         variant="decline"
@@ -360,7 +360,7 @@ function UserForm({ form, setForm, err, setErr }) {
   return (
     <div className="user-management-form">
       <div className="add-user-grid-two user-management-form-grid">
-        {field("name", "Full Name")}
+        {field("fullName", "Full Name")}
         {field("email", "Email Address", "email")}
       </div>
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import { getStoreById } from "../services/locationService";
@@ -35,6 +36,9 @@ function IconEdit() {
 export default function ViewStore() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const role = String(user?.role || "").toUpperCase();
+  const canEditStore = role === "ADMIN";
   const [store, setStore] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -91,14 +95,16 @@ export default function ViewStore() {
             <span className="view-store-card-icon"><IconStores /></span>
             <h2 className="view-store-card-title">Store Information</h2>
           </div>
-          <button
-            type="button"
-            className="view-store-edit-btn"
-            onClick={() => navigate(`/stores/edit`, { state: { store } })}
-          >
-            <IconEdit />
-            Edit Store
-          </button>
+          {canEditStore && (
+            <button
+              type="button"
+              className="view-store-edit-btn"
+              onClick={() => navigate(`/stores/edit`, { state: { store } })}
+            >
+              <IconEdit />
+              Edit Store
+            </button>
+          )}
         </div>
 
         <div className="view-store-card-body">

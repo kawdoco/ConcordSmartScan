@@ -10,7 +10,6 @@ import java.time.LocalDate;
 public class AddUserRequest {
 
     @NotBlank(message = "Full name is required")
-    @JsonAlias("fullName")
     private String name;
 
     @NotBlank(message = "Email is required")
