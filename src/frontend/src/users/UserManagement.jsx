@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../components/Toast";
 import AppFooter from "../components/AppFooter";
 import ConfirmActionModal from "../components/ConfirmActionModal";
 import { useSearchParams } from "react-router-dom";
@@ -47,6 +48,7 @@ export default function UserManagement() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchQ = searchParams.get("q") || "";
+  const { showToast } = useToast();
 
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -55,12 +57,6 @@ export default function UserManagement() {
   const [deleteUser, setDeleteUser] = useState(null);
   const [form, setForm] = useState({ fullName: "", role: "Technician", location: "", email: "", password: "" });
   const [formErr, setFormErr] = useState({});
-  const [toast, setToast] = useState({ msg: "", type: "", visible: false });
-
-  const showToast = useCallback((msg, type = "success") => {
-    setToast({ msg, type, visible: true });
-    setTimeout(() => setToast((previous) => ({ ...previous, visible: false })), 3000);
-  }, []);
 
   const loadUsers = useCallback((search = "") => {
     return apiClient
@@ -332,7 +328,6 @@ export default function UserManagement() {
         onCancel={() => setDeleteUser(null)}
       />
 
-      <div className={`user-management-toast user-management-toast-${toast.type}${toast.visible ? " visible" : ""}`}>{toast.msg}</div>
       <AppFooter />
     </section>
   );

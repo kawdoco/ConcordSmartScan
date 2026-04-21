@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
+import { useToast } from "../components/Toast";
 import { getGarmentById } from "../services/locationService";
 import "./ViewGarment.css";
 
@@ -40,6 +41,7 @@ export default function ViewGarment() {
   const { user } = useAuth();
   const role = String(user?.role || "").toUpperCase();
   const canEditGarment = role === "ADMIN";
+  const { showToast } = useToast();
   const [garment, setGarment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,6 +49,7 @@ export default function ViewGarment() {
   useEffect(() => {
     if (!id) {
       setError("Garment ID not found");
+      showToast("Garment ID not found", "error");
       setLoading(false);
       return;
     }
@@ -62,9 +65,10 @@ export default function ViewGarment() {
       .catch(err => {
         console.error("Failed to fetch garment:", err);
         setError("Failed to load garment details. Please try again.");
+        showToast("Failed to load garment details. Please try again.", "error");
         setLoading(false);
       });
-  }, [id]);
+  }, [id, showToast]);
 
   if (loading) {
     return (
