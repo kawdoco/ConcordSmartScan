@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import StatsCards from "../components/StatsCards";
+import AppFooter from "../components/AppFooter";
 import apiClient from "../services/api";
 import { formatUserId } from "../users/userId";
 import "./ApprovedRequests.css";
@@ -467,7 +468,7 @@ export default function ApprovedRequests() {
           </div>
         )}
       </div>
-
+      <AppFooter />
     </div>
   );
 }

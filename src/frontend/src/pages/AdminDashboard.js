@@ -268,9 +268,6 @@ export default function AdminDashboard() {
       <div className="adm-card" style={{marginTop: 0}}>
         <div className="adm-card-header">
           <h2 className="adm-card-title">Recent Requests</h2>
-          <button type="button" className="adm-filter-btn" aria-label="Filter requests">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
-          </button>
         </div>
         <div className="adm-req-grid">
           {loading ? (
@@ -288,18 +285,6 @@ export default function AdminDashboard() {
               </div>
             ))
           }
-          {!loading && recentRequests.length === 0 && (
-            <>
-              <div className="adm-req-row">
-                <div className="adm-req-card"><RequestTag type="transfer" status="Pending" /></div>
-                <div className="adm-req-card"><RequestTag type="purchase" status="Approval Required" /></div>
-              </div>
-              <div className="adm-req-row">
-                <div className="adm-req-card"><RequestTag type="transfer" status="Pending" /></div>
-                <div className="adm-req-card"><RequestTag type="purchase" status="Completed" /></div>
-              </div>
-            </>
-          )}
         </div>
       </div>
 
