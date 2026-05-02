@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import apiClient from "../services/api";
@@ -9,22 +8,10 @@ import {
 } from "recharts";
 import "./ChiefManagerDashboard.css";
 
-/* ── 6-month mock data for request trends ── */
+/* ── 6-month request trends from database data ── */
 const SIX_MONTHS = ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr"];
 
 function buildMonthlyData(requests) {
-  if (!requests.length) {
-    /* Demo data so chart is never blank */
-    return [
-      { month: "Nov", Transfer: 4, Purchase: 3 },
-      { month: "Dec", Transfer: 6, Purchase: 5 },
-      { month: "Jan", Transfer: 5, Purchase: 4 },
-      { month: "Feb", Transfer: 8, Purchase: 6 },
-      { month: "Mar", Transfer: 7, Purchase: 8 },
-      { month: "Apr", Transfer: 6, Purchase: 8 },
-    ];
-  }
-
   const now = new Date();
   const months = SIX_MONTHS.map((label, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
@@ -44,17 +31,6 @@ function buildMonthlyData(requests) {
 }
 
 function buildApprovalData(requests) {
-  if (!requests.length) {
-    return [
-      { month: "Nov", Approved: 3, Pending: 1, Declined: 0 },
-      { month: "Dec", Approved: 4, Pending: 2, Declined: 1 },
-      { month: "Jan", Approved: 5, Pending: 1, Declined: 1 },
-      { month: "Feb", Approved: 7, Pending: 3, Declined: 1 },
-      { month: "Mar", Approved: 6, Pending: 2, Declined: 2 },
-      { month: "Apr", Approved: 5, Pending: 3, Declined: 2 },
-    ];
-  }
-
   const now = new Date();
   const months = SIX_MONTHS.map((label, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
@@ -90,16 +66,52 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function ChiefManagerDashboard() {
-  useAuth();
+  const { user } = useAuth();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const extractNumericGarmentId = (value) => {
+    const matched = String(value || "").match(/(\d+)/);
+    if (!matched) {
+      return null;
+    }
+    const parsed = Number(matched[1]);
+    return Number.isInteger(parsed) ? parsed : null;
+  };
+
   useEffect(() => {
-    apiClient.get("/requests")
-      .then(res => setRequests(Array.isArray(res.data) ? res.data : []))
-      .catch(() => setRequests([]))
-      .finally(() => setLoading(false));
-  }, []);
+    const fetchRequests = async () => {
+      try {
+        const [response, currentUserResponse] = await Promise.all([
+          apiClient.get("/requests"),
+          user?.id ? apiClient.get(`/users/${user.id}`) : Promise.resolve(null)
+        ]);
+
+        const currentGarmentId = currentUserResponse?.data?.garmentId ?? null;
+
+        const normalizedRows = Array.isArray(response.data)
+          ? response.data.map((row) => ({
+              ...row,
+              status: String(row.status || "pending").toLowerCase(),
+              requestType: String(row.requestType || row.type || "").toLowerCase()
+            }))
+          : [];
+
+        // Filter requests for this chief manager's garment
+        const visibleRows = currentGarmentId != null
+          ? normalizedRows.filter((row) => extractNumericGarmentId(row.toGarmentId) === Number(currentGarmentId))
+          : [];
+
+        setRequests(visibleRows);
+      } catch {
+        setRequests([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequests();
+  }, [user?.id]);
 
   const transferRequests = requests.filter(r => (r.requestType || r.type || "").toLowerCase() === "transfer");
   const purchaseRequests = requests.filter(r => (r.requestType || r.type || "").toLowerCase() === "purchase");
@@ -107,10 +119,12 @@ export default function ChiefManagerDashboard() {
   const totalTransfer  = transferRequests.length;
   const approvedTransfer = transferRequests.filter(r => (r.status || "").toLowerCase() === "approved").length;
   const pendingTransfer  = transferRequests.filter(r => (r.status || "").toLowerCase() === "pending").length;
+  const declinedTransfer = transferRequests.filter(r => (r.status || "").toLowerCase() === "declined").length;
 
   const totalPurchase  = purchaseRequests.length;
   const approvedPurchase = purchaseRequests.filter(r => (r.status || "").toLowerCase() === "approved").length;
   const pendingPurchase  = purchaseRequests.filter(r => (r.status || "").toLowerCase() === "pending").length;
+  const declinedPurchase = purchaseRequests.filter(r => (r.status || "").toLowerCase() === "declined").length;
 
   const monthlyData   = buildMonthlyData(requests);
   const approvalData  = buildApprovalData(requests);
@@ -126,6 +140,7 @@ export default function ChiefManagerDashboard() {
             <div className="cm-stat-sub">
               <span className="cm-sub-approved">{approvedTransfer} Approved</span>
               <span className="cm-sub-pending">{pendingTransfer} Pending</span>
+              <span className="cm-sub-declined">{declinedTransfer} Declined</span>
             </div>
           </div>
           <div className="cm-stat-icon cm-icon-transfer">
@@ -142,6 +157,7 @@ export default function ChiefManagerDashboard() {
             <div className="cm-stat-sub">
               <span className="cm-sub-approved">{approvedPurchase} Approved</span>
               <span className="cm-sub-pending">{pendingPurchase} Pending</span>
+              <span className="cm-sub-declined">{declinedPurchase} Declined</span>
             </div>
           </div>
           <div className="cm-stat-icon cm-icon-purchase">
@@ -162,7 +178,6 @@ export default function ChiefManagerDashboard() {
               <h3 className="cm-chart-title">Request Volume — Last 6 Months</h3>
               <p className="cm-chart-sub">Transfer vs Purchase requests per month</p>
             </div>
-            <Link to="/requests/transfer" className="cm-chart-link">View All →</Link>
           </div>
           <div className="cm-chart-area">
             <ResponsiveContainer width="100%" height={260}>
@@ -186,7 +201,6 @@ export default function ChiefManagerDashboard() {
               <h3 className="cm-chart-title">Approval Rate Trend</h3>
               <p className="cm-chart-sub">Approved vs Pending vs Declined over 6 months</p>
             </div>
-            <Link to="/requests/approved" className="cm-chart-link">View All →</Link>
           </div>
           <div className="cm-chart-area">
             <ResponsiveContainer width="100%" height={260}>
@@ -215,45 +229,6 @@ export default function ChiefManagerDashboard() {
                 <Area type="monotone" dataKey="Declined" name="Declined" stroke="#ef4444" strokeWidth={2.5} fill="url(#gradDeclined)" dot={{ r: 4, fill: "#ef4444", strokeWidth: 0 }} activeDot={{ r: 6 }} />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* ── summary insight strip ── */}
-      <div className="cm-insight-strip">
-        <div className="cm-insight-item">
-          <span className="cm-insight-dot cm-dot-blue" />
-          <div>
-            <p className="cm-insight-number">{loading ? "—" : totalTransfer + totalPurchase}</p>
-            <p className="cm-insight-label">Total Requests (6 months)</p>
-          </div>
-        </div>
-        <div className="cm-insight-sep" />
-        <div className="cm-insight-item">
-          <span className="cm-insight-dot cm-dot-green" />
-          <div>
-            <p className="cm-insight-number">{loading ? "—" : approvedTransfer + approvedPurchase}</p>
-            <p className="cm-insight-label">Total Approved</p>
-          </div>
-        </div>
-        <div className="cm-insight-sep" />
-        <div className="cm-insight-item">
-          <span className="cm-insight-dot cm-dot-amber" />
-          <div>
-            <p className="cm-insight-number">{loading ? "—" : pendingTransfer + pendingPurchase}</p>
-            <p className="cm-insight-label">Pending Review</p>
-          </div>
-        </div>
-        <div className="cm-insight-sep" />
-        <div className="cm-insight-item">
-          <span className="cm-insight-dot cm-dot-orange" />
-          <div>
-            <p className="cm-insight-number">
-              {loading ? "—" : totalTransfer + totalPurchase > 0
-                ? `${Math.round(((approvedTransfer + approvedPurchase) / (totalTransfer + totalPurchase)) * 100)}%`
-                : "—"}
-            </p>
-            <p className="cm-insight-label">Approval Rate</p>
           </div>
         </div>
       </div>

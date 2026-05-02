@@ -53,6 +53,7 @@
 }
 .cm-sub-approved { color: #16a34a; }
 .cm-sub-pending  { color: #d97706; }
+.cm-sub-declined { color: #dc2626; }
 
 .cm-stat-icon {
   width: 52px; height: 52px;

@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 
 @Configuration
@@ -18,7 +17,6 @@ public class DataInitializer {
     CommandLineRunner initData(
             UserRepository userRepository,
             MachineRepository machineRepository,
-            MachineRequestRepository requestRepository,
             LocationRepository locationRepository,
             PasswordEncoder passwordEncoder
     ) {
@@ -48,16 +46,6 @@ public class DataInitializer {
                     createMachine("MCH-005", "Zig-Zag Stitcher", "Yamato", "VC2700", "SN123460", "Floor 2, Bay D")
                 ));
             }
-
-            // 4. Seed Machine Requests
-            if (requestRepository.count() == 0) {
-                requestRepository.saveAll(Arrays.asList(
-                    createRequest("REQ-TRANS-001", RequestType.TRANSFER, "MCH-001", "Single Needle Lockstitch", "Main Store", "Garment Plant A", "High", "Urgent production need", RequestStatus.PENDING),
-                    createRequest("REQ-PUR-001", RequestType.PURCHASE, null, "Ultrasonic Welder", "Main Store", "Garment Plant B", "Medium", "Expansion project", RequestStatus.PENDING),
-                    createRequest("REQ-TRANS-002", RequestType.TRANSFER, "MCH-002", "Overlock Machine", "Main Store", "Garment Plant B", "Low", "Scheduled relocation", RequestStatus.APPROVED),
-                    createRequest("REQ-PUR-002", RequestType.PURCHASE, null, "Heavy Duty Lockstitch", "Main Store", "Garment Plant A", "High", "Old machine replacement", RequestStatus.DECLINED)
-                ));
-            }
         };
     }
 
@@ -84,20 +72,5 @@ public class DataInitializer {
         m.setDate(LocalDate.now());
         return m;
     }
-
-    private MachineRequest createRequest(String code, RequestType type, String mid, String mtype, String from, String to, String priority, String reason, RequestStatus status) {
-        MachineRequest r = new MachineRequest();
-        r.setRequestCode(code);
-        r.setRequestType(type);
-        r.setMachineId(mid);
-        r.setMachineType(mtype);
-        r.setFromStoreId(from);
-        r.setToGarmentId(to);
-        r.setPriority(priority);
-        r.setReason(reason);
-        r.setRequiredDate(LocalDate.now().plusDays(7));
-        r.setStatus(status);
-        r.setCreatedAt(LocalDateTime.now());
-        return r;
-    }
 }
+
