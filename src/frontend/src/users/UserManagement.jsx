@@ -68,7 +68,9 @@ export default function UserManagement() {
           id: String(user.id),
           fullName: user.name || "",
           role: formatRoleDisplay(user.role),
-          location: user.location || "",
+          location: user.garmentId
+            ? `GAR-${String(user.garmentId).padStart(5, "0")}`
+            : (user.location || ""),
           email: user.email,
           date: user.createdAt
             ? user.createdAt.slice(0, 10)
