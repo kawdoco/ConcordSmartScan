@@ -72,9 +72,8 @@ function GarmentManagement() {
       })
       .catch(err => {
         console.error('Failed to fetch garments:', err);
-        const message = 'Failed to load garments. Please try again.';
-        setError(message);
-        showToast(message, 'error');
+        setGarments([]);
+        setError(null);
       })
       .finally(() => setLoading(false));
   };

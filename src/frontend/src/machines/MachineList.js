@@ -5,6 +5,7 @@ import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
 import { useToast } from "../components/Toast";
 import ConfirmActionModal from "../components/ConfirmActionModal";
+import TableEmptyState from "../components/TableEmptyState";
 import QRModal from "./QRModal";
 import ScanModal from "./ScanModal";
 import apiClient from "../services/api";
@@ -202,6 +203,8 @@ function MachineList() {
             <div className="machine-list-state">Loading machines...</div>
           ) : error ? (
             <div className="machine-list-state error">{error}<button className="machine-list-retry" onClick={fetchMachines}>Retry</button></div>
+          ) : machines.length === 0 ? (
+            <TableEmptyState message="No machines found" minHeight={392} />
           ) : (
             <table>
               <thead>
