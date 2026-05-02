@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";
 import apiClient from "../services/api";
+import { getMachineDisplayId } from "../machines/machineId";
 import "./AdminDashboard.css";
 
 /* ── tiny inline icons ── */
@@ -70,6 +71,8 @@ export default function AdminDashboard() {
   const [machines, setMachines] = useState([]);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [machinePage, setMachinePage] = useState(1);
+  const MACHINES_PER_PAGE = 3;
 
   useEffect(() => {
     Promise.all([
@@ -82,6 +85,14 @@ export default function AdminDashboard() {
   }, []);
 
   const totalMachines = machines.length;
+  const totalMachinePages = Math.max(1, Math.ceil(totalMachines / MACHINES_PER_PAGE));
+  const paginatedMachines = machines.slice((machinePage - 1) * MACHINES_PER_PAGE, machinePage * MACHINES_PER_PAGE);
+
+  // Reset to page 1 if machines list changes and current page is out of range
+  React.useEffect(() => {
+    if (machinePage > totalMachinePages) setMachinePage(1);
+  }, [totalMachinePages, machinePage]);
+
   const transferRequests = requests.filter(r => {
     const t = (r.requestType || r.type || "").toLowerCase();
     return t === "transfer" || t === "relocation";
@@ -127,24 +138,10 @@ export default function AdminDashboard() {
   return (
     <section className="adm-page">
       {/* ── page action bar ── */}
-      <div className="adm-page-action-bar">
-        <div>
-          <h2 className="adm-page-heading">System Overview</h2>
-        </div>
-        <button
-          type="button"
-          className="adm-add-machine-btn"
-          onClick={() => navigate("/add")}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          Add Machine
-        </button>
-      </div>
+      {/* Removed Add Machine button from top action bar; now in card header */}
 
       {/* ── stat cards ── */}
-      <div className="adm-stat-row">
+      <div className="adm-stat-row" style={{marginBottom: 0}}>
         {statCards.map(card => (
           <button
             key={card.label}
@@ -163,10 +160,22 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── recent machines table ── */}
-      <div className="adm-card">
-        <div className="adm-card-header">
+      <div className="adm-card" style={{marginTop: 0}}>
+        <div className="adm-card-header" style={{gap: 12}}>
           <h2 className="adm-card-title">Recent Machines</h2>
-          <Link to="/machines" className="adm-view-all">View all Machines →</Link>
+          <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
+            <button
+              type="button"
+              className="adm-add-machine-btn"
+              onClick={() => navigate("/add")}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Add Machine
+            </button>
+            <Link to="/machines" className="adm-view-all">View all Machines →</Link>
+          </div>
         </div>
         <div className="adm-table-wrap">
           <table className="adm-table">
@@ -182,13 +191,13 @@ export default function AdminDashboard() {
             <tbody>
               {loading ? (
                 <tr><td colSpan="5" className="adm-table-empty">Loading machines…</td></tr>
-              ) : recentMachines.length === 0 ? (
+              ) : paginatedMachines.length === 0 ? (
                 <tr><td colSpan="5" className="adm-table-empty">No machines found</td></tr>
-              ) : recentMachines.map(m => (
+              ) : paginatedMachines.map(m => (
                 <tr key={m.machineId || m.id}>
                   <td className="adm-machine-id">
                     <Link to={`/machine/${m.machineId || m.id}`} className="adm-id-link">
-                      #{`MCH-${String(m.machineId || m.id).padStart(5, "0")}`}
+                      {getMachineDisplayId(m) || "-"}
                     </Link>
                   </td>
                   <td>
@@ -203,9 +212,7 @@ export default function AdminDashboard() {
                       : (m.location || "—")}
                   </td>
                   <td className="adm-date-cell">
-                    {m.createdAt
-                      ? new Date(m.createdAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
-                      : "—"}
+                    {m.date || m.addedDate || "-"}
                   </td>
                   <td>
                     <button
@@ -224,19 +231,41 @@ export default function AdminDashboard() {
         </div>
         {!loading && (
           <div className="adm-table-footer">
-            <span>Showing {Math.min(recentMachines.length, 4)} of {totalMachines} machines</span>
+            <span>
+              {totalMachines === 0
+                ? "No machines"
+                : `Showing ${(machinePage - 1) * MACHINES_PER_PAGE + 1}-${Math.min(machinePage * MACHINES_PER_PAGE, totalMachines)} of ${totalMachines} machines`}
+            </span>
             <div className="adm-pagination">
-              <button type="button" className="adm-page-btn" disabled>Previous</button>
-              <button type="button" className="adm-page-btn adm-page-active">1</button>
-              <button type="button" className="adm-page-btn">2</button>
-              <button type="button" className="adm-page-btn">Next</button>
+              <button
+                type="button"
+                className="adm-page-btn"
+                onClick={() => setMachinePage(p => Math.max(1, p - 1))}
+                disabled={machinePage === 1}
+                aria-label="Previous page"
+              >&lt;</button>
+              {Array.from({ length: totalMachinePages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  type="button"
+                  className={`adm-page-btn${page === machinePage ? " adm-page-active" : ""}`}
+                  onClick={() => setMachinePage(page)}
+                >{page}</button>
+              ))}
+              <button
+                type="button"
+                className="adm-page-btn"
+                onClick={() => setMachinePage(p => Math.min(totalMachinePages, p + 1))}
+                disabled={machinePage === totalMachinePages}
+                aria-label="Next page"
+              >&gt;</button>
             </div>
           </div>
         )}
       </div>
 
       {/* ── recent requests ── */}
-      <div className="adm-card">
+      <div className="adm-card" style={{marginTop: 0}}>
         <div className="adm-card-header">
           <h2 className="adm-card-title">Recent Requests</h2>
           <button type="button" className="adm-filter-btn" aria-label="Filter requests">
@@ -248,20 +277,33 @@ export default function AdminDashboard() {
             <p className="adm-table-empty">Loading requests…</p>
           ) : recentRequests.length === 0 ? (
             <p className="adm-table-empty">No requests found</p>
-          ) : recentRequests.map((r, idx) => (
-            <RequestTag key={r.id || idx} type={r.requestType || r.type} status={r.status} code={r.requestCode} />
-          ))}
+          ) :
+            Array.from({ length: Math.ceil(recentRequests.length / 2) }, (_, rowIdx) => (
+              <div className="adm-req-row" key={rowIdx}>
+                {recentRequests.slice(rowIdx * 2, rowIdx * 2 + 2).map((r, idx) => (
+                  <div className="adm-req-card" key={r.id || (rowIdx * 2 + idx)}>
+                    <RequestTag type={r.requestType || r.type} status={r.status} code={r.requestCode} />
+                  </div>
+                ))}
+              </div>
+            ))
+          }
           {!loading && recentRequests.length === 0 && (
             <>
-              <RequestTag type="transfer" status="Pending" />
-              <RequestTag type="purchase" status="Approval Required" />
-              <RequestTag type="transfer" status="Pending" />
-              <RequestTag type="purchase" status="Completed" />
+              <div className="adm-req-row">
+                <div className="adm-req-card"><RequestTag type="transfer" status="Pending" /></div>
+                <div className="adm-req-card"><RequestTag type="purchase" status="Approval Required" /></div>
+              </div>
+              <div className="adm-req-row">
+                <div className="adm-req-card"><RequestTag type="transfer" status="Pending" /></div>
+                <div className="adm-req-card"><RequestTag type="purchase" status="Completed" /></div>
+              </div>
             </>
           )}
         </div>
       </div>
 
+      <div style={{ flex: 1 }} />
       <AppFooter />
     </section>
   );

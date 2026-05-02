@@ -1,19 +1,23 @@
 /* AdminDashboard.css */
 
 .adm-page {
+  min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 8px;
+  gap: 16px;
+  color: #0f1623;
+  font-family: 'Sora', sans-serif;
+  padding: 0 0 0 0;
 }
 
 /* ── page action bar ── */
 .adm-page-action-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 0;
 }
 
 .adm-page-heading {
@@ -148,31 +152,37 @@
 .adm-table-wrap { overflow-x: auto; }
 
 .adm-table {
-  width: 100%; border-collapse: collapse;
-  font-size: 0.88rem;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  font-family: 'Sora', sans-serif;
 }
 
-.adm-table thead tr {
-  border-top: 1px solid #f1f5f9;
-  border-bottom: 1px solid #f1f5f9;
-  background: #f8fafc;
+ .adm-table thead tr {
+  border-top: 1.5px solid #e5e7eb;
+  border-bottom: 1.5px solid #e5e7eb;
+  background: #f4f6fb;
 }
 
-.adm-table th {
-  padding: 11px 24px;
+ .adm-table th {
+  padding: 11px 20px;
   text-align: left;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #94a3b8;
-  letter-spacing: 0.06em;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  font-family: 'Sora', sans-serif;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-.adm-table td {
-  padding: 14px 24px;
-  border-bottom: 1px solid #f1f5f9;
-  color: #334155;
+ .adm-table td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 13.5px;
+  color: #475569;
+  font-weight: 400;
+  font-family: 'Sora', sans-serif;
   vertical-align: middle;
 }
 
@@ -180,10 +190,14 @@
 
 .adm-table tbody tr:hover { background: #fafbfc; }
 
-.adm-machine-id { font-weight: 600; }
+.adm-machine-id { font-weight: 400; }
 
 .adm-id-link {
-  color: #2563eb; text-decoration: none; font-weight: 700;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 400;
+  font-size: 13.5px;
+  font-family: 'Sora', sans-serif;
   transition: opacity 0.15s;
 }
 .adm-id-link:hover { opacity: 0.75; text-decoration: underline; }
@@ -195,16 +209,27 @@
   background: #cbd5e1; flex-shrink: 0;
 }
 
-.adm-date-cell { color: #64748b; font-size: 0.85rem; }
+.adm-date-cell {
+  color: #475569;
+  font-size: 13.5px;
+  font-weight: 400;
+}
 
 .adm-icon-btn {
-  background: #f8fafc; border: 1px solid #e2e8f0;
-  border-radius: 8px; padding: 6px 8px;
-  color: #64748b; cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  display: inline-flex; align-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid transparent;
+  border-radius: 7px;
+  background: #fff;
+  color: #6b7280;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s;
 }
-.adm-icon-btn:hover { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+.adm-icon-btn:hover { background: #eef1fd; color: #1a3fd4; border-color: #b8c8f8; }
 
 .adm-table-empty {
   text-align: center; color: #94a3b8;
@@ -253,20 +278,38 @@
   padding: 0 24px 16px 24px;
 }
 
-.adm-req-item {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 0;
-  border-bottom: 1px solid #f1f5f9;
+.adm-req-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 24px 16px 24px;
 }
 
+.adm-req-row {
+  display: flex;
+  gap: 16px;
+}
+
+.adm-req-card {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+  padding: 18px 18px 14px 18px;
+  display: flex;
+  align-items: stretch;
+}
 .adm-req-item:last-child { border-bottom: none; }
-
-.adm-req-icon {
-  width: 38px; height: 38px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+.adm-req-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 0;
+  border: none;
 }
+
 .adm-req-icon.transfer { background: #eff6ff; color: #2563eb; }
 .adm-req-icon.purchase { background: #fffbeb; color: #d97706; }
 
