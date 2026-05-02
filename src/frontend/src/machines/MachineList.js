@@ -90,9 +90,19 @@ function MachineList() {
     }
   };
 
+  const getLocationDisplay = (machine) => {
+    if (machine.storeId) {
+      return `STR-${String(machine.storeId).padStart(5, "0")}`;
+    }
+    if (machine.garmentId) {
+      return `GAR-${String(machine.garmentId).padStart(5, "0")}`;
+    }
+    return "-";
+  };
+
   const tabFiltered = machines.filter((m) => {
-    if (activeTab === "stores")   return m.location?.toUpperCase().startsWith("STO");
-    if (activeTab === "garments") return m.location?.toUpperCase().startsWith("GAR");
+    if (activeTab === "stores") return Boolean(m.storeId);
+    if (activeTab === "garments") return Boolean(m.garmentId);
     return true;
   });
 
@@ -103,7 +113,7 @@ function MachineList() {
       m.machineId?.toLowerCase().includes(q) ||
       displayMachineId.includes(q) ||
       m.type?.toLowerCase().includes(q) ||
-      m.location?.toLowerCase().includes(q) ||
+      getLocationDisplay(m).toLowerCase().includes(q) ||
       m.brand?.toLowerCase().includes(q) ||
       m.model?.toLowerCase().includes(q)
     );
@@ -127,8 +137,8 @@ function MachineList() {
   };
 
   const getLocationLabel = () => {
-    if (activeTab === "stores") return "Store Name";
-    if (activeTab === "garments") return "Garment Name";
+    if (activeTab === "stores") return "Store ID";
+    if (activeTab === "garments") return "Garment ID";
     return "Location";
   };
 
@@ -232,7 +242,7 @@ function MachineList() {
                           </span>
                         </td>
                         <td>
-                          <span className="machine-list-location-pill">{machine.location}</span>
+                          <span className="machine-list-location-pill">{getLocationDisplay(machine)}</span>
                         </td>
                         <td>{machine.date || machine.addedDate || "-"}</td>
                         <td>
