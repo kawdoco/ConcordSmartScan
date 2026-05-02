@@ -233,6 +233,7 @@ export default function ChiefManagerDashboard() {
         </div>
       </div>
 
+      <div style={{ flex: 1 }} />
       <AppFooter />
     </section>
   );

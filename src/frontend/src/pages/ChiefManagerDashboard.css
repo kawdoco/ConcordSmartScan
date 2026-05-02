@@ -5,6 +5,9 @@
   flex-direction: column;
   gap: 20px;
   padding: 8px;
+  min-height: 100%;
+  color: #0f1623;
+  font-family: 'Sora', sans-serif;
 }
 
 /* ── stat row ── */
