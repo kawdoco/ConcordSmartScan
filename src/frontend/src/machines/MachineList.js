@@ -90,19 +90,40 @@ function MachineList() {
     }
   };
 
+  const normalizeLocationDisplay = (value) => {
+    const trimmed = String(value || "").trim();
+    if (!trimmed) return "";
+    const match = trimmed.match(/^(STO|GAR)-(\d+)$/i);
+    if (!match) return trimmed;
+    const prefix = match[1].toUpperCase();
+    const numericPart = String(Number(match[2])).padStart(3, "0");
+    return `${prefix}-${numericPart}`;
+  };
+
   const getLocationDisplay = (machine) => {
+    const normalized = normalizeLocationDisplay(machine.location);
+    if (normalized) return normalized;
     if (machine.storeId) {
-      return `STR-${String(machine.storeId).padStart(5, "0")}`;
+      return `STO-${String(machine.storeId).padStart(3, "0")}`;
     }
     if (machine.garmentId) {
-      return `GAR-${String(machine.garmentId).padStart(5, "0")}`;
+      return `GAR-${String(machine.garmentId).padStart(3, "0")}`;
     }
     return "-";
   };
 
+  const getLocationType = (machine) => {
+    const normalized = normalizeLocationDisplay(machine.location).toUpperCase();
+    if (normalized.startsWith("STO-")) return "stores";
+    if (normalized.startsWith("GAR-")) return "garments";
+    if (machine.storeId) return "stores";
+    if (machine.garmentId) return "garments";
+    return "unknown";
+  };
+
   const tabFiltered = machines.filter((m) => {
-    if (activeTab === "stores") return Boolean(m.storeId);
-    if (activeTab === "garments") return Boolean(m.garmentId);
+    if (activeTab === "stores") return getLocationType(m) === "stores";
+    if (activeTab === "garments") return getLocationType(m) === "garments";
     return true;
   });
 

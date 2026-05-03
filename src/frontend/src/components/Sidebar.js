@@ -16,8 +16,9 @@ function Sidebar() {
       </svg>
     ),
     users: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M18 8a3 3 0 1 1 0 6M11 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="14" cy="7" r="4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
     machines: (
@@ -46,8 +47,11 @@ function Sidebar() {
       </svg>
     ),
     garments: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M6 4l2 4h8l2-4M9 8v12h6V8M9 12h6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+        <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M17 18h1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M12 18h1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M7 18h1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
     transferHistory: (
