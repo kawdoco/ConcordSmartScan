@@ -60,11 +60,13 @@ export default function TechnicianDashboard() {
   const transferRequests = requests
     .filter(r => (r.requestType || r.type || "").toLowerCase() === "transfer");
 
-  const recentMachines = machines;
+  const recentMachines = machines.slice(0, 4);
+  const recentPurchases = purchaseRequests.slice(0, 4);
+  const recentTransfers = transferRequests.slice(0, 4);
 
   const showMachines  = loading ? [] : recentMachines;
-  const showPurchases = loading ? [] : purchaseRequests;
-  const showTransfers = loading ? [] : transferRequests;
+  const showPurchases = loading ? [] : recentPurchases;
+  const showTransfers = loading ? [] : recentTransfers;
 
   return (
     <section className="tch-page">
@@ -101,7 +103,7 @@ export default function TechnicianDashboard() {
                       </td>
                       <td>{m.machineType || m.type || "—"}</td>
                       <td className="tch-location">
-                        {m.garmentId ? `GAR-${String(m.garmentId).padStart(5, "0")}` : m.storeId ? `STR-${String(m.storeId).padStart(5, "0")}` : "—"}
+                        {m.location ? m.location : m.garmentId ? `GAR-${String(m.garmentId).padStart(3, "0")}` : m.storeId ? `STO-${String(m.storeId).padStart(3, "0")}` : "—"}
                       </td>
                       <td className="tch-date">{m.date || m.addedDate || "—"}</td>
                     </tr>
