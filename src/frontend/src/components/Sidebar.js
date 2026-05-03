@@ -99,7 +99,16 @@ function Sidebar() {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
-  const displayName = user?.name || "Admin User";
+  const formatName = (name) => {
+    if (!name) return "Admin User";
+    return name
+      .split(/[\s_.]+/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  const rawName = user?.name || user?.fullName || user?.email?.split("@")[0] || "Admin User";
+  const displayName = formatName(rawName);
   const displayEmail = user?.email || "admin@concord.com";
   const avatarLetter = (displayName?.trim()?.charAt(0) || "A").toUpperCase();
 

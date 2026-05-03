@@ -73,7 +73,31 @@ function Topbar() {
     setSearchParams(nextParams, { replace: true });
   };
 
+  const formatName = (name) => {
+    if (!name) return "User";
+    return name
+      .split(/[\s_.]+/)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  const getVibrantColor = (letter) => {
+    const colors = [
+      "#FF6B6B", // Red-ish
+      "#1E90FF", // Blue
+      "#2ED573", // Green
+      "#FFA502", // Orange
+      "#9B59B6", // Purple
+      "#FF4757"  // Pink/Watermelon
+    ];
+    const charCode = (letter || "U").toUpperCase().charCodeAt(0);
+    return colors[charCode % colors.length];
+  };
+
   const shortName = (user?.email || "User").split("@")[0];
+  const rawName = user?.name || user?.fullName || shortName;
+  const displayName = formatName(rawName);
+  const firstLetter = displayName.slice(0, 1).toUpperCase();
 
   return (
     <div style={styles.topbar}>
@@ -93,8 +117,13 @@ function Topbar() {
       </div>
       <div style={styles.menuWrap}>
         <div style={styles.userInfo}>
-          <span style={styles.avatar}>{shortName.slice(0, 1).toUpperCase()}</span>
-          <span style={styles.userText}>{shortName}</span>
+          <div style={styles.userTextWrap}>
+            <span style={styles.userName}>{displayName}</span>
+            <span style={styles.userRole}>{role || "USER"}</span>
+          </div>
+          <span style={{ ...styles.avatar, background: getVibrantColor(firstLetter) }}>
+            {firstLetter}
+          </span>
         </div>
       </div>
     </div>
@@ -145,32 +174,41 @@ const styles = {
     gap: "10px"
   },
   userInfo: {
-    fontWeight: "600",
-    color: "#1e293b",
-    padding: "7px 10px",
-    background: "#f8fafc",
-    borderRadius: "999px",
-    border: "1px solid #e2e8f0",
     display: "inline-flex",
     alignItems: "center",
-    gap: "8px"
+    gap: "12px",
+    background: "transparent",
+    padding: "4px"
+  },
+  userTextWrap: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    lineHeight: "1.2"
+  },
+  userName: {
+    fontWeight: "700",
+    color: "#1e293b",
+    fontSize: "0.95rem"
+  },
+  userRole: {
+    fontWeight: "600",
+    color: "#64748b",
+    fontSize: "0.75rem",
+    textTransform: "uppercase",
+    letterSpacing: "0.03em"
   },
   avatar: {
-    width: "24px",
-    height: "24px",
+    width: "36px",
+    height: "36px",
     borderRadius: "999px",
-    background: "linear-gradient(135deg,#2563eb,#7c3aed)",
     color: "#fff",
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "0.75rem"
-  },
-  userText: {
-    maxWidth: "120px",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap"
+    fontSize: "1.1rem",
+    fontWeight: "bold",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
   },
   
 };
