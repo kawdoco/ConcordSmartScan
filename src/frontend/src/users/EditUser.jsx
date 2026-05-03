@@ -48,6 +48,7 @@ export default function EditUserPage() {
     confirmPassword: "",
   });
   const [submitError, setSubmitError] = useState("");
+  const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -110,7 +111,41 @@ export default function EditUserPage() {
       ...prev,
       [name]: value,
     }));
+    setFormErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
     setSubmitError("");
+  };
+
+  const getMaxDate = () => {
+    const today = new Date();
+    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+    return maxDate.toISOString().split("T")[0];
+  };
+
+  const validateAge = () => {
+    const dob = formData.dateOfBirth;
+    if (!dob) {
+      setFormErrors((prev) => ({ ...prev, dateOfBirth: "Date of Birth is required" }));
+      return false;
+    }
+
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age -= 1;
+    }
+
+    if (age < 18) {
+      setFormErrors((prev) => ({ ...prev, dateOfBirth: "User must be at least 18 years old" }));
+      return false;
+    }
+
+    setFormErrors((prev) => ({ ...prev, dateOfBirth: "" }));
+    return true;
   };
 
   const handleSubmit = async () => {
@@ -128,6 +163,10 @@ export default function EditUserPage() {
 
     if (formData.password && !formData.currentPassword) {
       setSubmitError("Current password is required to set a new password.");
+      return;
+    }
+
+    if (!validateAge()) {
       return;
     }
 
@@ -150,7 +189,7 @@ export default function EditUserPage() {
     }
 
     const payload = {
-      fullName: formData.fullName.trim(),
+      name: formData.fullName.trim(),
       dateOfBirth: formData.dateOfBirth,
       phoneNumber: formData.phoneNumber.trim(),
       email: formData.email.trim(),
@@ -267,7 +306,17 @@ export default function EditUserPage() {
             <div className="add-user-grid-two">
               <div className="add-user-field">
                 <label htmlFor="dateOfBirth">Date of Birth</label>
-                <input type="date" id="dateOfBirth" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} required />
+                <input
+                  type="date"
+                  id="dateOfBirth"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleInputChange}
+                  onBlur={validateAge}
+                  max={getMaxDate()}
+                  required
+                />
+                {formErrors.dateOfBirth && <span className="field-error-text">{formErrors.dateOfBirth}</span>}
               </div>
               <div className="add-user-field">
                 <label htmlFor="phoneNumber">Phone Number</label>

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import MapSelector from "../components/MapSelector";
+import { useToast } from "../components/Toast";
 import ConfirmActionModal from "../components/ConfirmActionModal";
 import { updateStore } from "../services/locationService";
 import "./EditStore.css";
@@ -89,12 +90,12 @@ function mapStoreToForm(store) {
 export default function EditStore() {
 	const location = useLocation();
 	const navigate = useNavigate();
+	const { showToast } = useToast();
 
 	const initialForm = useMemo(() => mapStoreToForm(location.state?.store), [location.state?.store]);
 
 	const [form, setForm] = useState(initialForm);
 	const [errors, setErrors] = useState({});
-	const [notification, setNotification] = useState(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 	const storeId = location.state?.store?.locationId;
@@ -103,11 +104,6 @@ export default function EditStore() {
 		setForm(initialForm);
 		setErrors({});
 	}, [initialForm]);
-
-	const showNotification = (message, type) => {
-		setNotification({ message, type });
-		setTimeout(() => setNotification(null), 3000);
-	};
 
 	const validate = () => {
 		const nextErrors = {};
@@ -152,7 +148,7 @@ export default function EditStore() {
 	const handleUpdate = async () => {
 		if (!validate()) return;
 		if (!storeId) {
-			showNotification("Error: Store ID not found", "error");
+			showToast("Error: Store ID not found", "error");
 			return;
 		}
 		setIsConfirmOpen(false);
@@ -169,7 +165,7 @@ export default function EditStore() {
 			};
 
 			await updateStore(storeId, payload);
-			showNotification("Store updated successfully!", "success");
+			showToast("Store updated successfully!", "success");
 
 			// Redirect after a short delay to show the success message
 			setTimeout(() => {
@@ -177,7 +173,7 @@ export default function EditStore() {
 			}, 1500);
 		} catch (err) {
 			const errorMsg = err.response?.data?.message || err.message || "Failed to update store. Please try again.";
-			showNotification(errorMsg, "error");
+			showToast(errorMsg, "error");
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -186,7 +182,7 @@ export default function EditStore() {
 	const handleOpenConfirm = () => {
 		if (!validate()) return;
 		if (!storeId) {
-			showNotification("Error: Store ID not found", "error");
+			showToast("Error: Store ID not found", "error");
 			return;
 		}
 		setIsConfirmOpen(true);
@@ -201,11 +197,6 @@ export default function EditStore() {
 	return (
 		<section className="edit-store-page">
 			<PagePath items={[{ label: "Stores", to: "/stores" }, { label: "Edit Store" }]} />
-			{notification && (
-				<div className={`edit-store-notice ${notification.type === "success" ? "success" : "info"}`}>
-					{notification.message}
-				</div>
-			)}
 
 			<div className="edit-store-card">
 				<div className="edit-store-card-header">

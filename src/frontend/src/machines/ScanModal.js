@@ -1,5 +1,6 @@
 // machines/ScanModal.js
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ScanModal.css";
 import axios from "axios";
 import { formatMachineId, getMachineDisplayId } from "./machineId";
@@ -110,6 +111,7 @@ function haversine(lat1, lng1, lat2, lng2) {
 
 /* ── Main component ──────────────────────────────────────────── */
 export default function ScanModal({ onClose, onRequest, showToast }) {
+  const navigate = useNavigate();
   const jsqrState  = useJsQR();
 
   const [tab,        setTab]        = useState("camera");  // "camera" | "upload"
@@ -311,17 +313,13 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
   };
 
   /* ── Send purchase request ── */
-  const handlePurchaseRequest = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        `http://localhost:8080/api/requests/purchase`,
-        { machineId: formatMachineId(scanResult?.data?.machineId) || scanResult?.data?.machineId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    } catch { /* endpoint may not be ready */ }
-    setPurchaseSent(true);
-    if (showToast) showToast("Purchase request sent to Chief Manager.", "info");
+  const handlePurchaseRequest = () => {
+    onClose();
+    const searchParams = new URLSearchParams({
+      type: 'purchase',
+      machineType: scanResult?.data?.type || ''
+    });
+    navigate(`/requests/new?${searchParams.toString()}`);
   };
 
   /* ── Reset to re-scan ── */
@@ -525,7 +523,19 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
                     </div>
                     <button
                       className={`scm-btn-request${requested.has(getMachineDisplayId(m)) ? " sent" : ""}`}
-                      onClick={() => !requested.has(getMachineDisplayId(m)) && handleRequest(m)}
+                      onClick={() => {
+                        if (!requested.has(getMachineDisplayId(m))) {
+                          onClose();
+                          const storeId = m.storeId ? `STO-${String(m.storeId).padStart(3, '0')}` : m.location || '';
+                          const searchParams = new URLSearchParams({
+                            type: 'transfer',
+                            machineId: getMachineDisplayId(m),
+                            machineType: m.type || '',
+                            fromStoreId: storeId
+                          });
+                          navigate(`/requests/new?${searchParams.toString()}`);
+                        }
+                      }}
                       disabled={requested.has(getMachineDisplayId(m))}
                     >
                       {requested.has(getMachineDisplayId(m)) ? "✓ Requested" : <><IconSend /> Request</>}

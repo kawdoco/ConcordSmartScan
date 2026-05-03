@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
+import { useToast } from "../components/Toast";
 import StatsCards from "../components/StatsCards";
+import AppFooter from "../components/AppFooter";
 import apiClient from "../services/api";
 import { formatUserId } from "../users/userId";
 import "./ApprovedRequests.css";
@@ -53,15 +55,6 @@ const ChevRight = () => (
   </svg>
 );
 
-function useToast() {
-  const [toast, setToast] = useState({ msg: "", type: "", visible: false });
-  const showToast = useCallback((msg, type = "info") => {
-    setToast({ msg, type, visible: true });
-    setTimeout(() => setToast((previous) => ({ ...previous, visible: false })), 3000);
-  }, []);
-  return [toast, showToast];
-}
-
 const formatDate = (value) => {
   if (!value) return "-";
   const parsed = new Date(value);
@@ -80,6 +73,7 @@ export default function ApprovedRequests() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchQ = searchParams.get("q") || "";
+  const { showToast } = useToast();
   const [requestTab, setRequestTab] = useState("transfer");
   const [page, setPage] = useState(1);
   const [purchasePage, setPurchasePage] = useState(1);
@@ -87,7 +81,6 @@ export default function ApprovedRequests() {
   const [purchaseRequests, setPurchaseRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [toast, showToast] = useToast();
 
   useEffect(() => {
     const fetchApprovedRequests = async () => {
@@ -128,7 +121,9 @@ export default function ApprovedRequests() {
         setTransferRequests(normalizedTransfer);
         setPurchaseRequests(normalizedPurchase);
       } catch (requestError) {
-        setError(requestError.response?.data?.message || "Failed to load approved requests.");
+        const errorMessage = requestError.response?.data?.message || "Failed to load approved requests.";
+        setError(errorMessage);
+        showToast(errorMessage, "error");
       } finally {
         setLoading(false);
       }
@@ -473,8 +468,7 @@ export default function ApprovedRequests() {
           </div>
         )}
       </div>
-
-      <div className={`toast toast-${toast.type}${toast.visible ? " visible" : ""}`}>{toast.msg}</div>
+      <AppFooter />
     </div>
   );
 }

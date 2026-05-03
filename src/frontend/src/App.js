@@ -7,8 +7,6 @@ import MachineList from "./machines/MachineList";
 import AddMachine from "./machines/AddMachine";
 import ViewMachine from "./machines/ViewMachine";
 import EditMachine from "./machines/EditMachine";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
 import AddUser from "./users/AddUser";
 import EditUserPage from "./users/EditUser";
@@ -26,6 +24,7 @@ import GarmentManagement from "./garments/GarmentManagement";
 import AddGarment from "./garments/AddGarment";
 import ViewGarment from "./garments/ViewGarment";
 import EditGarment from "./garments/EditGarment";
+import { ToastProvider, ToastViewport } from "./components/Toast";
 
 
 function RequireAuth({ children }) {
@@ -42,16 +41,18 @@ function RequireRole({ children, allowedRoles }) {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route
-          path="/"
-          element={
-            <RequireAuth>
-              <AppLayout />
-            </RequireAuth>
-          }
-        >
+      <ToastProvider>
+        <ToastViewport />
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <RequireAuth>
+                <AppLayout />
+              </RequireAuth>
+            }
+          >
           <Route path="dashboard" element={<Dashboard />} />
           <Route
             path="machines"
@@ -213,11 +214,10 @@ function App() {
               </RequireRole>
             }
           />
-          <Route path="profile" element={<Profile />} />
-          <Route path="settings" element={<Settings />} />
         </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </ToastProvider>
     </BrowserRouter>
   );
 }
