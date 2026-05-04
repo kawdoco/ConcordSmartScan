@@ -5,6 +5,7 @@ import AppFooter from "../components/AppFooter";
 import StatsCards from "../components/StatsCards";
 import { useToast } from "../components/Toast";
 import ConfirmActionModal from "../components/ConfirmActionModal";
+import TableEmptyState from "../components/TableEmptyState";
 import QRModal from "./QRModal";
 import ScanModal from "./ScanModal";
 import apiClient from "../services/api";
@@ -40,7 +41,7 @@ function IconScan() {
   return (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>);
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 function MachineList() {
   const navigate = useNavigate();
@@ -89,9 +90,40 @@ function MachineList() {
     }
   };
 
+  const normalizeLocationDisplay = (value) => {
+    const trimmed = String(value || "").trim();
+    if (!trimmed) return "";
+    const match = trimmed.match(/^(STO|GAR)-(\d+)$/i);
+    if (!match) return trimmed;
+    const prefix = match[1].toUpperCase();
+    const numericPart = String(Number(match[2])).padStart(3, "0");
+    return `${prefix}-${numericPart}`;
+  };
+
+  const getLocationDisplay = (machine) => {
+    const normalized = normalizeLocationDisplay(machine.location);
+    if (normalized) return normalized;
+    if (machine.storeId) {
+      return `STO-${String(machine.storeId).padStart(3, "0")}`;
+    }
+    if (machine.garmentId) {
+      return `GAR-${String(machine.garmentId).padStart(3, "0")}`;
+    }
+    return "-";
+  };
+
+  const getLocationType = (machine) => {
+    const normalized = normalizeLocationDisplay(machine.location).toUpperCase();
+    if (normalized.startsWith("STO-")) return "stores";
+    if (normalized.startsWith("GAR-")) return "garments";
+    if (machine.storeId) return "stores";
+    if (machine.garmentId) return "garments";
+    return "unknown";
+  };
+
   const tabFiltered = machines.filter((m) => {
-    if (activeTab === "stores")   return m.location?.toUpperCase().startsWith("STO");
-    if (activeTab === "garments") return m.location?.toUpperCase().startsWith("GAR");
+    if (activeTab === "stores") return getLocationType(m) === "stores";
+    if (activeTab === "garments") return getLocationType(m) === "garments";
     return true;
   });
 
@@ -102,7 +134,7 @@ function MachineList() {
       m.machineId?.toLowerCase().includes(q) ||
       displayMachineId.includes(q) ||
       m.type?.toLowerCase().includes(q) ||
-      m.location?.toLowerCase().includes(q) ||
+      getLocationDisplay(m).toLowerCase().includes(q) ||
       m.brand?.toLowerCase().includes(q) ||
       m.model?.toLowerCase().includes(q)
     );
@@ -126,8 +158,8 @@ function MachineList() {
   };
 
   const getLocationLabel = () => {
-    if (activeTab === "stores") return "Store Name";
-    if (activeTab === "garments") return "Garment Name";
+    if (activeTab === "stores") return "Store ID";
+    if (activeTab === "garments") return "Garment ID";
     return "Location";
   };
 
@@ -202,6 +234,8 @@ function MachineList() {
             <div className="machine-list-state">Loading machines...</div>
           ) : error ? (
             <div className="machine-list-state error">{error}<button className="machine-list-retry" onClick={fetchMachines}>Retry</button></div>
+          ) : machines.length === 0 ? (
+            <TableEmptyState message="No machines found" minHeight={392} />
           ) : (
             <table>
               <thead>
@@ -229,7 +263,7 @@ function MachineList() {
                           </span>
                         </td>
                         <td>
-                          <span className="machine-list-location-pill">{machine.location}</span>
+                          <span className="machine-list-location-pill">{getLocationDisplay(machine)}</span>
                         </td>
                         <td>{machine.date || machine.addedDate || "-"}</td>
                         <td>

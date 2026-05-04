@@ -7,6 +7,11 @@
   flex-direction: column;
 }
 
+.required-star {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
 .add-user-page *,
 .add-user-page *::before,
 .add-user-page *::after {

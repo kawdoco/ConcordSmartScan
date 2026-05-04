@@ -7,8 +7,6 @@ import MachineList from "./machines/MachineList";
 import AddMachine from "./machines/AddMachine";
 import ViewMachine from "./machines/ViewMachine";
 import EditMachine from "./machines/EditMachine";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
 import UserManagement from "./users/UserManagement";
 import AddUser from "./users/AddUser";
 import EditUserPage from "./users/EditUser";
@@ -216,8 +214,6 @@ function App() {
               </RequireRole>
             }
           />
-          <Route path="profile" element={<Profile />} />
-          <Route path="settings" element={<Settings />} />
         </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

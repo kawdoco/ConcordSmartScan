@@ -58,8 +58,11 @@ export default function NewRequest() {
   const [searchParams] = useSearchParams();
   const [form, setForm] = useState(() => {
     const urlType = searchParams.get("type");
+    const machineId = searchParams.get("machineId") || "";
+    const machineType = searchParams.get("machineType") || "";
+    const fromStoreId = searchParams.get("fromStoreId") || "";
     const requestType = urlType === "purchase" ? "purchase" : "transfer";
-    return { ...EMPTY_FORM, requestType };
+    return { ...EMPTY_FORM, requestType, machineId, machineType, fromStoreId };
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,10 +79,37 @@ export default function NewRequest() {
     return `${prefix}-${String(locationId).padStart(3, "0")}`;
   };
 
+  const getStoreIdFromMachine = (machine) => {
+    if (!machine) return "";
+    const loc = String(machine.location || "").trim().toUpperCase();
+    if (loc.startsWith("STO-")) {
+      const match = loc.match(/^STO-0*(\d+)$/);
+      if (match) return `STO-${match[1].padStart(3, "0")}`;
+    }
+    if (machine.storeId) {
+      return `STO-${String(machine.storeId).padStart(3, "0")}`;
+    }
+    return "";
+  };
+
+  const isMachineInStore = (machine) => {
+    return getStoreIdFromMachine(machine) !== "";
+  };
+
   useEffect(() => {
     const urlType = searchParams.get("type");
+    const machineId = searchParams.get("machineId") || "";
+    const machineType = searchParams.get("machineType") || "";
+    const fromStoreId = searchParams.get("fromStoreId") || "";
     const requestType = urlType === "purchase" ? "purchase" : "transfer";
-    setForm((previous) => ({ ...previous, requestType }));
+    
+    setForm((previous) => ({ 
+      ...previous, 
+      requestType,
+      ...(machineId && { machineId }),
+      ...(machineType && { machineType }),
+      ...(fromStoreId && { fromStoreId })
+    }));
   }, [searchParams]);
 
   const validate = () => {
@@ -200,11 +230,19 @@ export default function NewRequest() {
                 label="Machine ID"
                 value={form.machineId}
                 onChange={handleChange}
+                optionFilter={isMachineInStore}
                 onSelectMachine={(machine) => {
-                  setForm((previous) => ({
-                    ...previous,
-                    machineType: machine?.type || previous.machineType
-                  }));
+                  setForm((previous) => {
+                    const next = {
+                      ...previous,
+                      machineType: machine?.type || previous.machineType
+                    };
+                    const storeId = getStoreIdFromMachine(machine);
+                    if (storeId) {
+                      next.fromStoreId = storeId;
+                    }
+                    return next;
+                  });
                 }}
                 error={errors.machineId}
                 placeholder="e.g. MAC-001"

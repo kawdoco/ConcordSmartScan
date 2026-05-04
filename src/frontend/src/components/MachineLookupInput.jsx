@@ -15,7 +15,8 @@ export default function MachineLookupInput({
   onSelectMachine,
   error,
   placeholder = "",
-  className = "new-request-field"
+  className = "new-request-field",
+  optionFilter
 }) {
   return (
     <GenericLookupInput
@@ -28,6 +29,7 @@ export default function MachineLookupInput({
       error={error}
       placeholder={placeholder}
       className={className}
+      optionFilter={optionFilter}
       modifierClassName="generic-lookup--machine"
       endpoint="/machines"
       searchFields={[

@@ -31,6 +31,7 @@ export default function GenericLookupInput({
   className = "new-request-field",
   modifierClassName = "",
   endpoint,
+  optionFilter,
   searchFields = [],
   sortComparator,
   getOptionKey,
@@ -86,6 +87,10 @@ export default function GenericLookupInput({
 
     return sortedOptions
       .filter((option) => {
+        if (typeof optionFilter === "function" && !optionFilter(option)) {
+          return false;
+        }
+
         if (!searchText) {
           return true;
         }
@@ -100,7 +105,7 @@ export default function GenericLookupInput({
         return indexedValues.some((entry) => String(entry || "").toLowerCase().includes(searchText));
       })
       .slice(0, maxResults);
-  }, [options, searchFields, searchText, maxResults, sortComparator]);
+  }, [options, optionFilter, searchFields, searchText, maxResults, sortComparator]);
 
   const emitChange = (nextValue) => {
     if (!onChange) {

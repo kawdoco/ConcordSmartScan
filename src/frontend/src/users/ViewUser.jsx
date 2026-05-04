@@ -95,7 +95,7 @@ export default function ViewUser() {
   }
 
   const roleRaw = user.role || user.userType;
-  const userName = user.name || user.fullName || "N/A";
+  const userName = user.name || "N/A";
 
   return (
     <section className="view-user-page">

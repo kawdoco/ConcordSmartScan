@@ -73,7 +73,8 @@ const StoreManagement = () => {
       })
       .catch(err => {
         console.error('Failed to fetch stores:', err);
-        setError('Failed to load stores. Please try again.');
+        setStores([]);
+        setError(null);
       })
       .finally(() => setLoading(false));
   };

@@ -6,6 +6,7 @@ import PagePath from "../components/PagePath";
 import QRModal from "./QRModal";
 import apiClient from "../services/api";
 import { getMachineDisplayId } from "./machineId";
+import { useAuth } from "../authentication/AuthContext";
 import "./ViewMachine.css";
 
 function IconMachine() {
@@ -31,6 +32,9 @@ function IconEdit() {
 function ViewMachine() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const role = String(user?.role || "").toUpperCase();
+  const canEditMachine = role === "ADMIN";
 
   const [machine, setMachine] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -107,10 +111,12 @@ const displayMachineId = getMachineDisplayId(machine);
       >
         View QR Code
       </button>
-      <Link to={"/edit/" + id} className="view-machine-edit-btn">
-        <IconEdit />
-        Edit Machine
-      </Link>
+      {canEditMachine && (
+        <Link to={"/edit/" + id} className="view-machine-edit-btn">
+          <IconEdit />
+          Edit Machine
+        </Link>
+      )}
     </div>
   </div>
 
