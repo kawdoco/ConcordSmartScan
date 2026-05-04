@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import PagePath from "../components/PagePath";
 import { useToast } from "../components/Toast";
@@ -88,11 +88,25 @@ const EMPTY_MACHINE = {
 
 function AddMachine() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
   const [machine, setMachine] = useState(EMPTY_MACHINE);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  // Prefill form with request data from approved requests
+  useEffect(() => {
+    if (location.state?.request) {
+      const request = location.state.request;
+      setMachine((prev) => ({
+        ...prev,
+        type: request.machineType || "",
+        location: request.garment || "",
+        date: new Date().toISOString().split("T")[0]
+      }));
+    }
+  }, [location.state]);
 
   const validate = () => {
     const nextErrors = {};

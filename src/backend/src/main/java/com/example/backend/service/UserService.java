@@ -156,6 +156,7 @@ public class UserService {
         response.setPhoneNumber(user.getPhoneNumber());
         response.setAddress(user.getAddress());
         response.setCompanyEmail(user.getCompanyEmail());
+        response.setCreatedAt(user.getCreatedAt());
         if (user.getGarment() != null) {
             response.setGarmentId(user.getGarment().getLocationId());
             response.setGarmentName(user.getGarment().getName());
