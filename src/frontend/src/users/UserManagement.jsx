@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import AppFooter from "../components/AppFooter";
 import ConfirmActionModal from "../components/ConfirmActionModal";
@@ -21,6 +21,25 @@ const Icons = {
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
+
+const formatDate = (dateValue) => {
+  if (!dateValue) return "-";
+  try {
+    // Handle array format [year, month, day, ...]
+    if (Array.isArray(dateValue)) {
+      const [year, month, day] = dateValue;
+      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    }
+
+    const d = new Date(dateValue);
+    if (isNaN(d.getTime())) {
+      return String(dateValue).slice(0, 10);
+    }
+    return d.toISOString().split("T")[0];
+  } catch {
+    return String(dateValue).slice(0, 10);
+  }
+};
 
 const formatRoleDisplay = (role) => {
   if (role === "ADMIN") return "Admin";
@@ -46,7 +65,8 @@ const ROWS_PER_PAGE = 8;
 
 export default function UserManagement() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchQ = searchParams.get("q") || "";
   const { showToast } = useToast();
 
@@ -58,22 +78,33 @@ export default function UserManagement() {
   const [form, setForm] = useState({ name: "", role: "Technician", location: "", email: "", password: "" });
   const [formErr, setFormErr] = useState({});
 
+  // Clear search params when navigating back to this page
+  useEffect(() => {
+    const newParams = new URLSearchParams(searchParams);
+    if (newParams.has("q")) {
+      newParams.delete("q");
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [location.pathname, setSearchParams, searchParams]);
+
   const loadUsers = useCallback((search = "") => {
     return apiClient
       .get("/users", {
         params: search ? { search } : undefined,
       })
       .then((res) => {
-        const mapped = (Array.isArray(res.data) ? res.data : []).map((user) => ({
-          id: String(user.id),
-          name: user.name,
-          role: formatRoleDisplay(user.role),
-          location: user.location || "",
-          email: user.email,
-          date: user.createdAt
-            ? user.createdAt.slice(0, 10)
-            : today(),
-        }));
+        console.log("API Response:", res.data);
+        const mapped = (Array.isArray(res.data) ? res.data : []).map((user) => {
+          console.log("User createdAt:", user.createdAt);
+          return {
+            id: String(user.id),
+            fullName: user.name || "",
+            role: formatRoleDisplay(user.role),
+            location: user.location || "",
+            email: user.email,
+            date: formatDate(user.createdAt),
+          };
+        });
         setUsers(mapped);
       })
       .catch(() => showToast("Failed to load users", "error"));
@@ -135,11 +166,11 @@ export default function UserManagement() {
         setUsers((previous) => [
           {
             id: String(user.id),
-            name: user.name,
+            fullName: user.name || "",
             role: formatRoleDisplay(user.role),
             location: user.location || "",
             email: user.email,
-            date: user.createdAt ? user.createdAt.slice(0, 10) : today()
+            date: formatDate(user.createdAt)
           },
           ...previous
         ]);
@@ -250,7 +281,7 @@ export default function UserManagement() {
                 paged.map((user) => (
                   <tr key={user.id}>
                     <td><span className="user-management-uid">{formatUserId(user.id)}</span></td>
-                    <td><span className="user-management-name">{user.name}</span></td>
+                    <td><span className="user-management-name">{user.fullName}</span></td>
                     <td>
                       <span className={`user-management-badge ${roleClass(user.role)}`}>{user.role}</span>
                     </td>
