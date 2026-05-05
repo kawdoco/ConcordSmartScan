@@ -62,6 +62,7 @@ function EditMachine() {
   const { id } = useParams();
 
   const [machine, setMachine] = useState({
+    id: null,
     machineId: "",
     type: "",
     brand: "",
@@ -76,13 +77,13 @@ function EditMachine() {
   const [submitting, setSubmitting] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  // 🔹 FETCH MACHINE BY ID
+  // 🔹 FETCH MACHINE BY CODE
   useEffect(() => {
     const fetchMachine = async () => {
       try {
         const token = localStorage.getItem("token");
 
-        const response = await fetch(`http://localhost:8080/api/machines/${id}`, {
+        const response = await fetch(`http://localhost:8080/api/machines/code/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -131,7 +132,7 @@ function EditMachine() {
       setSubmitting(true);
       const token = localStorage.getItem("token");
 
-      const response = await fetch(`http://localhost:8080/api/machines/${id}`, {
+      const response = await fetch(`http://localhost:8080/api/machines/${machine.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
