@@ -60,6 +60,28 @@ function ViewMachine() {
     finally { setLoading(false); }
   };
 
+  const getLocationDisplay = (machine) => {
+    const normalized = normalizeLocationDisplay(machine.location);
+    if (normalized) return normalized;
+    if (machine.storeId) {
+      return `STO-${String(machine.storeId).padStart(3, "0")}`;
+    }
+    if (machine.garmentId) {
+      return `GAR-${String(machine.garmentId).padStart(3, "0")}`;
+    }
+    return "—";
+  };
+
+  const normalizeLocationDisplay = (value) => {
+    const trimmed = String(value || "").trim();
+    if (!trimmed) return "";
+    const match = trimmed.match(/^(STO|GAR)-(\d+)$/i);
+    if (!match) return trimmed;
+    const prefix = match[1].toUpperCase();
+    const numericPart = String(Number(match[2])).padStart(3, "0");
+    return `${prefix}-${numericPart}`;
+  };
+
   // Loading UI
   if (loading) {
     return (
@@ -156,7 +178,7 @@ const displayMachineId = getMachineDisplayId(machine);
 
       <div className="view-machine-detail-item">
         <span className="view-machine-detail-label">Store/Garment</span>
-        <span className="view-machine-detail-value">{machine.storeName || "—"}</span>
+        <span className="view-machine-detail-value">{getLocationDisplay(machine)}</span>
       </div>
 
       <div className="view-machine-detail-item">
@@ -167,7 +189,7 @@ const displayMachineId = getMachineDisplayId(machine);
       <div className="view-machine-detail-item">
         <span className="view-machine-detail-label">Status</span>
         <span className="view-machine-status-badge">
-          {machine.status || "Unknown"}
+          Operational
         </span>
       </div>
     </div>
