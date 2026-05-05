@@ -441,3 +441,115 @@
 .scm-btn-ghost:hover { background: #f8fafc; border-color: #cbd5e1; color: #1e293b; }
 
 .scm-btn-full { width: 100%; }
+
+/* ── Garment hint in header ───────────────────────────── */
+.scm-garment-hint {
+  margin: 4px 0 0;
+  font-size: 0.72rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.scm-garment-hint strong { color: #475569; }
+
+/* ── Result badge — compact card ─────────────────────── */
+.scm-result-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 20px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+}
+.scm-result-badge--ok  { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.scm-result-badge--err { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+.scm-result-check {
+  width: 22px; height: 22px;
+  background: #22c55e;
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.scm-result-info {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.scm-result-info strong { font-size: 0.88rem; color: #166534; }
+.scm-result-info span   { color: #15803d; }
+.scm-result-type {
+  display: inline-block;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+/* ── Match card enhancements ──────────────────────────── */
+.scm-match-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.scm-dist-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.scm-match-type-pill {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.scm-match-location-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+  font-size: 0.77rem;
+  flex-wrap: wrap;
+}
+.scm-store-name {
+  color: #475569;
+  font-weight: 500;
+}
+.scm-store-address {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  margin-top: 2px;
+}
+
+/* requested card */
+.scm-match-card--requested {
+  opacity: 0.65;
+}
+
+/* error with spacing */
+.scm-alert--spaced {
+  margin: 0 20px 12px;
+}
