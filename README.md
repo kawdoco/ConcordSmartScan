@@ -114,7 +114,7 @@ Add the PostgreSQL server in pgAdmin:
 5. Save the server.
 
 <img src="./docs/References_for_README/pgadmin-add-server.png" alt="Register server in pgAdmin" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(0,0,0,0.15);" />
-<img src="./docs/References_for_README/pgadmin-server-connection.png" alt="pgAdmin server connection tab with localhost and postgres credentials" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(0,0,0,0.15);" />
+<img src="./docs/References_for_README/pgadmin-server-connection.png" alt="pgAdmin server connection tab with localhost and postgres credentials" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(255,255,255,0.15);" />
 
 Create the project database in pgAdmin:
 
@@ -123,9 +123,9 @@ Create the project database in pgAdmin:
 3. Set Database name to concord_db.
 4. Keep Owner as postgres, then save.
 
-<img src="./docs/References_for_README/pgadmin-create-database.png" alt="Create concord_db database in pgAdmin" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(0,0,0,0.15);" />
+<img src="./docs/References_for_README/pgadmin-create-database.png" alt="Create concord_db database in pgAdmin" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(255,255,255,0.15);" />
 
-Before running the backend, ensure PostgreSQL service is running and credentials match the values above.
+Before running the backend, ensure the PostgreSQL service is running, and credentials match the values above.
 
 Reference (pgAdmin and database connection):
 https://youtu.be/WFT5MaZN6g4?si=1bB8h45fQ8TcCKwr
@@ -141,7 +141,7 @@ cd src/backend
 run-backend.bat
 ```
 
-<img src="./docs/References_for_README/backend-terminal-run.png" alt="Backend terminal running run-backend.bat" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(0,0,0,0.15);" />
+<img src="./docs/References_for_README/backend-terminal-run.png" alt="Backend terminal running run-backend.bat" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(255,255,255,0.15);" />
 
 Terminal 2 (Frontend):
 
@@ -150,7 +150,7 @@ cd src/frontend
 run-frontend.bat
 ```
 
-<img src="./docs/References_for_README/frontend-terminal-run.png" alt="Frontend terminal running run-frontend.bat" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(255,255,255,0.15);" />
+<img src="./docs/References_for_README/frontend-terminal-run.png" alt="Frontend terminal running run-frontend.bat" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(0,0,0,0.15);" />
 
 ### 5. Access the application
 
