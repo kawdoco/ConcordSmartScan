@@ -124,6 +124,8 @@ function IconUser() {
 export default function ScanModal({ onClose, showToast }) {
   const navigate    = useNavigate();
   const { user }    = useAuth();
+  const role        = String(user?.role || "").toUpperCase();
+  const canRequest  = role === "TECHNICIAN";
   const jsqrState   = useJsQR();
 
   const [tab,            setTab]            = useState("camera");
@@ -279,12 +281,18 @@ export default function ScanModal({ onClose, showToast }) {
     setRequested((prev) => new Set([...prev, displayId]));
     onClose();
     const storeId = match.location || (match.storeLocationId ? `STO-${String(match.storeLocationId).padStart(3, "0")}` : "");
+    const toGarmentId = user?.garmentId
+      ? `GAR-${String(user.garmentId).padStart(3, "0")}`
+      : "";
     const params  = new URLSearchParams({
       type:        "transfer",
       machineId:   displayId,
       machineType: match.type || "",
       fromStoreId: storeId,
     });
+    if (toGarmentId) {
+      params.set("toGarmentId", toGarmentId);
+    }
     navigate(`/requests/new?${params.toString()}`);
   };
 
@@ -499,12 +507,14 @@ export default function ScanModal({ onClose, showToast }) {
                         </div>
                       </div>
 
-                      <button
-                        className={`scm-btn-request${isReq ? " sent" : ""}`}
-                        onClick={() => handleRequest(m)}
-                        disabled={isReq}>
-                        {isReq ? "✓ Requested" : <><IconSend /> Request</>}
-                      </button>
+                      {canRequest && (
+                        <button
+                          className={`scm-btn-request${isReq ? " sent" : ""}`}
+                          onClick={() => handleRequest(m)}
+                          disabled={isReq}>
+                          {isReq ? "✓ Requested" : <><IconSend /> Request</>}
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -515,9 +525,11 @@ export default function ScanModal({ onClose, showToast }) {
                       No <strong>{scanResult.data.type}</strong> · <strong>{scanResult.data.model}</strong> machines
                       available at any store.
                     </p>
-                    <button className="scm-btn-purchase" onClick={handlePurchaseRequest}>
-                      <IconShoppingCart /> Send Purchase Request to Chief Manager
-                    </button>
+                    {canRequest && (
+                      <button className="scm-btn-purchase" onClick={handlePurchaseRequest}>
+                        <IconShoppingCart /> Send Purchase Request to Chief Manager
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

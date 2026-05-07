@@ -71,6 +71,25 @@ const MACHINE_TYPE_OPTIONS = [
   "Bar Tack",
 ];
 
+const normalizeGarmentId = (value) => {
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+  const match = String(value).match(/(\d+)/);
+  if (!match) {
+    return "";
+  }
+  return `GAR-${String(Number(match[1])).padStart(3, "0")}`;
+};
+
+const getGarmentIdFromUser = (user) => {
+  if (!user) return "";
+  if (user.garmentId != null && user.garmentId !== "") {
+    return normalizeGarmentId(user.garmentId);
+  }
+  return normalizeGarmentId(user.location);
+};
+
 export default function NewRequest() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -82,9 +101,7 @@ export default function NewRequest() {
     const machineType = searchParams.get("machineType") || "";
     const fromStoreId = searchParams.get("fromStoreId") || "";
     const requestType = urlType === "purchase" ? "purchase" : "transfer";
-    const toGarmentId = user?.garmentId
-      ? `GAR-${String(user.garmentId).padStart(3, "0")}`
-      : "";
+    const toGarmentId = getGarmentIdFromUser(user);
     return {
       ...EMPTY_FORM,
       requestType,
@@ -135,9 +152,7 @@ export default function NewRequest() {
     const machineType = searchParams.get("machineType") || "";
     const fromStoreId = searchParams.get("fromStoreId") || "";
     const requestType = urlType === "purchase" ? "purchase" : "transfer";
-    const toGarmentId = user?.garmentId
-      ? `GAR-${String(user.garmentId).padStart(3, "0")}`
-      : "";
+    const toGarmentId = getGarmentIdFromUser(user);
 
     setForm((previous) => ({
       ...previous,
