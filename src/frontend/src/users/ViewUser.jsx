@@ -46,6 +46,13 @@ function getRoleBadgeClass(role) {
   return "view-user-role-default";
 }
 
+function formatAssignedLocation(user) {
+  if (user?.garmentId != null && user.garmentId !== "") {
+    return `GAR-${String(user.garmentId).padStart(3, "0")}`;
+  }
+  return user?.location || "N/A";
+}
+
 export default function ViewUser() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -155,7 +162,7 @@ export default function ViewUser() {
 
             <div className="view-user-detail-item">
               <span className="view-user-detail-label">Assigned Location</span>
-              <span className="view-user-detail-value">{user.location || user.garmentId || "N/A"}</span>
+              <span className="view-user-detail-value">{formatAssignedLocation(user)}</span>
             </div>
 
             <div className="view-user-detail-item">

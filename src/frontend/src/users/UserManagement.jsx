@@ -48,6 +48,18 @@ const formatRoleDisplay = (role) => {
   return role;
 };
 
+const formatAssignedLocation = (user) => {
+  if (user?.garmentId != null && user.garmentId !== "") {
+    return `GAR-${String(user.garmentId).padStart(3, "0")}`;
+  }
+  return user?.location || "";
+};
+
+const toNumericId = (value) => {
+  const parsed = Number.parseInt(String(value), 10);
+  return Number.isNaN(parsed) ? Number.POSITIVE_INFINITY : parsed;
+};
+
 const roleClass = (roleDisplay) => {
   switch (roleDisplay) {
     case "Admin":
@@ -97,12 +109,11 @@ export default function UserManagement() {
           id: String(user.id),
           fullName: user.name || "",
           role: formatRoleDisplay(user.role),
-          location: user.garmentId
-            ? `GAR-${String(user.garmentId).padStart(5, "0")}`
-            : (user.location || ""),
+          location: formatAssignedLocation(user),
           email: user.email,
           date: formatDate(user.createdAt),
         }));
+        mapped.sort((a, b) => toNumericId(a.id) - toNumericId(b.id));
         setUsers(mapped);
       })
       .catch(() => showToast("Failed to load users", "error"));
