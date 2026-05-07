@@ -150,7 +150,7 @@ cd src/frontend
 run-frontend.bat
 ```
 
-<img src="./docs/References_for_README/frontend-terminal-run.png" alt="Frontend terminal running run-frontend.bat" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(0,0,0,0.15);" />
+<img src="./docs/References_for_README/frontend-terminal-run.png" alt="Frontend terminal running run-frontend.bat" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(255,255,255,0.15);" />
 
 ### 5. Access the application
 
@@ -161,7 +161,7 @@ First page shown on opening the frontend:
 
 <img src="./docs/References_for_README/login-page.png" alt="Login page shown first when opening frontend" width="50%" style="border:1px solid #888; box-shadow:0 1px 3px rgba(0,0,0,0.15);" />
 
-Do not close the terminals while project is running. 
+Do not close the terminals while the project is running. 
 To top running use below, in each terminal: 
 
 ```powershell
