@@ -125,7 +125,7 @@ Create the project database in pgAdmin:
 
 <img src="./docs/References_for_README/pgadmin-create-database.png" alt="Create concord_db database in pgAdmin" width="50%" style="background:#fff; border:1px solid #444; box-shadow:0 4px 10px rgba(0,0,0,0.25); padding:4px;" />
 
-Before running the backend, ensure PostgreSQL service is running and credentials match the values above.
+Before running the backend, ensure the PostgreSQL service is running, and credentials match the values above.
 
 Reference (pgAdmin and database connection):
 https://youtu.be/WFT5MaZN6g4?si=1bB8h45fQ8TcCKwr
@@ -161,7 +161,7 @@ First page shown on opening the frontend:
 
 <img src="./docs/References_for_README/login-page.png" alt="Login page shown first when opening frontend" width="50%" style="background:#fff; border:1px solid #444; box-shadow:0 4px 10px rgba(0,0,0,0.25); padding:4px;" />
 
-Do not close the terminals while project is running. 
+Do not close the terminals while the project is running. 
 To top running use below, in each terminal: 
 
 ```powershell
