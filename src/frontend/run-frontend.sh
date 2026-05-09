@@ -23,8 +23,17 @@ fi
 echo "[INFO] npm found!"
 npm --version
 
-# Ensure map packages (and any declared QR packages) exist
-REQUIRED_PACKAGES=(leaflet react-leaflet)
+echo ""
+# Check if node_modules exists, if not run full npm install
+if [ ! -d "node_modules" ]; then
+    echo "[INFO] node_modules not found. Running full npm install..."
+    npm install || { echo "[ERROR] Full npm install failed!"; exit 1; }
+else
+    echo "[INFO] node_modules found. Checking for specific packages..."
+fi
+
+# Ensure critical packages exist (map, charts, and any declared QR packages)
+REQUIRED_PACKAGES=(leaflet react-leaflet recharts)
 QR_PACKAGES=(qrcode.react react-qr-reader html5-qrcode jsqr qr-scanner)
 OPTIONAL_QR_PACKAGES=()
 
@@ -37,9 +46,9 @@ done
 CHECK_PACKAGES=("${REQUIRED_PACKAGES[@]}" "${OPTIONAL_QR_PACKAGES[@]}")
 
 if npm ls "${CHECK_PACKAGES[@]}" --depth=0 >/dev/null 2>&1; then
-    echo "[INFO] Map/QR packages already installed. Skipping install."
+    echo "[INFO] All required packages already installed."
 else
-    echo "[INFO] Missing map/QR packages detected. Installing: ${CHECK_PACKAGES[*]}"
+    echo "[INFO] Missing required packages detected. Installing: ${CHECK_PACKAGES[*]}"
     npm install "${CHECK_PACKAGES[@]}" || { echo "[ERROR] Package install failed!"; exit 1; }
 fi
 
