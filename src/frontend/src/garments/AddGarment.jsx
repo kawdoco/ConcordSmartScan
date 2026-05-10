@@ -1,3 +1,5 @@
+/* This is the Add Garment file*/ 
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";

@@ -1,3 +1,6 @@
+/* This is the Edit Garment file*/ 
+
+
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
