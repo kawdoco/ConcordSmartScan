@@ -1,3 +1,5 @@
+// This React component renders the "Approved Requests" page, allowing users to view and manage approved machine transfer and purchase requests. 
+
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";

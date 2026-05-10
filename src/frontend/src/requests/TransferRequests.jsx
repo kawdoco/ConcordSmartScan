@@ -1,3 +1,5 @@
+// This React component renders the "Transfer Requests" page, allowing users to view and manage machine transfer requests in the Concord Smart Scan application.
+
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";

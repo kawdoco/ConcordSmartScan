@@ -1,4 +1,5 @@
-// machines/QRModal.js
+// This React component implements a modal dialog that displays a QR code for a machine. 
+
 import { useState, useEffect } from "react";
 import { useToast } from "../components/Toast";
 import { getMachineDisplayId } from "./machineId";

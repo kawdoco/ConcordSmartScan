@@ -1,3 +1,5 @@
+// This React component renders the technician dashboard page for the Concord Smart Scan application.
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";

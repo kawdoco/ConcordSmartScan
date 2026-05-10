@@ -1,3 +1,4 @@
+// Edit machine page - form to edit existing machine details with validation and API integration
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
@@ -19,13 +20,34 @@ const buildLocationDisplayId = (location) => {
 };
 
 const machineTypes = [
-  "Single Needle",
-  "Double Needle",
+  "Single Needle Lockstitch",
+  "Double Needle Lockstitch",
   "Overlock",
   "Flatlock",
   "Button Hole",
   "Bar Tack",
 ];
+
+const normalizeMachine = (data) => {
+  if (!data) return data;
+  return {
+    ...data,
+    machineId:
+      data.machineId ?? data.machineCode ?? data.machine_id ?? data.code ?? data.id,
+    type: data.type ?? data.machineType ?? data.machine_type ?? "",
+    brand: data.brand ?? data.machineBrand ?? data.machine_brand ?? "",
+    model: data.model ?? data.machineModel ?? data.machine_model ?? "",
+    serialNumber: data.serialNumber ?? data.serial_number ?? "",
+    location: data.location ?? data.locationCode ?? data.location_id ?? "",
+    date:
+      data.date ??
+      data.addedDate ??
+      data.added_date ??
+      data.createdDate ??
+      data.createdAt ??
+      "",
+  };
+};
 
 function IconMachine() {
   return (
@@ -92,7 +114,7 @@ function EditMachine() {
         if (!response.ok) throw new Error(`Failed to load machine (${response.status})`);
 
         const data = await response.json();
-        setMachine(data);
+        setMachine(normalizeMachine(data));
 
       } catch (err) {
         showToast(err.message, "error");
@@ -210,6 +232,7 @@ function EditMachine() {
                 onChange={handleChange}
                 className={errors.type ? "error" : ""}
               >
+                <option value="">Select Machine Type</option>
                 {machineTypes.map((t) => (
                   <option key={t} value={t}>{t}</option>
                 ))}

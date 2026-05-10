@@ -1,3 +1,4 @@
+// This module provides utility functions for formatting and extracting machine IDs.
 const MACHINE_PREFIX = "MAC-";
 
 const extractMachineNumericPart = (value) => {

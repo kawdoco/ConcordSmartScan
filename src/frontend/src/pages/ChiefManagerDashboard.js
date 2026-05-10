@@ -1,3 +1,5 @@
+// This React component renders the chief manager dashboard page for the Concord Smart Scan application. 
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../authentication/AuthContext";
 import AppFooter from "../components/AppFooter";

@@ -1,3 +1,5 @@
+// This React component renders the main page for listing machines in the Concord Smart Scan application. 
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
