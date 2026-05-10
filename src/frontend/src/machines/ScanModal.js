@@ -1,4 +1,4 @@
-// machines/ScanModal.js
+// This React component implements a modal dialog that allows technicians to scan a machine's QR code using their device's camera or by uploading an image.
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ScanModal.css";

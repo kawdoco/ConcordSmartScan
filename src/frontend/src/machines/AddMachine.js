@@ -1,3 +1,4 @@
+// Add Machine page - form to add a new machine with validation and API integration
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";

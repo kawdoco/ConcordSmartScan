@@ -1,4 +1,4 @@
-// pages/ViewMachine.js
+// This React component renders the details page for a specific machine in the Concord Smart Scan application.
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
