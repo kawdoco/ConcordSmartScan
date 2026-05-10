@@ -1,3 +1,5 @@
+// This React component serves as the main dashboard entry point, routing users to role-specific dashboards.
+
 import React from "react";
 import { useAuth } from "../authentication/AuthContext";
 import AdminDashboard from "./AdminDashboard";

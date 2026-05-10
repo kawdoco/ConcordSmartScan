@@ -1,3 +1,5 @@
+// This React component renders the "New Request" page, allowing users to create new machine transfer or purchase requests in the Concord Smart Scan application.
+
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
