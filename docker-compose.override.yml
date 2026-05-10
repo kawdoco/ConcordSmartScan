@@ -1,0 +1,21 @@
+# Local overrides for host port mappings and dev tweaks.
+# Docker Compose automatically loads this file if present.
+
+services:
+  db:
+    ports:
+      - "5433:5432"
+
+  backend:
+    ports:
+      - "8081:8080"
+
+  frontend:
+    ports:
+      - "3001:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8081
+
+  pgadmin:
+    ports:
+      - "5051:80"

@@ -41,10 +41,19 @@ public class AuthService {
         }
 
         String token = jwtService.generateToken(user);
+
+        // Re-fetch with garment eagerly loaded to avoid lazy loading issues
+        Long garmentId = null;
+        User freshUser = userRepository.findByIdWithGarment(user.getId());
+        if (freshUser != null && freshUser.getGarment() != null) {
+            garmentId = freshUser.getGarment().getLocationId();
+        }
+
         AuthResponse.UserDto userDto = new AuthResponse.UserDto(
                 user.getId(),
                 user.getEmail(),
-                user.getRole().name()
+                user.getRole().name(),
+                garmentId
         );
         return new AuthResponse(token, userDto);
     }

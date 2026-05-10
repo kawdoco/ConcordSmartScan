@@ -1,0 +1,1 @@
+-- Baseline migration. Schema is managed by Hibernate (ddl-auto=update).

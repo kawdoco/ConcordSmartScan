@@ -107,6 +107,8 @@ public class UserService {
 
         if (request.getGarmentId() != null) {
             user.setGarment(resolveGarment(request.getGarmentId()));
+        } else if (isHeadquartersLocation(request.getLocation())) {
+            user.setGarment(null);
         }
 
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
@@ -156,6 +158,7 @@ public class UserService {
         response.setPhoneNumber(user.getPhoneNumber());
         response.setAddress(user.getAddress());
         response.setCompanyEmail(user.getCompanyEmail());
+        response.setCreatedAt(user.getCreatedAt());
         if (user.getGarment() != null) {
             response.setGarmentId(user.getGarment().getLocationId());
             response.setGarmentName(user.getGarment().getName());
@@ -247,6 +250,12 @@ public class UserService {
 
     private String normalizeSearch(String search) {
         return search == null ? "" : search.trim().toLowerCase();
+    }
+
+    private boolean isHeadquartersLocation(String location) {
+        if (location == null) return false;
+        String normalized = location.trim().toLowerCase();
+        return normalized.equals("headquarters") || normalized.equals("hq");
     }
 
     private boolean containsIgnoreCase(String value, String query) {

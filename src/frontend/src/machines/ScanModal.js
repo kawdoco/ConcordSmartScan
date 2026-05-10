@@ -1,39 +1,35 @@
 // This React component implements a modal dialog that allows technicians to scan a machine's QR code using their device's camera or by uploading an image.
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../authentication/AuthContext";
+import apiClient from "../services/api";
 import "./ScanModal.css";
-import axios from "axios";
-import { formatMachineId, getMachineDisplayId } from "./machineId";
-
-const API_URL = "http://localhost:8080/api/machines";
+import { formatMachineId } from "./machineId";
 
 /**
- * ScanModal — scan a machine QR code, then finds matching replacement machines
- * sorted by distance from the scanned machine's current garment location.
+ * ScanModal — scan a machine QR code, then shows matching replacement
+ * machines (same type + model, at stores) sorted by distance from the
+ * logged-in technician's garment location.
  *
  * Props:
- *   onClose      – callback to close the modal
- *   onRequest    – callback(machineId) when technician clicks "Request" for a match
- *   showToast    – optional callback(message, type) for notifications
+ *   onClose   – close the modal
+ *   showToast – optional (message, type) notification callback
  */
 
-/* ── jsQR CDN loader with fallbacks ─────────────────────────── */
+/* ── jsQR CDN loader ─────────────────────────────────────────── */
 const JSQR_URLS = [
   "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js",
   "https://unpkg.com/jsqr@1.4.0/dist/jsQR.js",
 ];
 
 function useJsQR() {
-  const [state, setState] = useState(
-    window.jsQR ? "ready" : "loading"  // "loading" | "ready" | "error"
-  );
-
+  const [state, setState] = useState(window.jsQR ? "ready" : "loading");
   useEffect(() => {
     if (window.jsQR) { setState("ready"); return; }
     let idx = 0;
     const tryNext = () => {
       if (idx >= JSQR_URLS.length) { setState("error"); return; }
-      const s   = document.createElement("script");
+      const s = document.createElement("script");
       s.src     = JSQR_URLS[idx++];
       s.onload  = () => (window.jsQR ? setState("ready") : tryNext());
       s.onerror = () => tryNext();
@@ -41,8 +37,7 @@ function useJsQR() {
     };
     tryNext();
   }, []);
-
-  return state;   // "loading" | "ready" | "error"
+  return state;
 }
 
 /* ── Icons ───────────────────────────────────────────────────── */
@@ -80,12 +75,29 @@ function IconSend() {
     </svg>
   );
 }
-function IconPin() {
+function IconMapPin() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
       <circle cx="12" cy="10" r="3"/>
+    </svg>
+  );
+}
+function IconDistance() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M5 12h14"/>
+    </svg>
+  );
+}
+function IconStore() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
     </svg>
   );
 }
@@ -98,31 +110,33 @@ function IconShoppingCart() {
     </svg>
   );
 }
-
-/* ── Haversine distance (km) ─────────────────────────────────── */
-function haversine(lat1, lng1, lat2, lng2) {
-  const R    = 6371;
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLng = (lng2 - lng1) * (Math.PI / 180);
-  const a    = Math.sin(dLat / 2) ** 2
-    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+function IconUser() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+  );
 }
 
 /* ── Main component ──────────────────────────────────────────── */
-export default function ScanModal({ onClose, onRequest, showToast }) {
-  const navigate = useNavigate();
-  const jsqrState  = useJsQR();
+export default function ScanModal({ onClose, showToast }) {
+  const navigate    = useNavigate();
+  const { user }    = useAuth();
+  const role        = String(user?.role || "").toUpperCase();
+  const canRequest  = role === "TECHNICIAN";
+  const jsqrState   = useJsQR();
 
-  const [tab,        setTab]        = useState("camera");  // "camera" | "upload"
-  const [camState,   setCamState]   = useState("idle");    // "idle"|"active"|"stopped"
-  const [camError,   setCamError]   = useState("");
+  const [tab,            setTab]            = useState("camera");
+  const [camState,       setCamState]       = useState("idle");
+  const [camError,       setCamError]       = useState("");
 
-  const [scanResult, setScanResult] = useState(null);      // { ok, data } | null
-  const [matches,    setMatches]    = useState([]);
+  const [scanResult,     setScanResult]     = useState(null);
+  const [matches,        setMatches]        = useState([]);
   const [loadingMatches, setLoadingMatches] = useState(false);
-  const [requested,  setRequested]  = useState(new Set());
-  const [purchaseSent, setPurchaseSent] = useState(false);
+  const [matchError,     setMatchError]     = useState("");
+  const [requested,      setRequested]      = useState(new Set());
 
   const videoRef  = useRef(null);
   const canvasRef = useRef(null);
@@ -137,7 +151,7 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  /* ── Stop camera on unmount or tab change ── */
+  /* ── Stop camera ── */
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
@@ -147,13 +161,8 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
     setCamState("stopped");
   }, []);
 
-  useEffect(() => {
-    return () => stopCamera();
-  }, [stopCamera]);
-
-  useEffect(() => {
-    if (tab === "upload") stopCamera();
-  }, [tab, stopCamera]);
+  useEffect(() => { return () => stopCamera(); }, [stopCamera]);
+  useEffect(() => { if (tab === "upload") stopCamera(); }, [tab, stopCamera]);
 
   /* ── Camera scan loop ── */
   const tick = useCallback(() => {
@@ -171,21 +180,21 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
     canvas.height = video.videoHeight;
     const ctx  = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const img  = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const code = window.jsQR(img.data, img.width, img.height);
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = window.jsQR(imgData.data, imgData.width, imgData.height);
     if (code) {
       stopCamera();
       handleQRData(code.data);
       return;
     }
     rafRef.current = requestAnimationFrame(tick);
-  }, [stopCamera]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [stopCamera]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const startCamera = useCallback(async () => {
     setCamError("");
     setScanResult(null);
     setMatches([]);
-    setPurchaseSent(false);
+    setMatchError("");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -203,7 +212,7 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
     }
   }, [tick]);
 
-  /* ── Handle decoded QR data ── */
+  /* ── Decode QR data ── */
   const handleQRData = useCallback(async (raw) => {
     let parsed = null;
     try { parsed = JSON.parse(raw); } catch { /* not JSON */ }
@@ -214,61 +223,37 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
     }
 
     setScanResult({ ok: true, data: parsed });
-    await fetchMatches(parsed);
-  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+    await fetchMatches(parsed.machineId);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ── Fetch matching machines from API ── */
-  const fetchMatches = async (parsed) => {
+  /* ── Call the backend scan endpoint ── */
+  const fetchMatches = async (machineCode) => {
     setLoadingMatches(true);
     setMatches([]);
+    setMatchError("");
     try {
-      const token = localStorage.getItem("token");
-      const res   = await axios.get(API_URL, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const all = res.data;
-
-      // Match: same type, at a Store (location starts with ST), exclude same machine
-      const scannedMachineId = formatMachineId(parsed.machineId);
-      const matching = all.filter(
-        (m) =>
-          getMachineDisplayId(m) !== scannedMachineId &&
-          m.type?.toLowerCase() === parsed.type?.toLowerCase() &&
-          m.location?.toUpperCase().startsWith("ST")
-      );
-
-      // Sort by distance if coordinates available, else keep API order
-      const withDist = matching.map((m) => {
-        const dist =
-          parsed.latitude && parsed.longitude && m.latitude && m.longitude
-            ? haversine(parsed.latitude, parsed.longitude, m.latitude, m.longitude)
-            : null;
-        return { ...m, _dist: dist };
-      });
-
-      withDist.sort((a, b) => {
-        if (a._dist === null && b._dist === null) return 0;
-        if (a._dist === null) return 1;
-        if (b._dist === null) return -1;
-        return a._dist - b._dist;
-      });
-
-      setMatches(withDist);
-    } catch {
-      setMatches([]);
+      const techId = user?.id ?? null;
+      const params = techId ? { technicianId: techId } : {};
+      const res = await apiClient.get(`/scan/${encodeURIComponent(machineCode)}`, { params });
+      setMatches(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      if (err?.response?.status === 404) {
+        setMatchError("This machine was not found in the system. The QR code may be outdated.");
+      } else {
+        setMatchError("Could not load matching machines. Please check your connection and try again.");
+      }
     } finally {
       setLoadingMatches(false);
     }
   };
 
-  /* ── File upload scan ── */
+  /* ── File upload ── */
   const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setScanResult(null);
     setMatches([]);
-    setPurchaseSent(false);
-
+    setMatchError("");
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement("canvas");
@@ -286,53 +271,60 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
       URL.revokeObjectURL(img.src);
     };
     img.src = URL.createObjectURL(file);
-    // reset input so same file can be re-selected
     e.target.value = "";
   };
 
-  /* ── Request machine ── */
-  const handleRequest = async (machine) => {
-    try {
-      const token = localStorage.getItem("token");
-      // POST to your request endpoint — adjust URL as needed
-      await axios.post(
-        `http://localhost:8080/api/requests`,
-        {
-          requestedMachineId: machine.id,
-          machineId:          formatMachineId(scanResult?.data?.machineId) || scanResult?.data?.machineId,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    } catch {
-      // If endpoint not yet implemented, still mark as requested in UI
+  /* ── Request a machine ── */
+  const handleRequest = (match) => {
+    const displayId = match.machineId || formatMachineId(match.id);
+    if (requested.has(displayId)) return;
+    setRequested((prev) => new Set([...prev, displayId]));
+    onClose();
+    const storeId = match.location || (match.storeLocationId ? `STO-${String(match.storeLocationId).padStart(3, "0")}` : "");
+    const toGarmentId = user?.garmentId
+      ? `GAR-${String(user.garmentId).padStart(3, "0")}`
+      : "";
+    const params  = new URLSearchParams({
+      type:        "transfer",
+      machineId:   displayId,
+      machineType: match.type || "",
+      fromStoreId: storeId,
+    });
+    if (toGarmentId) {
+      params.set("toGarmentId", toGarmentId);
     }
-    const machineDisplayId = getMachineDisplayId(machine);
-    setRequested((prev) => new Set([...prev, machineDisplayId]));
-    if (onRequest) onRequest(machineDisplayId);
-    if (showToast) showToast(`Request sent to Chief Manager for ${machineDisplayId}.`, "success");
+    navigate(`/requests/new?${params.toString()}`);
   };
 
-  /* ── Send purchase request ── */
+  /* ── Purchase request ── */
   const handlePurchaseRequest = () => {
     onClose();
-    const searchParams = new URLSearchParams({
-      type: 'purchase',
-      machineType: scanResult?.data?.type || ''
+    const params = new URLSearchParams({
+      type:        "purchase",
+      machineType: scanResult?.data?.type || "",
     });
-    navigate(`/requests/new?${searchParams.toString()}`);
+    navigate(`/requests/new?${params.toString()}`);
   };
 
-  /* ── Reset to re-scan ── */
+  /* ── Reset ── */
   const handleRescan = () => {
     setScanResult(null);
     setMatches([]);
+    setMatchError("");
     setRequested(new Set());
-    setPurchaseSent(false);
     setCamError("");
     setCamState("idle");
   };
 
-  /* ─────────────────────────────── RENDER ─────────────────────── */
+  /* ── Distance display ── */
+  const distLabel = (km) => {
+    if (km === null || km === undefined) return null;
+    return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+  };
+
+  const garmentLabel = user?.garmentName || user?.location || null;
+
+  /* ─────────────────────────── RENDER ─────────────────────────── */
   return (
     <div className="scm-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="scm-modal" role="dialog" aria-modal="true">
@@ -342,136 +334,103 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
           <div>
             <h2 className="scm-title">Scan Machine QR Code</h2>
             <p className="scm-subtitle">
-              Scan a broken machine's QR to find matching replacements in stores.
+              Scan a broken machine's QR to find matching replacements at stores.
             </p>
+            {garmentLabel && (
+              <p className="scm-garment-hint">
+                <IconUser /> Distances from <strong>{garmentLabel}</strong>
+              </p>
+            )}
           </div>
           <button className="scm-close" onClick={onClose} aria-label="Close"><IconX /></button>
         </div>
 
-        {/* Only show scanner UI if no result yet */}
+        {/* Scanner UI */}
         {!scanResult && (
           <>
-            {/* Tabs */}
             <div className="scm-tabs">
               {[["camera", "📷  Camera"], ["upload", "🖼  Upload Image"]].map(([t, lbl]) => (
-                <button
-                  key={t}
+                <button key={t}
                   className={`scm-tab${tab === t ? " active" : ""}`}
-                  onClick={() => { setTab(t); setCamError(""); }}
-                >
+                  onClick={() => { setTab(t); setCamError(""); }}>
                   {lbl}
                 </button>
               ))}
             </div>
 
-            {/* ── Camera tab ── */}
             {tab === "camera" && (
               <div className="scm-camera-section">
                 <div className="scm-video-wrap">
-                  <video
-                    ref={videoRef}
-                    playsInline
-                    muted
-                    className="scm-video"
-                    style={{ display: camState === "active" ? "block" : "none" }}
-                  />
+                  <video ref={videoRef} playsInline muted className="scm-video"
+                    style={{ display: camState === "active" ? "block" : "none" }} />
                   <canvas ref={canvasRef} style={{ display: "none" }} />
-
-                  {/* Idle placeholder */}
                   {camState !== "active" && (
                     <div className="scm-video-placeholder">
-                      <IconCamera />
-                      <p>{camError || "Click Start Camera to begin scanning."}</p>
+                      <IconCamera /><p>{camError || "Click Start Camera to begin scanning."}</p>
                     </div>
                   )}
-
-                  {/* Scanning overlay */}
                   {camState === "active" && (
                     <div className="scm-scan-overlay">
                       <div className="scm-frame">
-                        <span className="scm-corner tl" />
-                        <span className="scm-corner tr" />
-                        <span className="scm-corner bl" />
-                        <span className="scm-corner br" />
+                        <span className="scm-corner tl" /><span className="scm-corner tr" />
+                        <span className="scm-corner bl" /><span className="scm-corner br" />
                         <div className="scm-scan-line" />
                       </div>
                       <p className="scm-scan-hint">Point camera at QR code</p>
                     </div>
                   )}
                 </div>
-
-                {camError && (
-                  <div className="scm-alert scm-alert--error">{camError}</div>
-                )}
-
+                {camError && <div className="scm-alert scm-alert--error">{camError}</div>}
                 <div className="scm-camera-actions">
                   {camState !== "active" ? (
                     jsqrState === "error" ? (
-                      <div className="scm-alert scm-alert--error">
-                        QR scanner failed to load. Please use the Upload tab instead.
-                      </div>
+                      <div className="scm-alert scm-alert--error">QR scanner failed to load. Use the Upload tab.</div>
                     ) : jsqrState === "loading" ? (
-                      <div className="scm-loading-hint">
-                        <span className="scm-mini-spinner" />
-                        Loading QR scanner…
-                      </div>
+                      <div className="scm-loading-hint"><span className="scm-mini-spinner" /> Loading QR scanner…</div>
                     ) : (
-                      <button className="scm-btn-primary scm-btn-full" onClick={startCamera}>
-                        Start Camera
-                      </button>
+                      <button className="scm-btn-primary scm-btn-full" onClick={startCamera}>Start Camera</button>
                     )
                   ) : (
-                    <button className="scm-btn-ghost scm-btn-full" onClick={stopCamera}>
-                      Stop Camera
-                    </button>
+                    <button className="scm-btn-ghost scm-btn-full" onClick={stopCamera}>Stop Camera</button>
                   )}
                 </div>
               </div>
             )}
 
-            {/* ── Upload tab ── */}
             {tab === "upload" && (
               <div className="scm-upload-section">
-                <div
-                  className="scm-dropzone"
+                <div className="scm-dropzone"
                   onClick={() => fileRef.current?.click()}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => {
                     e.preventDefault();
-                    const file = e.dataTransfer.files[0];
-                    if (file) { fileRef.current.files = e.dataTransfer.files; handleFile({ target: { files: [file], value: "" } }); }
-                  }}
-                >
+                    const f = e.dataTransfer.files[0];
+                    if (f) handleFile({ target: { files: [f], value: "" } });
+                  }}>
                   <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: "none" }} />
                   <IconUpload />
                   <p className="scm-dropzone-title">Click or drag &amp; drop a QR image</p>
                   <p className="scm-dropzone-sub">PNG, JPG or JPEG · max 10 MB</p>
                 </div>
-                {jsqrState === "loading" && (
-                  <div className="scm-loading-hint">
-                    <span className="scm-mini-spinner" />
-                    Loading QR scanner…
-                  </div>
-                )}
-                {jsqrState === "error" && (
-                  <div className="scm-alert scm-alert--error">
-                    QR scanner failed to load. Try refreshing the page.
-                  </div>
-                )}
+                {jsqrState === "loading" && <div className="scm-loading-hint"><span className="scm-mini-spinner" /> Loading QR scanner…</div>}
+                {jsqrState === "error"   && <div className="scm-alert scm-alert--error">QR scanner failed to load. Try refreshing.</div>}
               </div>
             )}
           </>
         )}
 
-        {/* ── Scan result ── */}
+        {/* Results */}
         {scanResult && (
           <div className="scm-results-section">
-            {/* Result badge */}
+
             {scanResult.ok ? (
               <div className="scm-result-badge scm-result-badge--ok">
-                ✓ Scanned: <strong>{formatMachineId(scanResult.data.machineId) || scanResult.data.machineId}</strong>
-                &nbsp;·&nbsp;{scanResult.data.type}
-                &nbsp;·&nbsp;{scanResult.data.brand} {scanResult.data.model}
+                <span className="scm-result-check">✓</span>
+                <div className="scm-result-info">
+                  <strong>{formatMachineId(scanResult.data.machineId) || scanResult.data.machineId}</strong>
+                  <span>{scanResult.data.brand} {scanResult.data.model}</span>
+                  <span className="scm-result-type">{scanResult.data.type}</span>
+                </div>
               </div>
             ) : (
               <div className="scm-result-badge scm-result-badge--err">
@@ -479,90 +438,106 @@ export default function ScanModal({ onClose, onRequest, showToast }) {
               </div>
             )}
 
-            {/* Matches */}
             {scanResult.ok && (
               <div className="scm-matches">
                 <div className="scm-matches-header">
                   <h3 className="scm-matches-title">
                     {loadingMatches
                       ? "Searching store inventory…"
+                      : matchError
+                      ? "Search Error"
                       : matches.length > 0
                       ? `${matches.length} Matching Machine${matches.length !== 1 ? "s" : ""} Found`
                       : "No Matching Machines in Stores"}
                   </h3>
-                  {!loadingMatches && (
+                  {!loadingMatches && !matchError && (
                     <p className="scm-matches-sub">
-                      Available <strong>{scanResult.data.type}</strong> machines at stores
-                      {matches.length > 0 ? ", sorted by distance." : "."}
+                      <strong>{scanResult.data.type}</strong> · <strong>{scanResult.data.model}</strong> at stores
+                      {matches.length > 0 && garmentLabel
+                        ? `, sorted by distance from ${garmentLabel}.`
+                        : matches.length > 0 ? ", sorted by distance." : "."}
                     </p>
                   )}
                 </div>
 
-                {/* Loading */}
                 {loadingMatches && (
                   <div className="scm-matches-loading">
-                    <span className="scm-mini-spinner" /> Searching…
+                    <span className="scm-mini-spinner" /> Searching store inventory…
                   </div>
                 )}
 
-                {/* Match cards */}
-                {!loadingMatches && matches.map((m) => (
-                  <div key={m.id} className="scm-match-card">
-                    <div className="scm-match-left">
-                      <span className="scm-match-id">{getMachineDisplayId(m)}</span>
-                      <span className="scm-match-model">{m.brand} {m.model}</span>
-                      <div className="scm-match-meta">
-                        <span>{m.type}</span>
-                        <span className="scm-match-location">
-                          <IconPin /> {m.location}{m.storeName ? ` · ${m.storeName}` : ""}
-                        </span>
-                        {m._dist !== null && (
-                          <span className="scm-match-dist">{m._dist.toFixed(1)} km away</span>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      className={`scm-btn-request${requested.has(getMachineDisplayId(m)) ? " sent" : ""}`}
-                      onClick={() => {
-                        if (!requested.has(getMachineDisplayId(m))) {
-                          onClose();
-                          const storeId = m.storeId ? `STO-${String(m.storeId).padStart(3, '0')}` : m.location || '';
-                          const searchParams = new URLSearchParams({
-                            type: 'transfer',
-                            machineId: getMachineDisplayId(m),
-                            machineType: m.type || '',
-                            fromStoreId: storeId
-                          });
-                          navigate(`/requests/new?${searchParams.toString()}`);
-                        }
-                      }}
-                      disabled={requested.has(getMachineDisplayId(m))}
-                    >
-                      {requested.has(getMachineDisplayId(m)) ? "✓ Requested" : <><IconSend /> Request</>}
-                    </button>
-                  </div>
-                ))}
+                {!loadingMatches && matchError && (
+                  <div className="scm-alert scm-alert--error scm-alert--spaced">{matchError}</div>
+                )}
 
-                {/* No matches — show purchase request */}
-                {!loadingMatches && matches.length === 0 && (
+                {!loadingMatches && !matchError && matches.map((m) => {
+                  const displayId  = m.machineId || formatMachineId(m.id);
+                  const isReq      = requested.has(displayId);
+                  const dist       = distLabel(m.distanceKm);
+
+                  return (
+                    <div key={m.id} className={`scm-match-card${isReq ? " scm-match-card--requested" : ""}`}>
+                      <div className="scm-match-left">
+
+                        <div className="scm-match-top-row">
+                          <span className="scm-match-id">{displayId}</span>
+                          {dist && (
+                            <span className="scm-dist-badge">
+                              <IconDistance /> {dist} away
+                            </span>
+                          )}
+                        </div>
+
+                        <span className="scm-match-model">{m.brand} {m.model}</span>
+
+                        <div className="scm-match-meta">
+                          <span className="scm-match-type-pill">{m.type}</span>
+
+                          <span className="scm-match-location-row">
+                            <IconMapPin />
+                            <span>{m.location}</span>
+                            {m.storeName && <span className="scm-store-name">· {m.storeName}</span>}
+                          </span>
+
+                          {m.storeAddress && (
+                            <span className="scm-store-address">
+                              <IconStore /> {m.storeAddress}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {canRequest && (
+                        <button
+                          className={`scm-btn-request${isReq ? " sent" : ""}`}
+                          onClick={() => handleRequest(m)}
+                          disabled={isReq}>
+                          {isReq ? "✓ Requested" : <><IconSend /> Request</>}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {!loadingMatches && !matchError && matches.length === 0 && (
                   <div className="scm-no-match">
-                    <p>No available <strong>{scanResult.data.type}</strong> machines found in any store.</p>
-                    {!purchaseSent ? (
+                    <p>
+                      No <strong>{scanResult.data.type}</strong> · <strong>{scanResult.data.model}</strong> machines
+                      available at any store.
+                    </p>
+                    {canRequest && (
                       <button className="scm-btn-purchase" onClick={handlePurchaseRequest}>
                         <IconShoppingCart /> Send Purchase Request to Chief Manager
                       </button>
-                    ) : (
-                      <div className="scm-purchase-sent">✓ Purchase request sent to Chief Manager.</div>
                     )}
                   </div>
                 )}
               </div>
             )}
 
-            {/* Re-scan */}
             <div className="scm-rescan-row">
               <button className="scm-btn-ghost" onClick={handleRescan}>
-                ← Scan Another Machine
+              -- Scan Another Machine
               </button>
             </div>
           </div>

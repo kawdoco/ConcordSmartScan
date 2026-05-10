@@ -55,6 +55,44 @@
   border-color: #fecaca;
 }
 
+.purchase-request-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.purchase-request-filter label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.purchase-status-filter-select {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.purchase-status-filter-select:hover {
+  border-color: #94a3b8;
+}
+
+.purchase-status-filter-select:focus {
+  outline: none;
+  border-color: var(--pr-blue);
+  box-shadow: 0 0 0 3px rgba(26, 63, 212, 0.1);
+}
+
 .purchase-btn.approve {
   color: #fff;
   background: var(--pr-blue);

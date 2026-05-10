@@ -8,7 +8,17 @@ import ConfirmActionModal from "../components/ConfirmActionModal";
 import apiClient from "../services/api";
 import "./AddUser.css";
 
+const HEADQUARTERS_LABEL = "Headquarters";
+
+const isHeadquartersValue = (value) => {
+  const normalized = String(value || "").trim().toLowerCase();
+  return normalized === "headquarters" || normalized === "hq";
+};
+
 const formatGarmentDisplayId = (garmentId) => {
+  if (isHeadquartersValue(garmentId)) {
+    return HEADQUARTERS_LABEL;
+  }
   const parsed = Number(garmentId);
   if (!Number.isInteger(parsed) || parsed < 0) {
     return "";
@@ -17,6 +27,9 @@ const formatGarmentDisplayId = (garmentId) => {
 };
 
 const parseGarmentId = (value) => {
+  if (isHeadquartersValue(value)) {
+    return null;
+  }
   const normalized = String(value || "").trim();
   if (!normalized) {
     return null;
@@ -87,7 +100,9 @@ export default function EditUserPage() {
           phoneNumber: data.phoneNumber || "",
           email: data.email || "",
           address: data.address || "",
-          garmentId: data.garmentId != null ? formatGarmentDisplayId(data.garmentId) : "",
+          garmentId: data.garmentId != null
+            ? formatGarmentDisplayId(data.garmentId)
+            : (isHeadquartersValue(data.location) ? HEADQUARTERS_LABEL : ""),
           companyEmail: data.companyEmail || "",
           userType: data.userType || data.role || "",
           currentPassword: "",
@@ -170,8 +185,9 @@ export default function EditUserPage() {
       return;
     }
 
+    const isHeadquarters = isHeadquartersValue(formData.garmentId);
     const parsedGarmentId = parseGarmentId(formData.garmentId);
-    if (formData.garmentId && parsedGarmentId === null) {
+    if (formData.garmentId && !isHeadquarters && parsedGarmentId === null) {
       setSubmitError("Garment ID must be a valid number.");
       return;
     }
@@ -200,6 +216,10 @@ export default function EditUserPage() {
       currentPassword: isChangingPassword ? formData.currentPassword : null,
       password: isChangingPassword ? formData.password : null,
     };
+
+    if (isHeadquarters) {
+      payload.location = HEADQUARTERS_LABEL;
+    }
 
     try {
       setIsSubmitting(true);
@@ -299,6 +319,7 @@ export default function EditUserPage() {
                   <option value=""></option>
                   <option value="TECHNICIAN">Technician</option>
                   <option value="CHIEF_MANAGER">Chief Manager</option>
+                  <option value="ADMIN">Admin</option>
                 </select>
               </div>
             </div>
@@ -355,7 +376,11 @@ export default function EditUserPage() {
                   placeholder="Select or search Garment ID"
                   className="add-user-field"
                   endpoint="/locations/garments"
+                  extraOptions={[{ locationId: "HQ", name: HEADQUARTERS_LABEL, isHeadquarters: true }]}
                   optionFilter={(garment) => {
+                    if (garment.isHeadquarters) {
+                      return true;
+                    }
                     if (formData.userType !== 'CHIEF_MANAGER') {
                       return true;
                     }
@@ -369,7 +394,7 @@ export default function EditUserPage() {
                   getOptionKey={(garment) => garment.locationId}
                   getOptionValue={(garment) => formatGarmentDisplayId(garment.locationId)}
                   getPrimaryText={(garment) => formatGarmentDisplayId(garment.locationId)}
-                  getSecondaryText={(garment) => garment.name || "-"}
+                  getSecondaryText={(garment) => (garment.isHeadquarters ? "Company" : (garment.name || "-"))}
                   emptyMessage={formData.userType === 'CHIEF_MANAGER' ? 'No unassigned garments found' : 'No garments found'}
                   loadingMessage="Loading garments..."
                 />

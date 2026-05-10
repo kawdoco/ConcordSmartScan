@@ -31,6 +31,7 @@ function PurchaseRequest() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [updatingRequestIds, setUpdatingRequestIds] = useState([]);
   const [pendingAction, setPendingAction] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const truncateText = (text, maxLength = 20) => {
     const value = String(text || "").trim();
@@ -72,9 +73,15 @@ function PurchaseRequest() {
         : [];
 
       const visibleRows = canManageStatus
-        ? (currentGarmentId != null
-          ? normalizedRows.filter((row) => extractNumericGarmentId(row.toGarmentId) === Number(currentGarmentId))
-          : [])
+        ? normalizedRows.filter((row) => {
+            // If chief manager has a garment assigned, filter by that garment
+            if (currentGarmentId != null) {
+              return extractNumericGarmentId(row.toGarmentId) === Number(currentGarmentId);
+            }
+            
+            // If no garment assigned, show all requests
+            return true;
+          })
         : normalizedRows;
 
       setPurchaseRequests(visibleRows);
@@ -91,6 +98,13 @@ function PurchaseRequest() {
 
   const filteredRequests = purchaseRequests.filter((row) => {
     const query = searchQ.trim().toLowerCase();
+    
+    // Apply status filter
+    if (statusFilter !== "all" && row.status !== statusFilter) {
+      return false;
+    }
+    
+    // Apply search query
     if (!query) {
       return true;
     }
@@ -165,6 +179,23 @@ function PurchaseRequest() {
         </div>
 
         {error && <div className="request-inline-error">{error}</div>}
+
+        {canManageStatus && (
+          <div className="purchase-request-filter">
+            <label htmlFor="purchase-status-filter">Filter by Status:</label>
+            <select
+              id="purchase-status-filter"
+              className="purchase-status-filter-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All Requests</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="declined">Declined</option>
+            </select>
+          </div>
+        )}
 
         <div className="purchase-request-table-wrap">
           {loading ? (

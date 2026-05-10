@@ -7,7 +7,17 @@ import ConfirmActionModal from '../components/ConfirmActionModal';
 import apiClient from '../services/api';
 import './AddUser.css';
 
+const HEADQUARTERS_LABEL = 'Headquarters';
+
+const isHeadquartersValue = (value) => {
+  const normalized = String(value || '').trim().toLowerCase();
+  return normalized === 'headquarters' || normalized === 'hq';
+};
+
 const formatGarmentDisplayId = (garmentId) => {
+  if (isHeadquartersValue(garmentId)) {
+    return HEADQUARTERS_LABEL;
+  }
   const parsed = Number(garmentId);
   if (!Number.isInteger(parsed) || parsed < 0) {
     return '';
@@ -16,6 +26,9 @@ const formatGarmentDisplayId = (garmentId) => {
 };
 
 const parseGarmentId = (value) => {
+  if (isHeadquartersValue(value)) {
+    return null;
+  }
   const normalized = String(value || '').trim();
   if (!normalized) {
     return null;
@@ -159,8 +172,9 @@ const AddUser = () => {
     if (!validateSecurityFields()) return;
     if (!validateAge()) return;  // Age validation added here
 
+    const isHeadquarters = isHeadquartersValue(formData.garmentId);
     const parsedGarmentId = parseGarmentId(formData.garmentId);
-    if (formData.garmentId && parsedGarmentId === null) {
+    if (formData.garmentId && !isHeadquarters && parsedGarmentId === null) {
       setSubmitError('Garment ID must be a valid number.');
       return;
     }
@@ -181,6 +195,10 @@ const AddUser = () => {
       password: formData.password,
       garmentId: parsedGarmentId,
     };
+
+    if (isHeadquarters) {
+      payload.location = HEADQUARTERS_LABEL;
+    }
 
     try {
       setIsSubmitting(true);
@@ -274,6 +292,7 @@ const AddUser = () => {
                   <option value="selection" disabled>Select a User Type</option>
                   <option value="TECHNICIAN">Technician</option>
                   <option value="CHIEF_MANAGER">Chief Manager</option>
+                  <option value="ADMIN">Admin</option>
                 </select>
                 {formErrors.userType && <span className="field-error-text">{formErrors.userType}</span>}
               </div>
@@ -363,7 +382,11 @@ const AddUser = () => {
                   placeholder="Select or search Garment ID"
                   className="add-user-field"
                   endpoint="/locations/garments"
+                  extraOptions={[{ locationId: "HQ", name: HEADQUARTERS_LABEL, isHeadquarters: true }]}
                   optionFilter={(garment) => {
+                    if (garment.isHeadquarters) {
+                      return true;
+                    }
                     if (formData.userType !== 'CHIEF_MANAGER') {
                       return true;
                     }
@@ -377,7 +400,7 @@ const AddUser = () => {
                   getOptionKey={(garment) => garment.locationId}
                   getOptionValue={(garment) => formatGarmentDisplayId(garment.locationId)}
                   getPrimaryText={(garment) => formatGarmentDisplayId(garment.locationId)}
-                  getSecondaryText={(garment) => garment.name || '-'}
+                  getSecondaryText={(garment) => (garment.isHeadquarters ? 'Company' : (garment.name || '-'))}
                   emptyMessage={formData.userType === 'CHIEF_MANAGER' ? 'No unassigned garments found' : 'No garments found'}
                   loadingMessage="Loading garments..."
                 />
