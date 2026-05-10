@@ -1,0 +1,358 @@
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import AppFooter from "../components/AppFooter";
+import PagePath from "../components/PagePath";
+import { useToast } from "../components/Toast";
+import GenericLookupInput from "../components/GenericLookupInput";
+import ConfirmActionModal from "../components/ConfirmActionModal";
+import "./MachineShared.css";
+import axios from "axios";
+
+const buildLocationDisplayId = (location) => {
+  const parsed = Number(location?.locationId);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    return "";
+  }
+
+  const prefix = location?.type === "STORE" ? "STO" : "GAR";
+  return `${prefix}-${String(parsed).padStart(3, "0")}`;
+};
+
+function IconMachine() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="8" width="18" height="10" rx="2" />
+      <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
+      <path d="M8 13h2" />
+      <path d="M14 13h2" />
+    </svg>
+  );
+}
+
+function IconMapPin() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function IconPlus() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+const EMPTY_MACHINE = {
+  type: "",
+  brand: "",
+  model: "",
+  serialNumber: "",
+  location: "",
+  date: "",
+};
+
+function AddMachine() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { showToast } = useToast();
+  const [machine, setMachine] = useState(EMPTY_MACHINE);
+  const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  // Prefill form with request data from approved requests
+  useEffect(() => {
+    if (location.state?.request) {
+      const request = location.state.request;
+      setMachine((prev) => ({
+        ...prev,
+        type: request.machineType || "",
+        location: request.garment || "",
+        date: new Date().toISOString().split("T")[0]
+      }));
+    }
+  }, [location.state]);
+
+  const validate = () => {
+    const nextErrors = {};
+    if (!machine.type.trim()) nextErrors.type = "Machine type is required.";
+    if (!machine.brand.trim()) nextErrors.brand = "Brand is required.";
+    if (!machine.model.trim()) nextErrors.model = "Model is required.";
+    if (!machine.serialNumber.trim())
+      nextErrors.serialNumber = "Serial number is required.";
+    if (!machine.location.trim()) nextErrors.location = "Location is required.";
+    if (!machine.date) nextErrors.date = "Added date is required.";
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setMachine((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const submit = async () => {
+    if (!validate()) return;
+    setIsConfirmOpen(false);
+
+    setSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(
+        "http://localhost:8080/api/machines",
+        machine, // send data
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      console.log(response.data); // optional
+
+      showToast("Machine added successfully!", "success");
+
+      setMachine(EMPTY_MACHINE);
+      setErrors({});
+
+      setTimeout(() => navigate("/machines"), 1200);
+    } catch (err) {
+      console.error(err);
+
+      const message = err.response?.data?.message || "Error adding machine";
+
+      showToast(message, "error");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleOpenConfirm = (event) => {
+    event.preventDefault();
+    if (!validate()) return;
+    setIsConfirmOpen(true);
+  };
+  const handleCancel = () => {
+    setMachine(EMPTY_MACHINE);
+    setErrors({});
+    navigate("/machines");
+  };
+
+  return (
+    <section className="add-machine-page">
+      <PagePath
+        items={[
+          { label: "Machines", to: "/machines" },
+          { label: "Add Machine" },
+        ]}
+      />
+
+      <form className="add-machine-card" onSubmit={handleOpenConfirm} noValidate>
+        <div className="add-machine-card-header">
+          <span className="add-machine-card-icon">
+            <IconMachine />
+          </span>
+          <div>
+            <h2>Machine Details</h2>
+          </div>
+        </div>
+
+        <div className="add-machine-card-body">
+          <div className="add-machine-grid-two">
+            <div className="add-machine-field">
+              <label htmlFor="type">Type</label>
+              <select
+                id="type"
+                name="type"
+                value={machine.type}
+                onChange={handleChange}
+                className={errors.type ? "error" : ""}
+              >
+                <option value="">Select Machine Type</option>
+                <option value="Single Needle Lockstitch">
+                  Single Needle Lockstitch
+                </option>
+                <option value="Double Needle Lockstitch">
+                  Double Needle Lockstitch
+                </option>
+                <option value="Overlock">Overlock</option>
+                <option value="Flatlock">Flatlock</option>
+                <option value="Button Hole">Button Hole</option>
+                <option value="Bar Tack">Bar Tack</option>
+              </select>
+              {errors.type && (
+                <span className="add-machine-error">{errors.type}</span>
+              )}
+            </div>
+
+            <div className="add-machine-field">
+              <label htmlFor="brand">Brand</label>
+              <input
+                id="brand"
+                name="brand"
+                value={machine.brand}
+                onChange={handleChange}
+                placeholder="e.g. JUKI"
+                className={errors.brand ? "error" : ""}
+              />
+              {errors.brand && (
+                <span className="add-machine-error">{errors.brand}</span>
+              )}
+            </div>
+          </div>
+
+          <div className="add-machine-grid-two">
+            <div className="add-machine-field">
+              <label htmlFor="model">Model</label>
+              <input
+                id="model"
+                name="model"
+                value={machine.model}
+                onChange={handleChange}
+                placeholder="e.g. DDL-8700"
+                className={errors.model ? "error" : ""}
+              />
+              {errors.model && (
+                <span className="add-machine-error">{errors.model}</span>
+              )}
+            </div>
+
+            <div className="add-machine-field">
+              <label htmlFor="serialNumber">Serial Number</label>
+              <input
+                id="serialNumber"
+                name="serialNumber"
+                value={machine.serialNumber}
+                onChange={handleChange}
+                placeholder="e.g. SN12345678"
+                className={errors.serialNumber ? "error" : ""}
+              />
+              {errors.serialNumber && (
+                <span className="add-machine-error">{errors.serialNumber}</span>
+              )}
+            </div>
+          </div>
+
+          <div className="add-machine-location-heading">
+            <span>
+              <IconMapPin />
+            </span>
+            <h3>Location &amp; Tracking</h3>
+          </div>
+
+          <div className="add-machine-grid-two">
+            <div className="add-machine-field">
+              <GenericLookupInput
+                id="location"
+                name="location"
+                value={machine.location}
+                label="Location"
+                onChange={handleChange}
+                error={errors.location}
+                placeholder="e.g., GAR-001 or STO-002"
+                className="add-machine-field"
+                endpoint="/locations"
+                searchFields={[
+                  (location) => buildLocationDisplayId(location),
+                  "locationId",
+                  "name",
+                  "type"
+                ]}
+                sortComparator={(a, b) => Number(a.locationId) - Number(b.locationId)}
+                getOptionKey={(location) => `${location.type}-${location.locationId}`}
+                getOptionValue={(location) => buildLocationDisplayId(location)}
+                getPrimaryText={(location) => buildLocationDisplayId(location)}
+                getSecondaryText={(location) => `${location.name || "-"} | ${location.type || "-"}`}
+                emptyMessage="No locations found"
+                loadingMessage="Loading locations..."
+              />
+            </div>
+
+            <div className="add-machine-field">
+              <label htmlFor="date">Added Date</label>
+              <input
+                id="date"
+                type="date"
+                name="date"
+                value={machine.date}
+                onChange={handleChange}
+                className={errors.date ? "error" : ""}
+              />
+              {errors.date && (
+                <span className="add-machine-error">{errors.date}</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="add-machine-actions">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={handleCancel}
+          >
+            Cancel
+          </button>
+          <button type="submit" className="btn-primary" disabled={submitting}>
+            <IconPlus />
+            {submitting ? "Adding..." : "Add Machine"}
+          </button>
+        </div>
+      </form>
+
+      <ConfirmActionModal
+        isOpen={isConfirmOpen}
+        title="Confirm New Machine"
+        message="Are you sure you want to add this machine?"
+        confirmLabel="Yes, Add Machine"
+        cancelLabel="Cancel"
+        variant="approve"
+        isSubmitting={submitting}
+        onConfirm={submit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
+
+      <AppFooter />
+    </section>
+  );
+}
+
+export default AddMachine;

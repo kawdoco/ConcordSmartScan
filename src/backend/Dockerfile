@@ -1,11 +1,12 @@
 # Backend Dockerfile
 # Using openjdk base image which is more commonly cached
-FROM openjdk:17-jdk-slim AS build
+#FROM openjdk:17-jdk-slim AS build
+FROM eclipse-temurin:17-jdk AS build
 
 WORKDIR /app
 
 # Install Maven
-RUN apt-get update && apt-get install -y maven
+RUN apt-get update && apt-get install -y maven ca-certificates
 
 # Copy pom.xml
 COPY pom.xml .
@@ -20,7 +21,9 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Runtime stage
-FROM openjdk:17-jre-slim
+#FROM openjdk:17-jre-slim
+FROM eclipse-temurin:17-jre
+
 
 WORKDIR /app
 

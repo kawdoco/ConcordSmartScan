@@ -1,0 +1,241 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+.garment-page {
+  font-family: 'Sora', sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  gap: 16px;
+  color: #0f1623;
+}
+
+.garment-page-content {
+  padding: 8px;
+}
+
+.garment-table-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.garment-card-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.garment-card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.garment-card-description {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.garment-add-btn {
+  border: none;
+  border-radius: 8px;
+  background: #1a3fd4;
+  color: #fff;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1;
+  padding: 10px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.garment-add-btn:hover {
+  background: #1230a8;
+}
+
+.garment-add-icon {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.garment-table-wrap {
+  overflow-x: auto;
+}
+
+.garment-data-area {
+  min-height: 392px;
+  background: #fff;
+}
+
+.garment-loading,
+.garment-empty {
+  min-height: 392px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: #64748b;
+  padding: 0 16px;
+}
+
+.garment-table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+}
+
+.garment-table th {
+  background: #f4f6fb;
+  text-align: left;
+  padding: 11px 20px;
+  line-height: 1.2;
+  white-space: nowrap;
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #64748b;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.garment-table td {
+  padding: 15px 20px;
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
+  color: #475569;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.garment-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.garment-id {
+  color: #475569;
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
+}
+
+.garment-branch {
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.garment-lat-long {
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
+  color: #475569;
+}
+
+.garment-action-icons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.garment-action-icons button {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: #fff;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.garment-action-icons button:hover {
+  background: #eef1fd;
+  color: #1a3fd4;
+  border-color: #b8c8f8;
+}
+
+.garment-action-icons button.delete:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+.garment-action-icons button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.garment-table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 20px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.garment-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.garment-page-btn {
+  min-width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0 7px;
+}
+
+.garment-page-btn:hover:not(:disabled) {
+  background: #eef2ff;
+  color: #1f2937;
+}
+
+.garment-page-btn:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.garment-page-active,
+.garment-page-active:hover {
+  background: #1a3fd4;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .garment-card-header {
+    padding: 14px 14px;
+  }
+
+  .garment-table th,
+  .garment-table td {
+    padding: 12px 12px;
+  }
+
+  .garment-table-footer {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}

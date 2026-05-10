@@ -1,0 +1,232 @@
+.edit-garment-page {
+  font-family: 'Sora', sans-serif;
+  color: #0f1623;
+  padding: 8px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-garment-page *,
+.edit-garment-page *::before,
+.edit-garment-page *::after {
+  box-sizing: border-box;
+}
+
+.edit-garment-notice {
+  margin-bottom: 14px;
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.edit-garment-notice.success {
+  background: #065f46;
+}
+
+.edit-garment-notice.info {
+  background: #1230a8;
+}
+
+.edit-garment-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.edit-garment-card-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.edit-garment-card-icon {
+  color: #1a3fd4;
+  display: inline-flex;
+  align-items: center;
+}
+
+.edit-garment-card-header h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.edit-garment-card-header p {
+  margin: 2px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.edit-garment-card-body {
+  padding: 22px;
+}
+
+.edit-garment-field {
+  margin-bottom: 16px;
+}
+
+.edit-garment-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.edit-garment-inline-icon {
+  margin-left: 6px;
+  color: #6b7280;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.edit-garment-field input,
+.edit-garment-field textarea {
+  width: 100%;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: #0f1623;
+  background: #fff;
+  outline: none;
+}
+
+.edit-garment-field input::placeholder,
+.edit-garment-field textarea::placeholder {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.edit-garment-field input:focus,
+.edit-garment-field textarea:focus {
+  border-color: #1a3fd4;
+}
+
+.edit-garment-field textarea {
+  resize: vertical;
+}
+
+.edit-garment-field input.disabled {
+  background: #f4f6fb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.edit-garment-field input.error,
+.edit-garment-field textarea.error {
+  border-color: #ef4444;
+}
+
+.edit-garment-error {
+  margin-top: 3px;
+  display: block;
+  color: #ef4444;
+  font-size: 11px;
+}
+
+.edit-garment-hint {
+  margin-top: 3px;
+  display: block;
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.edit-garment-grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 26px;
+  row-gap: 14px;
+  margin-bottom: 2px;
+}
+
+.edit-garment-location-heading {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #1a3fd4;
+}
+
+.edit-garment-location-heading h3 {
+  margin: 0;
+  color: #0f1623;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.edit-garment-location-heading p {
+  margin: 2px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.edit-garment-actions {
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 22px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.edit-garment-actions button {
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.edit-garment-actions .btn-secondary {
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  padding: 10px 18px;
+}
+
+.edit-garment-actions .btn-secondary:hover {
+  background: #f4f6fb;
+  color: #0f1623;
+}
+
+.edit-garment-actions .btn-primary {
+  border: none;
+  background: #1a3fd4;
+  color: #fff;
+  padding: 10px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-garment-actions .btn-primary:hover {
+  background: #1230a8;
+}
+
+.edit-garment-help-text {
+  color: #6b7280;
+  font-size: 12px;
+  margin-bottom: 8px;
+  margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .edit-garment-grid-two {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-garment-card,
+  .edit-garment-card-body {
+    width: 100%;
+  }
+}
