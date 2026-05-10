@@ -19,6 +19,52 @@ ConcordSmartScan/
 `-- README.md
 ```
 
+## Run with Docker (recommended)
+
+From the project root:
+
+```powershell
+docker compose up --build
+```
+
+To include pgAdmin (optional):
+
+```powershell
+docker compose --profile tools up --build
+```
+
+Access:
+
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8080
+- pgAdmin (optional): http://localhost:5050
+
+pgAdmin connection details (inside Docker):
+
+- Host: db
+- Port: 5432
+- Database: concord_db
+- Username: postgres
+- Password: postgres
+
+Stop services:
+
+```powershell
+docker compose down
+```
+
+To remove volumes and reset data:
+
+```powershell
+docker compose down -v
+```
+
+Local overrides: this repo includes docker-compose.override.yml which is auto-loaded by Docker Compose. It maps host ports to 3001/8081/5433/5051 and updates the frontend API URL to http://localhost:8081.
+
+Migrations:
+
+- Flyway is enabled to track migrations (baseline only for now; schema is still created by Hibernate).
+
 ## Setup and Run Project
 
 ### 1. Clone the project from dev branch
@@ -37,6 +83,8 @@ git pull origin dev
 
 ### 2. Prerequisites
 
+Only needed if you are running without Docker.
+
 Before starting setup, make sure these are already installed on your machine:
 
 - Java 17+
@@ -46,6 +94,8 @@ Before starting setup, make sure these are already installed on your machine:
 - pgAdmin 4
 
 ### 3. Set up PostgreSQL and pgAdmin
+
+Skip this section if you are using Docker with the pgAdmin profile.
 
 Backend database config is in src/backend/src/main/resources/application.properties and expects:
 
@@ -63,8 +113,8 @@ Add the PostgreSQL server in pgAdmin:
 4. In Connection tab, use Host: localhost, Port: 5432, Username: postgres, Password: postgres.
 5. Save the server.
 
-<img src="docs/References_for_README/pgadmin-add-server.png" alt="Register server in pgAdmin" width="50%" />
-<img src="docs/References_for_README/pgadmin-server-connection.png" alt="pgAdmin server connection tab with localhost and postgres credentials" width="50%" />
+<img src="./docs/References_for_README/pgadmin-add-server.png" alt="Register server in pgAdmin" width="50%" style="background:#fff; border:1px solid #444; box-shadow:0 4px 10px rgba(0,0,0,0.25); padding:4px;" />
+<img src="./docs/References_for_README/pgadmin-server-connection.png" alt="pgAdmin server connection tab with localhost and postgres credentials" width="50%" style="background:#fff; border:1px solid #444; box-shadow:0 4px 10px rgba(0,0,0,0.25); padding:4px;" />
 
 Create the project database in pgAdmin:
 
@@ -73,9 +123,9 @@ Create the project database in pgAdmin:
 3. Set Database name to concord_db.
 4. Keep Owner as postgres, then save.
 
-<img src="docs/References_for_README/pgadmin-create-database.png" alt="Create concord_db database in pgAdmin" width="50%" />
+<img src="./docs/References_for_README/pgadmin-create-database.png" alt="Create concord_db database in pgAdmin" width="50%" style="background:#fff; border:1px solid #444; box-shadow:0 4px 10px rgba(0,0,0,0.25); padding:4px;" />
 
-Before running the backend, ensure PostgreSQL service is running and credentials match the values above.
+Before running the backend, ensure the PostgreSQL service is running, and credentials match the values above.
 
 Reference (pgAdmin and database connection):
 https://youtu.be/WFT5MaZN6g4?si=1bB8h45fQ8TcCKwr
@@ -91,7 +141,7 @@ cd src/backend
 run-backend.bat
 ```
 
-<img src="docs/References_for_README/backend-terminal-run.png" alt="Backend terminal running run-backend.bat" width="50%" />
+<img src="./docs/References_for_README/backend-terminal-run.png" alt="Backend terminal running run-backend.bat" width="50%" style="background:#fff; border:1px solid #444; box-shadow:0 4px 10px rgba(0,0,0,0.25); padding:4px;" />
 
 Terminal 2 (Frontend):
 
@@ -100,7 +150,7 @@ cd src/frontend
 run-frontend.bat
 ```
 
-<img src="docs/References_for_README/frontend-terminal-run.png" alt="Frontend terminal running run-frontend.bat" width="50%" />
+<img src="./docs/References_for_README/frontend-terminal-run.png" alt="Frontend terminal running run-frontend.bat" width="50%" style="background:#fff; border:1px solid #444; box-shadow:0 4px 10px rgba(0,0,0,0.25); padding:4px;" />
 
 ### 5. Access the application
 
@@ -109,9 +159,9 @@ run-frontend.bat
 
 First page shown on opening the frontend:
 
-<img src="docs/References_for_README/login-page.png" alt="Login page shown first when opening frontend" width="50%" />
+<img src="./docs/References_for_README/login-page.png" alt="Login page shown first when opening frontend" width="50%" style="background:#fff; border:1px solid #444; box-shadow:0 4px 10px rgba(0,0,0,0.25); padding:4px;" />
 
-Do not close the terminals while project is running. 
+Do not close the terminals while the project is running. 
 To top running use below, in each terminal: 
 
 ```powershell

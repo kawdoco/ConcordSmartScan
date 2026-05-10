@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import AppFooter from "../components/AppFooter";
 import ConfirmActionModal from "../components/ConfirmActionModal";
@@ -22,11 +22,42 @@ const Icons = {
 
 const today = () => new Date().toISOString().slice(0, 10);
 
+const formatDate = (dateValue) => {
+  if (!dateValue) return "-";
+  try {
+    // Handle array format [year, month, day, ...]
+    if (Array.isArray(dateValue)) {
+      const [year, month, day] = dateValue;
+      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    }
+
+    const d = new Date(dateValue);
+    if (isNaN(d.getTime())) {
+      return String(dateValue).slice(0, 10);
+    }
+    return d.toISOString().split("T")[0];
+  } catch {
+    return String(dateValue).slice(0, 10);
+  }
+};
+
 const formatRoleDisplay = (role) => {
   if (role === "ADMIN") return "Admin";
   if (role === "CHIEF_MANAGER") return "Chief Manager";
   if (role === "TECHNICIAN") return "Technician";
   return role;
+};
+
+const formatAssignedLocation = (user) => {
+  if (user?.garmentId != null && user.garmentId !== "") {
+    return `GAR-${String(user.garmentId).padStart(3, "0")}`;
+  }
+  return user?.location || "";
+};
+
+const toNumericId = (value) => {
+  const parsed = Number.parseInt(String(value), 10);
+  return Number.isNaN(parsed) ? Number.POSITIVE_INFINITY : parsed;
 };
 
 const roleClass = (roleDisplay) => {
@@ -46,7 +77,8 @@ const ROWS_PER_PAGE = 8;
 
 export default function UserManagement() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchQ = searchParams.get("q") || "";
   const { showToast } = useToast();
 
@@ -58,6 +90,15 @@ export default function UserManagement() {
   const [form, setForm] = useState({ fullName: "", role: "Technician", location: "", email: "", password: "" });
   const [formErr, setFormErr] = useState({});
 
+  // Clear search params when navigating back to this page
+  useEffect(() => {
+    const newParams = new URLSearchParams(searchParams);
+    if (newParams.has("q")) {
+      newParams.delete("q");
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [location.pathname, setSearchParams, searchParams]);
+
   const loadUsers = useCallback((search = "") => {
     return apiClient
       .get("/users", {
@@ -68,14 +109,11 @@ export default function UserManagement() {
           id: String(user.id),
           fullName: user.name || "",
           role: formatRoleDisplay(user.role),
-          location: user.garmentId
-            ? `GAR-${String(user.garmentId).padStart(5, "0")}`
-            : (user.location || ""),
+          location: formatAssignedLocation(user),
           email: user.email,
-          date: user.createdAt
-            ? user.createdAt.slice(0, 10)
-            : today(),
+          date: formatDate(user.createdAt),
         }));
+        mapped.sort((a, b) => toNumericId(a.id) - toNumericId(b.id));
         setUsers(mapped);
       })
       .catch(() => showToast("Failed to load users", "error"));
@@ -141,7 +179,7 @@ export default function UserManagement() {
             role: formatRoleDisplay(user.role),
             location: user.location || "",
             email: user.email,
-            date: user.createdAt ? user.createdAt.slice(0, 10) : today()
+            date: formatDate(user.createdAt)
           },
           ...previous
         ]);

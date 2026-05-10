@@ -18,12 +18,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class MachineRequestService {
+
+    private static final Pattern TRAILING_DIGITS = Pattern.compile("(\\d+)$");
 
     private final MachineRequestRepository machineRequestRepository;
     private final MachineRepository machineRepository;
@@ -102,6 +107,13 @@ public class MachineRequestService {
         request.setStatus(parsedStatus);
         if (parsedStatus == RequestStatus.APPROVED) {
             request.setApprovedByManagerId(resolveApprovedByManagerId(request.getToGarmentId()));
+            
+            // Auto-apply location changes on approval
+            if (request.getRequestType() == RequestType.TRANSFER) {
+                applyTransferRequest(request);
+            } else if (request.getRequestType() == RequestType.PURCHASE) {
+                applyPurchaseRequest(request);
+            }
         } else {
             request.setApprovedByManagerId(null);
         }
@@ -350,5 +362,88 @@ public class MachineRequestService {
         }
 
         return machineRepository.findByMachineId(padded);
+    }
+
+    private void applyTransferRequest(MachineRequest request) {
+        // For transfer requests, update the machine's location to the requested garment
+        String machineId = request.getMachineId();
+        if (machineId == null || machineId.isBlank()) {
+            return;
+        }
+
+        Optional<Machine> machineOpt = findMachineByFlexibleMachineId(machineId);
+        if (machineOpt.isEmpty()) {
+            return;
+        }
+
+        Machine machine = machineOpt.get();
+        String newLocation = request.getToGarmentId();
+        if (newLocation != null && !newLocation.isBlank()) {
+            machine.setLocation(newLocation);
+            machineRepository.save(machine);
+        }
+    }
+
+    private void applyPurchaseRequest(MachineRequest request) {
+        // For purchase requests, create a new machine with the garment as location
+        String machineType = request.getMachineType();
+        String toGarmentId = request.getToGarmentId();
+
+        if (machineType == null || machineType.isBlank() || toGarmentId == null || toGarmentId.isBlank()) {
+            return;
+        }
+
+        Machine newMachine = new Machine();
+        newMachine.setType(machineType);
+        newMachine.setLocation(toGarmentId);
+        newMachine.setDate(LocalDate.now());
+        
+        // Auto-generate machine ID
+        String generatedMachineId = generateNextMachineIdForPurchase();
+        newMachine.setMachineId(generatedMachineId);
+
+        Machine savedMachine = machineRepository.save(newMachine);
+        
+        // Update the request to reference the newly created machine
+        request.setMachineId(formatMachineDisplayId(savedMachine));
+    }
+
+    private synchronized String generateNextMachineIdForPurchase() {
+        int maxUsedNumber = machineRepository.findAll().stream()
+                .map(Machine::getMachineId)
+                .mapToInt(this::extractTrailingNumberForMachineId)
+                .max()
+                .orElse(0);
+
+        int nextNumber = maxUsedNumber + 1;
+        String candidate = formatMachineIdForPurchase(nextNumber);
+
+        while (machineRepository.findByMachineId(candidate).isPresent()) {
+            nextNumber++;
+            candidate = formatMachineIdForPurchase(nextNumber);
+        }
+
+        return candidate;
+    }
+
+    private int extractTrailingNumberForMachineId(String value) {
+        if (value == null || value.isBlank()) {
+            return 0;
+        }
+
+        Matcher matcher = TRAILING_DIGITS.matcher(value.trim());
+        if (!matcher.find()) {
+            return 0;
+        }
+
+        try {
+            return Integer.parseInt(matcher.group(1));
+        } catch (NumberFormatException ex) {
+            return 0;
+        }
+    }
+
+    private String formatMachineIdForPurchase(int value) {
+        return String.format(Locale.ROOT, "MAC-%03d", value);
     }
 }

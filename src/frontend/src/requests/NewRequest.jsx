@@ -13,7 +13,17 @@ import "./NewRequest.css";
 
 function IconFlow() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M3 6h7" />
       <path d="M14 6h7" />
       <path d="M10 6l4 0" />
@@ -25,7 +35,17 @@ function IconFlow() {
 
 function IconPlus() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
@@ -41,7 +61,7 @@ const EMPTY_FORM = {
   priority: "medium",
   reason: "",
   requiredDate: "",
-  notes: ""
+  notes: "",
 };
 
 const MACHINE_TYPE_OPTIONS = [
@@ -50,8 +70,27 @@ const MACHINE_TYPE_OPTIONS = [
   "Overlock",
   "Flatlock",
   "Button Hole",
-  "Bar Tack"
+  "Bar Tack",
 ];
+
+const normalizeGarmentId = (value) => {
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+  const match = String(value).match(/(\d+)/);
+  if (!match) {
+    return "";
+  }
+  return `GAR-${String(Number(match[1])).padStart(3, "0")}`;
+};
+
+const getGarmentIdFromUser = (user) => {
+  if (!user) return "";
+  if (user.garmentId != null && user.garmentId !== "") {
+    return normalizeGarmentId(user.garmentId);
+  }
+  return normalizeGarmentId(user.location);
+};
 
 export default function NewRequest() {
   const navigate = useNavigate();
@@ -64,14 +103,23 @@ export default function NewRequest() {
     const machineType = searchParams.get("machineType") || "";
     const fromStoreId = searchParams.get("fromStoreId") || "";
     const requestType = urlType === "purchase" ? "purchase" : "transfer";
-    return { ...EMPTY_FORM, requestType, machineId, machineType, fromStoreId };
+    const toGarmentId = getGarmentIdFromUser(user);
+    return {
+      ...EMPTY_FORM,
+      requestType,
+      machineId,
+      machineType,
+      fromStoreId,
+      toGarmentId,
+    };
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isTransfer = form.requestType === "transfer";
   const role = String(user?.role || "").toUpperCase();
-  const requestsRootPath = role === "ADMIN" ? "/requests/approved" : "/requests/transfer";
+  const requestsRootPath =
+    role === "ADMIN" ? "/requests/approved" : "/requests/transfer";
   const todayIso = new Date().toISOString().split("T")[0];
 
   const formatLocationCode = (prefix, locationId) => {
@@ -83,7 +131,9 @@ export default function NewRequest() {
 
   const getStoreIdFromMachine = (machine) => {
     if (!machine) return "";
-    const loc = String(machine.location || "").trim().toUpperCase();
+    const loc = String(machine.location || "")
+      .trim()
+      .toUpperCase();
     if (loc.startsWith("STO-")) {
       const match = loc.match(/^STO-0*(\d+)$/);
       if (match) return `STO-${match[1].padStart(3, "0")}`;
@@ -104,23 +154,31 @@ export default function NewRequest() {
     const machineType = searchParams.get("machineType") || "";
     const fromStoreId = searchParams.get("fromStoreId") || "";
     const requestType = urlType === "purchase" ? "purchase" : "transfer";
-    
-    setForm((previous) => ({ 
-      ...previous, 
+    const toGarmentId = getGarmentIdFromUser(user);
+
+    setForm((previous) => ({
+      ...previous,
       requestType,
       ...(machineId && { machineId }),
       ...(machineType && { machineType }),
-      ...(fromStoreId && { fromStoreId })
+      ...(fromStoreId && { fromStoreId }),
+      ...(toGarmentId && { toGarmentId }),
     }));
-  }, [searchParams]);
+  }, [searchParams, user]);
 
   const validate = () => {
     const nextErrors = {};
 
-    if (isTransfer && !form.machineId.trim()) nextErrors.machineId = "Machine ID is required for transfer requests.";
-    if (!isTransfer && !form.machineType.trim()) nextErrors.machineType = "Machine type is required for purchase requests.";
-    if (isTransfer && !form.fromStoreId.trim()) nextErrors.fromStoreId = "From Store ID is required for transfer requests.";
-    if (!form.toGarmentId.trim()) nextErrors.toGarmentId = "To Garment ID is required.";
+    if (isTransfer && !form.machineId.trim())
+      nextErrors.machineId = "Machine ID is required for transfer requests.";
+    if (!isTransfer && !form.machineType.trim())
+      nextErrors.machineType =
+        "Machine type is required for purchase requests.";
+    if (isTransfer && !form.fromStoreId.trim())
+      nextErrors.fromStoreId =
+        "From Store ID is required for transfer requests.";
+    if (!form.toGarmentId.trim())
+      nextErrors.toGarmentId = "To Garment ID is required.";
     if (!form.reason.trim()) nextErrors.reason = "Reason is required.";
     if (!form.requiredDate) {
       nextErrors.requiredDate = "Required date is required.";
@@ -160,17 +218,22 @@ export default function NewRequest() {
         priority: form.priority,
         reason: form.reason,
         requiredDate: form.requiredDate,
-        notes: form.notes
+        notes: form.notes,
       });
 
-      const successLabel = isTransfer ? "Transfer request created successfully!" : "Purchase request created successfully!";
+      const successLabel = isTransfer
+        ? "Transfer request created successfully!"
+        : "Purchase request created successfully!";
       showToast(successLabel, "success");
 
       setTimeout(() => {
         navigate(isTransfer ? "/requests/transfer" : "/requests/purchase");
       }, 900);
     } catch (requestError) {
-      showToast(requestError.response?.data?.message || "Failed to create request.", "error");
+      showToast(
+        requestError.response?.data?.message || "Failed to create request.",
+        "error",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -184,7 +247,12 @@ export default function NewRequest() {
 
   return (
     <section className="new-request-page">
-      <PagePath items={[{ label: "Requests", to: requestsRootPath }, { label: "New Request" }]} />
+      <PagePath
+        items={[
+          { label: "Requests", to: requestsRootPath },
+          { label: "New Request" },
+        ]}
+      />
 
       <div className="new-request-card">
         <div className="new-request-card-header">
@@ -237,7 +305,7 @@ export default function NewRequest() {
                   setForm((previous) => {
                     const next = {
                       ...previous,
-                      machineType: machine?.type || previous.machineType
+                      machineType: machine?.type || previous.machineType,
                     };
                     const storeId = getStoreIdFromMachine(machine);
                     if (storeId) {
@@ -263,19 +331,29 @@ export default function NewRequest() {
                 >
                   <option value="">Select Machine Type</option>
                   {MACHINE_TYPE_OPTIONS.map((typeOption) => (
-                    <option key={typeOption} value={typeOption}>{typeOption}</option>
+                    <option key={typeOption} value={typeOption}>
+                      {typeOption}
+                    </option>
                   ))}
                 </select>
-                {errors.machineType && <span className="new-request-error">{errors.machineType}</span>}
+                {errors.machineType && (
+                  <span className="new-request-error">
+                    {errors.machineType}
+                  </span>
+                )}
               </div>
             )}
           </div>
 
           <div className="new-request-flow-heading">
-            <span><IconFlow /></span>
+            <span>
+              <IconFlow />
+            </span>
             <div>
               <h3>Request Routing</h3>
-              <p>Define where the machine should be transferred or delivered.</p>
+              <p>
+                Define where the machine should be transferred or delivered.
+              </p>
             </div>
           </div>
 
@@ -290,33 +368,40 @@ export default function NewRequest() {
                 error={errors.fromStoreId}
                 placeholder="e.g. STO-001"
                 endpoint="/locations/stores"
-                searchFields={[(store) => formatLocationCode("STO", store?.locationId), "name"]}
+                searchFields={[
+                  (store) => formatLocationCode("STO", store?.locationId),
+                  "name",
+                ]}
                 getOptionKey={(store) => store.locationId || store.name}
-                getOptionValue={(store) => formatLocationCode("STO", store.locationId)}
-                getPrimaryText={(store) => formatLocationCode("STO", store.locationId) || "-"}
+                getOptionValue={(store) =>
+                  formatLocationCode("STO", store.locationId)
+                }
+                getPrimaryText={(store) =>
+                  formatLocationCode("STO", store.locationId) || "-"
+                }
                 getSecondaryText={(store) => `Branch: ${store.name || "-"}`}
                 emptyMessage="No stores found"
                 loadingMessage="Loading stores..."
               />
             )}
-
-            <GenericLookupInput
-              id="toGarmentId"
-              name="toGarmentId"
-              label="To Garment (ID)"
-              value={form.toGarmentId}
-              onChange={handleChange}
-              error={errors.toGarmentId}
-              placeholder="e.g. GAR-001"
-              endpoint="/locations/garments"
-              searchFields={[(garment) => formatLocationCode("GAR", garment?.locationId), "name"]}
-              getOptionKey={(garment) => garment.locationId || garment.name}
-              getOptionValue={(garment) => formatLocationCode("GAR", garment.locationId)}
-              getPrimaryText={(garment) => formatLocationCode("GAR", garment.locationId) || "-"}
-              getSecondaryText={(garment) => `Branch: ${garment.name || "-"}`}
-              emptyMessage="No garments found"
-              loadingMessage="Loading garments..."
-            />
+            <div className="new-request-field">
+              <label htmlFor="toGarmentId">To Garment (ID)</label>
+              <input
+                id="toGarmentId"
+                name="toGarmentId"
+                value={form.toGarmentId || "Not assigned"}
+                readOnly
+                style={{
+                  background: "#f8fafc",
+                  color: "#475569",
+                  cursor: "not-allowed",
+                  border: "1px solid #e2e8f0",
+                }}
+              />
+              {errors.toGarmentId && (
+                <span className="new-request-error">{errors.toGarmentId}</span>
+              )}
+            </div>
           </div>
 
           <div className="new-request-grid-two">
@@ -331,7 +416,9 @@ export default function NewRequest() {
                 min={todayIso}
                 className={errors.requiredDate ? "error" : ""}
               />
-              {errors.requiredDate && <span className="new-request-error">{errors.requiredDate}</span>}
+              {errors.requiredDate && (
+                <span className="new-request-error">{errors.requiredDate}</span>
+              )}
             </div>
 
             <div className="new-request-field">
@@ -344,7 +431,9 @@ export default function NewRequest() {
                 placeholder="e.g. Capacity increase"
                 className={errors.reason ? "error" : ""}
               />
-              {errors.reason && <span className="new-request-error">{errors.reason}</span>}
+              {errors.reason && (
+                <span className="new-request-error">{errors.reason}</span>
+              )}
             </div>
           </div>
 
@@ -362,8 +451,19 @@ export default function NewRequest() {
         </div>
 
         <div className="new-request-actions">
-          <button type="button" className="btn-secondary" onClick={handleCancel}>Cancel</button>
-          <button type="button" className="btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={handleCancel}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          >
             <IconPlus />
             {isSubmitting ? "Creating..." : "Create Request"}
           </button>

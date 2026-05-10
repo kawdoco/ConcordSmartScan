@@ -38,6 +38,7 @@ export default function GenericLookupInput({
   getOptionValue,
   getPrimaryText,
   getSecondaryText,
+  extraOptions = [],
   emptyMessage = "No results found",
   loadingMessage = "Loading...",
   maxResults = 50
@@ -81,9 +82,10 @@ export default function GenericLookupInput({
 
   const searchText = String(value || "").trim().toLowerCase();
   const suggestions = useMemo(() => {
+    const mergedOptions = [...extraOptions, ...options];
     const sortedOptions = typeof sortComparator === "function"
-      ? [...options].sort(sortComparator)
-      : options;
+      ? [...mergedOptions].sort(sortComparator)
+      : mergedOptions;
 
     return sortedOptions
       .filter((option) => {
@@ -105,7 +107,7 @@ export default function GenericLookupInput({
         return indexedValues.some((entry) => String(entry || "").toLowerCase().includes(searchText));
       })
       .slice(0, maxResults);
-  }, [options, optionFilter, searchFields, searchText, maxResults, sortComparator]);
+  }, [options, extraOptions, optionFilter, searchFields, searchText, maxResults, sortComparator]);
 
   const emitChange = (nextValue) => {
     if (!onChange) {

@@ -1,15 +1,19 @@
 // components/Topbar.js
-import React from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../authentication/AuthContext";
+import { useToast } from "../components/Toast";
+import ScanModal from "../machines/ScanModal";
 import SearchBar from "./SearchBar";
 
 function Topbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { showToast } = useToast();
   const role = String(user?.role || "").toUpperCase();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [scanOpen, setScanOpen] = useState(false);
 
   const titleByPath = {
     "/dashboard": "Dashboard",
@@ -38,6 +42,9 @@ function Topbar() {
   const searchConfig = (() => {
     if (location.pathname === "/users") {
       return { placeholder: "Search users by ID, name, or role" };
+    }
+    if (location.pathname === "/dashboard") {
+      return { placeholder: "Search machines, users, stores, or requests" };
     }
     if (location.pathname === "/machines") {
       return { placeholder: "Search machines by ID, type, location, or date" };
@@ -98,35 +105,57 @@ function Topbar() {
   const rawName = user?.name || user?.fullName || shortName;
   const displayName = formatName(rawName);
   const firstLetter = displayName.slice(0, 1).toUpperCase();
+  const handleScanClick = () => {
+    setScanOpen(true);
+  };
+
+  const searchIcon = (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+      <circle cx="11" cy="11" r="8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="m21 21-4.35-4.35" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 
   return (
-    <div style={styles.topbar}>
-      <div style={styles.leftWrap}>
-        <h1 style={styles.title}>{title}</h1>
-      </div>
-      <div style={styles.centerWrap}>
-        {searchConfig && (
-          <SearchBar
-            size="sm"
-            value={searchQ}
-            onChange={handleSearchChange}
-            placeholder={searchConfig.placeholder}
-            className="topbar-search"
-          />
-        )}
-      </div>
-      <div style={styles.menuWrap}>
-        <div style={styles.userInfo}>
-          <div style={styles.userTextWrap}>
-            <span style={styles.userName}>{displayName}</span>
-            <span style={styles.userRole}>{role || "USER"}</span>
+    <>
+      {scanOpen && (
+        <ScanModal
+          onClose={() => setScanOpen(false)}
+          showToast={(msg, type) => showToast(msg, type || "success")}
+        />
+      )}
+      <div style={styles.topbar}>
+        <div style={styles.leftWrap}>
+          <h1 style={styles.title}>{title}</h1>
+        </div>
+        <div style={styles.centerWrap}>
+          {searchConfig && (
+            <SearchBar
+              size="sm"
+              value={searchQ}
+              onChange={handleSearchChange}
+              placeholder={searchConfig.placeholder}
+              className="topbar-search"
+            />
+          )}
+        </div>
+        <div style={styles.menuWrap}>
+          <button type="button" style={styles.scanButton} onClick={handleScanClick}>
+            <span style={styles.scanIcon}>{searchIcon}</span>
+            <span>Scan Machine</span>
+          </button>
+          <div style={styles.userInfo}>
+            <div style={styles.userTextWrap}>
+              <span style={styles.userName}>{displayName}</span>
+              <span style={styles.userRole}>{role || "USER"}</span>
+            </div>
+            <span style={{ ...styles.avatar, background: getVibrantColor(firstLetter) }}>
+              {firstLetter}
+            </span>
           </div>
-          <span style={{ ...styles.avatar, background: getVibrantColor(firstLetter) }}>
-            {firstLetter}
-          </span>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -172,6 +201,25 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "10px"
+  },
+  scanButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "8px 12px",
+    borderRadius: "8px",
+    background: "#2563eb",
+    color: "#fff",
+    border: "1px solid #2563eb",
+    fontSize: "0.82rem",
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "transform 0.2s ease, background 0.2s ease, border-color 0.2s ease"
+  },
+  scanIcon: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center"
   },
   userInfo: {
     display: "inline-flex",
