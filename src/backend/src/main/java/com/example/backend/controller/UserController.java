@@ -24,7 +24,7 @@ public class UserController {
     /**
      * POST /api/users
      * Add a new user to the system.
-     * Body: { "name": "...", "email": "...", "password": "...", "role": "TECHNICIAN", "location": "..." }
+      * Body: { "name": "...", "email": "...", "password": "...", "role": "TECHNICIAN", "location": "..." }
      */
     @PostMapping
     public ResponseEntity<UserResponse> addUser(@Valid @RequestBody AddUserRequest request) {
@@ -37,8 +37,8 @@ public class UserController {
      * Retrieve all users.
      */
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<List<UserResponse>> getAllUsers(@RequestParam(required = false) String search) {
+        return ResponseEntity.ok(userService.getAllUsers(search));
     }
 
     /**
@@ -53,7 +53,7 @@ public class UserController {
     /**
      * PUT /api/users/{id}
      * Update an existing user's details.
-     * Body: { "name": "...", "email": "...", "role": "...", "location": "..." }
+      * Body: { "name": "...", "email": "...", "role": "...", "location": "..." }
      * Password is optional — omit or leave blank to keep existing password.
      */
     @PutMapping("/{id}")

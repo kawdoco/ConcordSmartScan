@@ -1,0 +1,75 @@
+.stats-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.stats-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 22px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stats-card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.stats-card-icon.machines,
+.stats-card-icon.stores {
+  color: #2563eb;
+  background: #eaf1ff;
+}
+
+.stats-card-icon.garments {
+  color: #7c3aed;
+  background: #f2eaff;
+}
+
+.stats-card-icon.requests-total,
+.stats-card-icon.requests-purchase {
+  color: #2563eb;
+  background: #eaf1ff;
+}
+
+.stats-card-icon.requests-transfer {
+  color: #7c3aed;
+  background: #f2eaff;
+}
+
+.stats-card-label {
+  margin: 0 0 5px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.stats-card-value {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.1;
+  font-weight: 700;
+  color: #0f1623;
+}
+
+@media (max-width: 900px) {
+  .stats-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}

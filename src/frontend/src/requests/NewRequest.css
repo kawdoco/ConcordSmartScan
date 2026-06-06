@@ -1,0 +1,35 @@
+/* New Request Styles */
+
+@import "./RequestsShared.css";
+
+.new-request-notice.success {
+  background: #065f46;
+}
+.new-request-field input:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+.new-request-flow-heading {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #1a3fd4;
+}
+
+.new-request-flow-heading h3 {
+  margin: 0;
+  color: #0f1623;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.new-request-flow-heading p {
+  margin: 2px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+

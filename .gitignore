@@ -1,0 +1,4 @@
+node_modules/
+.env
+.DS_Store
+src/backend/src/main/resources/application.properties

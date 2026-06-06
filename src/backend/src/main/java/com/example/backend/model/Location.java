@@ -23,6 +23,8 @@ public class Location {
 
     private String contactInfo;
 
+    private String address;
+
     public Location() {}
 
     public Location(String name, Double latitude, Double longitude,
@@ -32,6 +34,16 @@ public class Location {
         this.longitude = longitude;
         this.type = type;
         this.contactInfo = contactInfo;
+    }
+
+    public Location(String name, Double latitude, Double longitude,
+                    LocationType type, String contactInfo, String address) {
+        this.name = name;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.type = type;
+        this.contactInfo = contactInfo;
+        this.address = address;
     }
 
     // Getters & Setters
@@ -52,4 +64,7 @@ public class Location {
 
     public String getContactInfo() { return contactInfo; }
     public void setContactInfo(String contactInfo) { this.contactInfo = contactInfo; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 }

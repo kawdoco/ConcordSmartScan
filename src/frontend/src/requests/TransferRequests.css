@@ -1,0 +1,120 @@
+/* Transfer Requests Styles */
+
+@import "./RequestsShared.css";
+
+.transfer-requests-page {
+  --tr-blue: #1a3fd4;
+  --tr-blue-dark: #1230a8;
+  --tr-blue-light: #eef1fd;
+  --tr-red: #ef4444;
+}
+
+.transfer-requests-table-wrap table {
+  min-width: 980px;
+  width: 100%;
+  table-layout: auto;
+}
+
+.transfer-requests-table-wrap th:last-child,
+.transfer-requests-table-wrap td:last-child {
+  text-align: center;
+}
+
+.transfer-requests-table-wrap .transfer-actions {
+  justify-content: center;
+}
+
+.transfer-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 2px solid #cbd5e1;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.transfer-badge.approved {
+  color: #1a3fd4;
+  background: transparent;
+  border-color: #bfdbfe;
+}
+
+.transfer-badge.pending {
+  color: #92400e;
+  background: transparent;
+  border-color: #fde68a;
+}
+
+.transfer-badge.declined {
+  color: var(--tr-red);
+  background: transparent;
+  border-color: #fecaca;
+}
+
+.transfer-requests-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.transfer-requests-filter label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.transfer-status-filter-select {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.transfer-status-filter-select:hover {
+  border-color: #94a3b8;
+}
+
+.transfer-status-filter-select:focus {
+  outline: none;
+  border-color: var(--tr-blue);
+  box-shadow: 0 0 0 3px rgba(26, 63, 212, 0.1);
+}
+
+.transfer-btn.approve {
+  color: #fff;
+  background: var(--tr-blue);
+}
+
+.transfer-btn.approve:hover {
+  background: var(--tr-blue-dark);
+}
+
+.transfer-btn.decline {
+  color: var(--tr-red);
+  background: #fff5f5;
+  border-color: #fecaca;
+}
+
+.transfer-btn.decline:hover {
+  background: #fee2e2;
+}
+
+.transfer-page-btn.active {
+  color: #fff;
+  background: var(--tr-blue);
+  border-color: var(--tr-blue);
+}

@@ -33,7 +33,8 @@ public class LocationService {
                 request.getLatitude(),
                 request.getLongitude(),
                 request.getType(),
-                request.getContactInfo()
+                request.getContactInfo(),
+                request.getAddress()
         );
 
         return new LocationResponse(locationRepository.save(location));
@@ -41,8 +42,14 @@ public class LocationService {
 
     /** Get all locations of type GARMENT */
     public List<LocationResponse> getAllGarments() {
+        return getAllGarments(null);
+    }
+
+    /** Get all locations of type GARMENT filtered by a search string */
+    public List<LocationResponse> getAllGarments(String search) {
         return locationRepository.findByType(LocationType.GARMENT)
                 .stream()
+                .filter(location -> matchesSearch(location, search))
                 .map(LocationResponse::new)
                 .collect(Collectors.toList());
     }
@@ -50,18 +57,30 @@ public class LocationService {
     // NOTE: Store management is handled by a separate implementation.
     // getAllStores() has been commented out to avoid conflicts.
     //
-    // /** Get all locations of type STORE */
-    // public List<LocationResponse> getAllStores() {
-    //     return locationRepository.findByType(LocationType.STORE)
-    //             .stream()
-    //             .map(LocationResponse::new)
-    //             .collect(Collectors.toList());
-    // }
+    /** Get all locations of type STORE */
+     public List<LocationResponse> getAllStores() {
+         return getAllStores(null);
+     }
+
+    /** Get all locations of type STORE filtered by a search string */
+     public List<LocationResponse> getAllStores(String search) {
+         return locationRepository.findByType(LocationType.STORE)
+                 .stream()
+                 .filter(location -> matchesSearch(location, search))
+                 .map(LocationResponse::new)
+                 .collect(Collectors.toList());
+     }
 
     /** Get all locations */
     public List<LocationResponse> getAllLocations() {
+        return getAllLocations(null);
+    }
+
+    /** Get all locations filtered by a search string */
+    public List<LocationResponse> getAllLocations(String search) {
         return locationRepository.findAll()
                 .stream()
+                .filter(location -> matchesSearch(location, search))
                 .map(LocationResponse::new)
                 .collect(Collectors.toList());
     }
@@ -85,6 +104,7 @@ public class LocationService {
         location.setLongitude(request.getLongitude());
         location.setType(request.getType());
         location.setContactInfo(request.getContactInfo());
+        location.setAddress(request.getAddress());
 
         return new LocationResponse(locationRepository.save(location));
     }
@@ -96,5 +116,28 @@ public class LocationService {
                     "Location not found with id: " + id);
         }
         locationRepository.deleteById(id);
+    }
+
+    private boolean matchesSearch(Location location, String search) {
+        String query = normalizeSearch(search);
+        if (query.isEmpty()) {
+            return true;
+        }
+
+        return containsIgnoreCase(String.valueOf(location.getLocationId()), query)
+                || containsIgnoreCase(location.getName(), query)
+                || containsIgnoreCase(location.getType() == null ? null : location.getType().name(), query)
+                || containsIgnoreCase(location.getContactInfo(), query)
+                || containsIgnoreCase(location.getAddress(), query)
+                || containsIgnoreCase(location.getLatitude() == null ? null : location.getLatitude().toString(), query)
+                || containsIgnoreCase(location.getLongitude() == null ? null : location.getLongitude().toString(), query);
+    }
+
+    private String normalizeSearch(String search) {
+        return search == null ? "" : search.trim().toLowerCase();
+    }
+
+    private boolean containsIgnoreCase(String value, String query) {
+        return value != null && value.toLowerCase().contains(query);
     }
 }

@@ -9,22 +9,27 @@
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100vh;
   display: grid;
   grid-template-columns: 260px 1fr;
   background: radial-gradient(circle at 0% 0%, #eef2ff, transparent 30%), var(--shell-bg);
+  overflow: hidden;
 }
 
 .app-shell-main {
   min-width: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .app-shell-body {
   flex: 1;
-  padding: 24px;
-  overflow: auto;
+  min-height: 0;
+  padding: 20px 22px 64px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 @media (max-width: 900px) {
@@ -33,6 +38,6 @@
   }
 
   .app-shell-body {
-    padding: 16px;
+    padding: 14px 16px 72px;
   }
 }
