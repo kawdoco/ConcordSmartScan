@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import ConfirmActionModal from "../components/ConfirmActionModal";
+import RequestStatusFilter from "../components/RequestStatusFilter";
 import TableEmptyState from "../components/TableEmptyState";
 import { useAuth } from "../authentication/AuthContext";
 import apiClient from "../services/api";
@@ -51,17 +52,34 @@ function PurchaseRequest() {
     return Number.isInteger(parsed) ? parsed : null;
   };
 
+  const resolveChiefManagerGarmentId = async () => {
+    const currentUserGarmentId = extractNumericGarmentId(user?.garmentId ?? user?.location);
+    if (currentUserGarmentId != null) {
+      return currentUserGarmentId;
+    }
+
+    if (!user?.id) {
+      return null;
+    }
+
+    try {
+      const currentUserResponse = await apiClient.get(`/users/${user.id}`);
+      return extractNumericGarmentId(currentUserResponse?.data?.garmentId ?? currentUserResponse?.data?.location);
+    } catch {
+      return null;
+    }
+  };
+
   const fetchPurchaseRequests = async () => {
     try {
       setError("");
-      const [response, currentUserResponse] = await Promise.all([
+      const [response, currentGarmentId] = await Promise.all([
         apiClient.get("/requests", {
           params: { type: "purchase" }
         }),
-        canManageStatus && user?.id ? apiClient.get(`/users/${user.id}`) : Promise.resolve(null)
+        canManageStatus ? resolveChiefManagerGarmentId() : Promise.resolve(null)
       ]);
 
-      const currentGarmentId = currentUserResponse?.data?.garmentId ?? null;
       setChiefManagerGarmentId(currentGarmentId);
 
       const normalizedRows = Array.isArray(response.data)
@@ -176,26 +194,18 @@ function PurchaseRequest() {
                 : "Review and process purchase requests for new machines."}
             </p>
           </div>
+          {canManageStatus && (
+            <RequestStatusFilter
+              filterId="purchase-status-filter"
+              className="purchase-request-filter"
+              selectClassName="purchase-status-filter-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            />
+          )}
         </div>
 
         {error && <div className="request-inline-error">{error}</div>}
-
-        {canManageStatus && (
-          <div className="purchase-request-filter">
-            <label htmlFor="purchase-status-filter">Filter by Status:</label>
-            <select
-              id="purchase-status-filter"
-              className="purchase-status-filter-select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">All Requests</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="declined">Declined</option>
-            </select>
-          </div>
-        )}
 
         <div className="purchase-request-table-wrap">
           {loading ? (

@@ -59,10 +59,6 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 8px;
-  margin-bottom: 16px;
 }
 
 .purchase-request-filter label {

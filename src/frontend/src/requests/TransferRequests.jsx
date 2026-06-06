@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AppFooter from "../components/AppFooter";
 import ConfirmActionModal from "../components/ConfirmActionModal";
+import RequestStatusFilter from "../components/RequestStatusFilter";
 import TableEmptyState from "../components/TableEmptyState";
 import { useAuth } from "../authentication/AuthContext";
 import apiClient from "../services/api";
@@ -63,17 +64,34 @@ function TransferRequests() {
     return Number.isInteger(parsed) ? parsed : null;
   };
 
+  const resolveChiefManagerGarmentId = async () => {
+    const currentUserGarmentId = extractNumericGarmentId(user?.garmentId ?? user?.location);
+    if (currentUserGarmentId != null) {
+      return currentUserGarmentId;
+    }
+
+    if (!user?.id) {
+      return null;
+    }
+
+    try {
+      const currentUserResponse = await apiClient.get(`/users/${user.id}`);
+      return extractNumericGarmentId(currentUserResponse?.data?.garmentId ?? currentUserResponse?.data?.location);
+    } catch {
+      return null;
+    }
+  };
+
   const fetchTransferRequests = async () => {
     try {
       setError("");
-      const [response, currentUserResponse] = await Promise.all([
+      const [response, currentGarmentId] = await Promise.all([
         apiClient.get("/requests", {
           params: { type: "transfer" }
         }),
-        canManageStatus && user?.id ? apiClient.get(`/users/${user.id}`) : Promise.resolve(null)
+        canManageStatus ? resolveChiefManagerGarmentId() : Promise.resolve(null)
       ]);
 
-      const currentGarmentId = currentUserResponse?.data?.garmentId ?? null;
       setChiefManagerGarmentId(currentGarmentId);
 
       const normalizedRows = Array.isArray(response.data)
@@ -189,26 +207,18 @@ function TransferRequests() {
                 : "Review and process transfer requests between stores and garment units."}
             </p>
           </div>
+          {canManageStatus && (
+            <RequestStatusFilter
+              filterId="transfer-status-filter"
+              className="transfer-requests-filter"
+              selectClassName="transfer-status-filter-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            />
+          )}
         </div>
 
         {error && <div className="request-inline-error">{error}</div>}
-
-        {canManageStatus && (
-          <div className="transfer-requests-filter">
-            <label htmlFor="transfer-status-filter">Filter by Status:</label>
-            <select
-              id="transfer-status-filter"
-              className="transfer-status-filter-select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">All Requests</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="declined">Declined</option>
-            </select>
-          </div>
-        )}
 
         <div className="transfer-requests-table-wrap">
           {loading ? (
