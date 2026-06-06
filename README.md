@@ -8,6 +8,35 @@ ConcordSmartScan is an enterprise solution designed to reduce production downtim
 
 When a sewing machine fails, finding a replacement manually across multiple stores can delay production. This system improves that process by helping teams identify and allocate available machines faster.
 
+## ConcordSmartScan Team
+
+Contributors (replace the GitHub placeholders with real usernames):
+
+- [Nirmalie Perera](https://github.com/NirmaliePerera) - Project Lead, UI Design, Frontend, Backend, QA
+- [Buddika Prabhath](https://github.com/buddikaprabath) - Second Lead, Project initiation, Database Configuration, Frontend, Backend
+- [Tharushi Sandeepani](https://github.com/TharushiSandeepani) - Frontend, Backend, QA Lead
+- [Imal Udyog](https://github.com/imaludyog) - Frontend, Backend
+- [Prasansa Nawanjalee](https://github.com/Nawanjalee) - Frontend, Backend
+- [Malki Perera](https://github.com/Malki14) - UI Lead Design, Frontend, Backend, 
+- [Rashmi Fernando](https://github.com/RashmiFernando99) - Frontend
+- [Kavindu Pansilu](https://github.com/kavindupansilu) - Frontend
+- [Nuwan Senevirathna](https://github.com/nuwansenevirathna) - Frontend
+- [Rayani Fernando](https://github.com/RayaniMaleesha) - Frontend, Testing
+- [Nimna Fernando](https://github.com/NimnaDevindi99) - Frontend
+
+
+
+<table>
+	<tr>
+		<td><img src="docs/References_for_README/Presentation-Day.jpeg" alt="Photo 1" style="height:220px; width:auto;"/></td>
+		<td><img src="docs/References_for_README/Group-B-ConcordSmartScan.jpeg" alt="Photo 2" style="height:220px; width:auto;"/></td>
+	</tr>
+	<tr>
+		<td align="center">Presentation Day</td>
+		<td align="center">Group B ConcordSmartScan</td>
+	</tr>
+</table>
+
 ## Project Structure
 
 ```text
@@ -170,15 +199,18 @@ ctrl+c
 
 Check if tables are created in pgAdmin at:
 
-Server > Your_Server_Name > Databases > concord_db > Schemas > Public > Tables
+```Server > Your_Server_Name > Databases > concord_db > Schemas > Public > Tables
+```
 
 Check if Admin details are in user table:
 
-Right Click users -> View/Edit Data -> All Rows 
+```Right Click users -> View/Edit Data -> All Rows 
+```
 
 Seed Admin login details are initialized in:
 
-src/backend/src/main/java/com/example/backend/config/DataInitializer.java
+```src/backend/src/main/java/com/example/backend/config/DataInitializer.java
+```
 
 Default seed Admin credentials:
 
