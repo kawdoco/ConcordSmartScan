@@ -1,5 +1,12 @@
 ﻿# ConcordSmartScan
 
+![Enterprise Application](https://img.shields.io/badge/Enterprise-Application-darkblue?style=for-the-badge)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge)
+![QR Technology](https://img.shields.io/badge/QR-Technology-FF8C00?style=for-the-badge)
+
 > Enterprise Application Development - Group B
 > Automating Asset Recovery and Allocation for the Garment Industry
 
@@ -10,7 +17,6 @@ When a sewing machine fails, finding a replacement manually across multiple stor
 
 ## ConcordSmartScan Team
 
-Contributors (replace the GitHub placeholders with real usernames):
 
 - [Nirmalie Perera](https://github.com/NirmaliePerera) - Project Lead, UI Design, Frontend, Backend, QA
 - [Buddika Prabhath](https://github.com/buddikaprabath) - Second Lead, Project initiation, Database Configuration, Frontend, Backend
@@ -191,26 +197,23 @@ First page shown on opening the frontend:
 <img src="./docs/References_for_README/login-page.png" alt="Login page shown first when opening frontend" width="50%" style="background:#fff; border:1px solid #444; box-shadow:0 4px 10px rgba(0,0,0,0.25); padding:4px;" />
 
 Do not close the terminals while the project is running. 
-To top running use below, in each terminal: 
-
+**To stop running, use the following in each terminal: 
+**
 ```powershell
 ctrl+c
 ``` 
 
-Check if tables are created in pgAdmin at:
+**Check if tables are created in pgAdmin at:
+**
+Server > Your_Server_Name > Databases > concord_db > Schemas > Public > Tables
 
-```Server > Your_Server_Name > Databases > concord_db > Schemas > Public > Tables
-```
+**Check if Admin details are in user table:
+**
+Right Click users -> View/Edit Data -> All Rows 
 
-Check if Admin details are in user table:
-
-```Right Click users -> View/Edit Data -> All Rows 
-```
-
-Seed Admin login details are initialized in:
-
-```src/backend/src/main/java/com/example/backend/config/DataInitializer.java
-```
+**Seed Admin login details are initialized in:
+**
+src/backend/src/main/java/com/example/backend/config/DataInitializer.java
 
 Default seed Admin credentials:
 
