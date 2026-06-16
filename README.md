@@ -1,4 +1,4 @@
-﻿# ConcordSmartScan
+# ConcordSmartScan
 
 > Enterprise Application Development - Group B
 > Automating Asset Recovery and Allocation for the Garment Industry
@@ -7,6 +7,10 @@
 ConcordSmartScan is an enterprise solution designed to reduce production downtime in garment factories.
 
 When a sewing machine fails, finding a replacement manually across multiple stores can delay production. This system improves that process by helping teams identify and allocate available machines faster.
+
+## Project Resources
+- **ConcordSmartScan Final Presentation**: [docs/ConcordSmartScan final presentation.pptx](docs/ConcordSmartScan%20final%20presentation.pptx)
+- **ConcordSmartScan Wireframes**: [Figma Link](https://www.figma.com/design/Wz0zwspewrJ3hwQs6MwX02/CONCORD-APPAREL-PVT-LTD---EDB?node-id=0-1&t=fnRMTY4CM12PtjgT-1)
 
 ## Project Structure
 
